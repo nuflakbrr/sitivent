@@ -1,0 +1,16 @@
+import './test-case/tc001-login-success.spec';
+import './test-case/tc002-login-admin-success.spec';
+import './test-case/tc003-login-failed-credentials.spec';
+import './test-case/tc004-register-participant-success.spec';
+import './test-case/tc005-register-participant-duplicate.spec';
+import './test-case/tc006-create-event-success.spec';
+import './test-case/tc007-create-event-invalid-quota.spec';
+import './test-case/tc008-register-event-free.spec';
+import './test-case/tc009-register-event-paid.spec';
+import './test-case/tc010-register-event-duplicate.spec';
+import './test-case/tc011-upload-payment-proof.spec';
+import './test-case/tc012-verify-payment-paid.spec';
+import './test-case/tc013-qr-checkin-success.spec';
+import './test-case/tc014-qr-checkin-duplicate.spec';
+import './test-case/tc015-download-certificate-success.spec';
+import './test-case/tc016-download-certificate-blocked.spec';

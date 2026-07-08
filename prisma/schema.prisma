@@ -1,0 +1,279 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  emailVerified Boolean   @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?   @map("ban_reason")
+  banExpires    DateTime? @map("ban_expires")
+  roleId        String?   @map("role_id")
+  sessions      Session[]
+  accounts      Account[]
+  roles              Role[]
+  registrations      Registration[]
+  verifiedPayments   Payment[]
+  certificates       Certificate[]
+  scannedAttendances Attendance[]   @relation("ScannerToAttendance")
+  auditLogs          AuditLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id             String   @id @default(uuid())
+  expiresAt      DateTime @map("expires_at")
+  token          String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  userId         String   @map("user_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?  @map("impersonated_by")
+
+  @@unique([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model Permission {
+  id                    String                @id @default(uuid())
+  name                  String                @unique
+  description           String?
+  roles                 Role[]                @relation("PermissionToRole")
+  model_has_permissions ModelHasPermissions[]
+  role_has_permissions  RoleHasPermission[]
+  createdAt             DateTime              @default(now()) @map("created_at")
+  updatedAt             DateTime              @updatedAt @map("updated_at")
+
+  @@map("permissions")
+}
+
+model Role {
+  id                  String                @id @default(uuid())
+  name                String                @unique
+  description         String?
+  users               User[]
+  permissions         Permission[]          @relation("PermissionToRole")
+  roleHasPermissions  RoleHasPermission[]
+  modelHasPermissions ModelHasPermissions[]
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
+model RoleHasPermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissions  Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@id([roleId, permissionId])
+  @@map("role_has_permissions")
+}
+
+model ModelHasPermissions {
+  modelId      String     @map("model_id")
+  modelType    String     @map("model_type")
+  permissionId String     @map("permission_id")
+  permissions  Permission @relation(fields: [permissionId], references: [id])
+  role         Role?      @relation(fields: [roleId], references: [id])
+  roleId       String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@id([modelId, modelType, permissionId])
+  @@map("model_has_permissions")
+}
+
+enum EventType {
+  ONLINE
+  OFFLINE
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  COMPLETED
+}
+
+model Event {
+  id                   String      @id @default(cuid())
+  title                String
+  slug                 String      @unique
+  description          String
+  banner               String?
+  startDate            DateTime    @map("start_date")
+  endDate              DateTime    @map("end_date")
+  startTime            String      @map("start_time")
+  endTime              String      @map("end_time")
+  location             String
+  eventType            EventType   @map("event_type")
+  registrationDeadline DateTime    @map("registration_deadline")
+  quota                Int
+  price                Int
+  status               EventStatus @default(DRAFT)
+  certificateEnabled   Boolean     @default(false) @map("certificate_enabled")
+  publishedAt          DateTime?   @map("published_at")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+  deletedAt            DateTime?      @map("deleted_at")
+  registrations        Registration[]
+  certificates         Certificate[]
+
+  @@map("events")
+}
+
+enum RegistrationStatus {
+  WAITING_PAYMENT
+  REGISTERED
+  CANCELLED
+  CHECKED_IN
+}
+
+model Registration {
+  id                 String             @id @default(cuid())
+  eventId            String             @map("event_id")
+  event              Event              @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  userId             String             @map("user_id")
+  user               User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  registrationNumber String             @unique @map("registration_number")
+  qrToken            String?            @unique @map("qr_token")
+  status             RegistrationStatus @default(WAITING_PAYMENT)
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  deletedAt          DateTime?          @map("deleted_at")
+  payment            Payment?
+  certificates       Certificate[]
+  attendances        Attendance[]
+
+  @@map("registrations")
+}
+
+enum PaymentStatus {
+  WAITING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  registrationId String        @unique @map("registration_id")
+  registration   Registration  @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  amount         Int
+  status         PaymentStatus @default(WAITING)
+  proofUrl       String?       @map("proof_url")
+  verifiedAt     DateTime?     @map("verified_at")
+  verifiedById   String?       @map("verified_by_id")
+  verifiedBy     User?         @relation(fields: [verifiedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  deletedAt      DateTime?     @map("deleted_at")
+
+  @@map("payments")
+}
+
+model Certificate {
+  id                String       @id @default(cuid())
+  registrationId    String       @unique @map("registration_id")
+  registration      Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  eventId           String       @map("event_id")
+  event             Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId            String       @map("user_id")
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certificateNumber String       @unique @map("certificate_number")
+  templateUrl       String?      @map("template_url")
+  pdfUrl            String       @map("pdf_url")
+  downloadUrl       String       @map("download_url")
+  downloadTime      DateTime?    @map("download_time")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  @@map("certificates")
+}
+
+enum AttendanceStatus {
+  SUCCESS
+  FAILED
+}
+
+model Attendance {
+  id             String           @id @default(cuid())
+  registrationId String?          @map("registration_id")
+  registration   Registration?    @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  scanTime       DateTime         @default(now()) @map("scan_time")
+  scannerId      String?          @map("scanner_id")
+  scanner        User?            @relation("ScannerToAttendance", fields: [scannerId], references: [id], onDelete: SetNull)
+  status         AttendanceStatus
+
+  @@map("attendances")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  table     String
+  recordId  String   @map("record_id")
+  oldValues String?  @map("old_values")
+  newValues String?  @map("new_values")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
