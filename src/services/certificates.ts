@@ -42,15 +42,19 @@ export type CertificatePaginationResponse = {
 export async function getCertificates(
   page: number = 1,
   limit: number = 5,
-  search: string = ''
+  search: string = '',
+  eventId?: string
 ): Promise<CertificatePaginationResponse> {
   try {
     await verifyPermission('certificates.read');
 
     const skip = (page - 1) * limit;
 
-    const whereClause: any = {
-      OR: [
+    const whereClause: any = {};
+
+    // Add search condition if search is provided
+    if (search) {
+      whereClause.OR = [
         {
           certificateNumber: {
             contains: search,
@@ -73,8 +77,13 @@ export async function getCertificates(
             },
           },
         },
-      ],
-    };
+      ];
+    }
+
+    // Add eventId condition if eventId is provided
+    if (eventId) {
+      whereClause.eventId = eventId;
+    }
 
     const [total, certificates] = await Promise.all([
       prisma.certificate.count({ where: whereClause }),
@@ -512,6 +521,34 @@ export async function reorderSignatures(orderedIds: string[]) {
   } catch (error: any) {
     console.error('Reorder Signatures Error:', error);
     return { success: false, error: error.message || 'Gagal mengubah urutan TTD.' };
+  }
+}
+
+/**
+ * Delete a certificate
+ */
+export async function deleteCertificate(id: string) {
+  try {
+    await verifyPermission('certificates.delete');
+
+    const existing = await prisma.certificate.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return { success: false, error: 'Sertifikat tidak ditemukan.' };
+    }
+
+    await prisma.certificate.delete({
+      where: { id },
+    });
+
+    revalidatePath(BASE_PATH);
+
+    return { success: true, message: 'Sertifikat berhasil dihapus.' };
+  } catch (error: any) {
+    console.error('Delete Certificate Error:', error);
+    return { success: false, error: error.message || 'Gagal menghapus sertifikat.' };
   }
 }
 

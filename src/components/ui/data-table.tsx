@@ -47,6 +47,7 @@ interface DataTableProps<TData, TValue> {
   placeholderSearch?: string;
   isFetching?: boolean;
   onLimitChange?: (limit: number) => void;
+  customFilters?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -63,6 +64,7 @@ export function DataTable<TData, TValue>({
   placeholderSearch,
   isFetching,
   onLimitChange,
+  customFilters,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -136,7 +138,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      {/* 🔍 Search input & Bulk Actions */}
+      {/* 🔍 Search input, custom filters & Bulk Actions */}
       <div className="flex items-center justify-between py-4 gap-2">
         <div className="flex items-center gap-2">
           {onBulkDelete && selectedRows.length > 0 && (
@@ -150,6 +152,7 @@ export function DataTable<TData, TValue>({
               Hapus Terpilih ({selectedRows.length})
             </Button>
           )}
+          {customFilters}
         </div>
         <Input
           placeholder={placeholderSearch ? placeholderSearch : "Cari..."}
@@ -237,7 +240,7 @@ export function DataTable<TData, TValue>({
                 onLimitChange?.(newSize);
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-17.5">
                 <SelectValue placeholder={pageSize} />
               </SelectTrigger>
               <SelectContent side="top">
