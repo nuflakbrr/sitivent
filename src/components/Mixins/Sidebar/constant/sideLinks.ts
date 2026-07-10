@@ -47,13 +47,13 @@ export const sideLinks: SideLinks = {
       items: [
         {
           title: 'Manajemen Event',
-          url: 'events',
+          url: 'master/events',
           icon: Calendar,
           permission: 'events.read',
         },
         {
           title: 'Sertifikat',
-          url: 'certificates',
+          url: 'master/certificates',
           icon: Award,
           permission: 'certificates.read',
         },
@@ -67,13 +67,13 @@ export const sideLinks: SideLinks = {
       items: [
         {
           title: 'Pendaftaran',
-          url: 'registrations',
+          url: 'transactions/registrations',
           icon: ClipboardList,
           permission: 'registrations.read',
         },
         {
           title: 'Pembayaran',
-          url: 'payments',
+          url: 'transactions/payments',
           icon: CreditCard,
           permission: 'payments.verify',
         },
