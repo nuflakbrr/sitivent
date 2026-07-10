@@ -12,7 +12,7 @@ import { verifyPermission } from './security';
 import { slugify } from '@/lib/slugify';
 import { EventStatus } from '@/generated/prisma/enums';
 
-const BASE_PATH = '/admin/events';
+const BASE_PATH = '/admin/master/events';
 
 export type EventValues = z.infer<typeof eventSchema>;
 

@@ -55,7 +55,7 @@ const DashboardCMS = async () => {
       value: counts.events.total,
       description: `${counts.events.published} Aktif | ${counts.events.draft} Draft`,
       icon: Calendar,
-      href: '/admin/events',
+      href: '/admin/master/events',
       colorClass:
         'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-950',
     },
@@ -64,7 +64,7 @@ const DashboardCMS = async () => {
       value: counts.registrations.total,
       description: `${counts.registrations.uniqueParticipants} Peserta Unik`,
       icon: Users,
-      href: '/admin/registrations',
+      href: '/admin/transactions/registrations',
       colorClass:
         'text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/20 border-blue-100 dark:border-blue-950',
     },
@@ -73,7 +73,7 @@ const DashboardCMS = async () => {
       value: formatCurrency(counts.revenue),
       description: 'Dari pembayaran sukses',
       icon: CreditCard,
-      href: '/admin/payments',
+      href: '/admin/transactions/payments',
       colorClass:
         'text-rose-600 dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/20 border-rose-100 dark:border-rose-950',
     },
@@ -146,7 +146,7 @@ const DashboardCMS = async () => {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={'/admin/registrations' as Route}>Lihat Semua</Link>
+                  <Link href={'/admin/transactions/registrations' as Route}>Lihat Semua</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -262,7 +262,7 @@ const DashboardCMS = async () => {
                 className="w-full justify-start text-xs text-muted-foreground"
                 asChild
               >
-                <Link href={'/admin/events/new' as Route}>
+                <Link href={'/admin/master/events/new' as Route}>
                   <Plus className="w-4 h-4 mr-2 text-primary" /> Buat Event Baru
                 </Link>
               </Button>

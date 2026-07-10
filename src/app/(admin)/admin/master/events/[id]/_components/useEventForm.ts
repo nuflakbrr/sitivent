@@ -48,7 +48,7 @@ export const useEventForm = (initialData: Event | null) => {
         toast.success(result.message);
         await queryClient.invalidateQueries({ queryKey: ['events'] });
         router.refresh();
-        router.push('/admin/events');
+        router.push('/admin/master/events');
       } else {
         toast.error(result.error);
       }
@@ -62,7 +62,7 @@ export const useEventForm = (initialData: Event | null) => {
         toast.success(result.message);
         await queryClient.invalidateQueries({ queryKey: ['events'] });
         router.refresh();
-        router.push('/admin/events');
+        router.push('/admin/master/events');
       } else {
         toast.error(result.error);
       }

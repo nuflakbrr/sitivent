@@ -25,7 +25,7 @@ const EventsCMS: FC = () => {
         />
         {hasPermission('events.create') && (
           <Button asChild>
-            <Link href="/admin/events/new">
+            <Link href="/admin/master/events/new">
               <Plus className="h-4 w-4 mr-2" /> Tambah Event
             </Link>
           </Button>

@@ -81,7 +81,7 @@ const CellAction: FC<CellActionProps> = ({ data }) => {
             <DropdownMenuItem
               variant="warning"
               className="cursor-pointer"
-              onClick={() => router.push(`/admin/events/${data.id}`)}
+              onClick={() => router.push(`/admin/master/events/${data.id}`)}
             >
               <Edit className="mr-2 h-4 w-4" /> Ubah
             </DropdownMenuItem>

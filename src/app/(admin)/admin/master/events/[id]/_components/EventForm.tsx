@@ -149,7 +149,7 @@ const EventForm: FC<Props> = ({ initialData }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/events">
+            <Link href="/admin/master/events">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -578,7 +578,7 @@ const EventForm: FC<Props> = ({ initialData }) => {
 
         <div className="flex justify-end gap-4 mt-6">
           <Button variant="outline" type="button" asChild>
-            <Link href="/admin/events">Batal</Link>
+            <Link href="/admin/master/events">Batal</Link>
           </Button>
           {canEdit && (
             <Button type="submit" disabled={submitMutation.isPending || isUploading}>
