@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   reactCompiler: true,
   reactStrictMode: true,
+  // allowedDevOrigins: ['192.168.18.4'], // only want to debug cross network
   // Remove X-Powered-By header (improves Best Practices score)
   poweredByHeader: false,
   experimental: {
