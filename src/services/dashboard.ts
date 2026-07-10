@@ -173,6 +173,7 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
           location: upcomingReg.event.location,
           qrToken: upcomingReg.qrToken,
           status: upcomingReg.status,
+          registrationNumber: upcomingReg.registrationNumber,
         }
       : null;
 

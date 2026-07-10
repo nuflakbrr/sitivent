@@ -1,0 +1,38 @@
+import { z } from 'zod';
+import { EventStatus, EventType } from '@/generated/prisma/enums';
+
+export const eventSchema = z.object({
+  title: z.string().min(3, 'Judul minimal 3 karakter.'),
+  slug: z.string().min(3, 'Slug minimal 3 karakter.'),
+  description: z.string().min(10, 'Deskripsi minimal 10 karakter.'),
+  banner: z.string().optional().nullable(),
+  startDate: z.date({
+    message: 'Tanggal mulai wajib diisi.',
+  }),
+  endDate: z.date({
+    message: 'Tanggal selesai wajib diisi.',
+  }),
+  startTime: z.string().min(1, 'Waktu mulai wajib diisi.'),
+  endTime: z.string().min(1, 'Waktu selesai wajib diisi.'),
+  location: z.string().min(3, 'Lokasi minimal 3 karakter.'),
+  eventType: z.nativeEnum(EventType, {
+    message: 'Tipe event wajib dipilih.',
+  }),
+  registrationDeadline: z.date({
+    message: 'Batas akhir pendaftaran wajib diisi.',
+  }),
+  quota: z.coerce.number().int().min(0, 'Kuota tidak boleh negatif.'),
+  price: z.coerce.number().int().min(0, 'Harga tidak boleh negatif.'),
+  status: z.nativeEnum(EventStatus).default(EventStatus.DRAFT),
+  certificateEnabled: z.boolean().default(false),
+});
+
+export const refinedEventSchema = eventSchema
+  .refine((data) => data.registrationDeadline <= data.startDate, {
+    message: 'Batas pendaftaran tidak boleh melewati tanggal mulai event.',
+    path: ['registrationDeadline'],
+  })
+  .refine((data) => data.endDate >= data.startDate, {
+    message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+    path: ['endDate'],
+  });

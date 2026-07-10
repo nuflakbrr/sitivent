@@ -58,6 +58,7 @@ export interface ParticipantDashboardStats {
     location: string;
     qrToken: string | null;
     status: string;
+    registrationNumber?: string;
   } | null;
   history: Array<{
     id: string;
