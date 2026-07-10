@@ -4,6 +4,12 @@ import { prisma } from '@/lib/prisma';
 import { verifyPermission } from './security';
 import { EventStatus, RegistrationStatus, CertNumberMode } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
+import crypto from 'crypto';
+import type {
+  CertificateTemplateAppearance,
+  CertificateTemplateHeader,
+  CertificateTemplateNumbering,
+} from '@/interfaces/features/certificates';
 
 const BASE_PATH = '/admin/master/certificates';
 
@@ -50,7 +56,12 @@ export async function getCertificates(
 
     const skip = (page - 1) * limit;
 
-    const whereClause: any = {};
+    const whereClause: any = {
+      event: {
+        certificateEnabled: true,
+        deletedAt: null,
+      },
+    };
 
     // Add search condition if search is provided
     if (search) {
@@ -129,11 +140,13 @@ export async function getCertificates(
         lastPage: Math.ceil(total / limit),
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get Certificates Error:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Gagal mengambil data sertifikat.';
     return {
       success: false,
-      error: error.message || 'Gagal mengambil data sertifikat.',
+      error: errorMessage,
     };
   }
 }
@@ -152,58 +165,125 @@ export async function generateCertificatesForEvent(eventId: string) {
     }
 
     if (!event.certificateEnabled) {
-      return { success: false, error: 'Fitur sertifikat dinonaktifkan untuk event ini.' };
+      // Delete existing certificates if the feature is disabled
+      const deleted = await prisma.certificate.deleteMany({
+        where: { eventId },
+      });
+      revalidatePath(BASE_PATH);
+      revalidatePath('/participant/dashboard');
+      return {
+        success: true,
+        count: 0,
+        message: `Fitur dinonaktifkan. Semua sertifikat (${deleted.count}) untuk event ini telah dihapus.`,
+      };
     }
 
-    // Find all checked-in registrations that do not have a certificate yet
+    // Find all checked-in registrations ordered by creation date
     const registrations = await prisma.registration.findMany({
       where: {
         eventId,
         status: RegistrationStatus.CHECKED_IN,
-        certificates: {
-          none: {},
-        },
+      },
+      orderBy: {
+        createdAt: 'asc',
       },
       include: {
         user: true,
+        certificates: true,
       },
     });
 
     if (registrations.length === 0) {
-      return { success: true, count: 0, message: 'Tidak ada sertifikat baru yang perlu dibuat.' };
+      return {
+        success: true,
+        count: 0,
+        message: 'Tidak ada peserta check-in yang memenuhi syarat.',
+      };
     }
 
+    // Load template configuration for numbering format
+    const template = await prisma.certificateTemplate.findUnique({
+      where: { eventId },
+    });
+
+    const formatTemplate = template?.numberTemplate ?? 'CERT/{SLUG}/{REG_NO}';
     let createdCount = 0;
+    let updatedCount = 0;
 
-    // Generate certificate for each registration
-    for (const reg of registrations) {
-      const certificateNumber = `CERT/${event.slug.toUpperCase()}/${reg.registrationNumber}`;
+    // Helper function to resolve number templates
+    const resolveNumber = (pattern: string, reg: any, seqIdx: number) => {
+      const now = new Date();
+      const year = now.getFullYear().toString();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const day = now.getDate().toString().padStart(2, '0');
+      const slug = event.slug.toUpperCase();
+      const seq = seqIdx.toString().padStart(3, '0');
+      const rand = crypto.randomBytes
+        ? crypto.randomBytes(2).toString('hex').toUpperCase()
+        : Math.random().toString(36).substring(2, 6).toUpperCase();
 
-      // Check if number already exists
-      const existing = await prisma.certificate.findFirst({
-        where: { certificateNumber },
-      });
+      return pattern
+        .replace(/\{SLUG\}/g, slug)
+        .replace(/\{REG_NO\}/g, reg.registrationNumber)
+        .replace(/\{YEAR\}/g, year)
+        .replace(/\{MONTH\}/g, month)
+        .replace(/\{DAY\}/g, day)
+        .replace(/\{SEQ\}/g, seq)
+        .replace(/\{EVENT_ID\}/g, event.id)
+        .replace(/\{REG_ID\}/g, reg.id)
+        .replace(/\{RAND\}/g, rand);
+    };
 
-      if (existing) continue;
+    // Generate/Update certificate for each registration
+    for (let i = 0; i < registrations.length; i++) {
+      const reg = registrations[i];
+      const seqIndex = i + 1;
+      const certificateNumber = resolveNumber(formatTemplate, reg, seqIndex);
+      const existing = reg.certificates[0] || null;
 
-      const certId = crypto.randomUUID
-        ? crypto.randomUUID()
-        : Math.random().toString(36).substring(2);
+      if (existing) {
+        // Update if format has changed or if template background changed
+        const currentBgUrl = template?.backgroundUrl || event.banner || '';
+        if (
+          existing.certificateNumber !== certificateNumber ||
+          existing.templateUrl !== currentBgUrl
+        ) {
+          await prisma.certificate.update({
+            where: { id: existing.id },
+            data: {
+              certificateNumber,
+              templateUrl: currentBgUrl,
+              downloadTime: null, // Reset download status so participant must re-download
+            },
+          });
+          updatedCount++;
+        }
+      } else {
+        // Double check uniqueness of certificateNumber
+        const duplicate = await prisma.certificate.findFirst({
+          where: { certificateNumber },
+        });
+        if (duplicate) continue;
 
-      await prisma.certificate.create({
-        data: {
-          id: certId,
-          registrationId: reg.id,
-          eventId: event.id,
-          userId: reg.userId,
-          certificateNumber,
-          templateUrl: event.banner || '',
-          pdfUrl: `/certificates/${certId}`,
-          downloadUrl: `/certificates/${certId}`,
-        },
-      });
+        const certId = crypto.randomUUID
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2);
 
-      createdCount++;
+        await prisma.certificate.create({
+          data: {
+            id: certId,
+            registrationId: reg.id,
+            eventId: event.id,
+            userId: reg.userId,
+            certificateNumber,
+            templateUrl: template?.backgroundUrl || event.banner || '',
+            pdfUrl: `/certificates/${certId}`,
+            downloadUrl: `/certificates/${certId}`,
+          },
+        });
+
+        createdCount++;
+      }
     }
 
     revalidatePath(BASE_PATH);
@@ -211,14 +291,15 @@ export async function generateCertificatesForEvent(eventId: string) {
 
     return {
       success: true,
-      count: createdCount,
-      message: `Berhasil membuat ${createdCount} sertifikat baru.`,
+      count: createdCount + updatedCount,
+      message: `Berhasil memproses sertifikat: ${createdCount} baru dibuat, ${updatedCount} diperbarui.`,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Generate Certificates Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Gagal memproses sertifikat.';
     return {
       success: false,
-      error: error.message || 'Gagal memproses sertifikat.',
+      error: errorMessage,
     };
   }
 }
@@ -238,12 +319,14 @@ export async function getCertificateById(id: string) {
           },
         },
         event: {
-          select: {
-            title: true,
-            slug: true,
-            startDate: true,
-            endDate: true,
-            location: true,
+          include: {
+            certificateTemplate: {
+              include: {
+                signatures: {
+                  orderBy: { order: 'asc' },
+                },
+              },
+            },
           },
         },
         registration: {
@@ -254,6 +337,10 @@ export async function getCertificateById(id: string) {
         },
       },
     });
+
+    if (cert && !cert.event.certificateEnabled) {
+      return null;
+    }
 
     return cert;
   } catch (error) {
@@ -334,23 +421,28 @@ export async function getCompletedEventsWithCertStats() {
       success: true,
       data: eventsWithStats,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get Completed Events Cert Stats Error:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Gagal mengambil statistik event.';
     return {
       success: false,
-      error: error.message || 'Gagal mengambil statistik event.',
+      error: errorMessage,
     };
   }
 }
 
 // ─── Certificate Template ────────────────────────────────────────────────────
 
-export type CertTemplateUpsertInput = {
-  backgroundUrl?: string | null;
-  numberTemplate?: string;
-  numberMode?: CertNumberMode;
-  showIssuedDate?: boolean;
-};
+export type CertTemplateUpsertInput = Partial<
+  CertificateTemplateAppearance &
+    CertificateTemplateHeader &
+    Omit<CertificateTemplateNumbering, 'numberTemplate' | 'numberMode' | 'showIssuedDate'> & {
+      numberTemplate?: string;
+      numberMode?: CertNumberMode;
+      showIssuedDate?: boolean;
+    }
+>;
 
 export type SignatureInput = {
   name: string;
@@ -374,9 +466,11 @@ export async function getCertificateTemplate(eventId: string) {
     });
 
     return { success: true, data: template };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get Certificate Template Error:', error);
-    return { success: false, error: error.message || 'Gagal mengambil template sertifikat.' };
+    const errorMessage =
+      error instanceof Error ? error.message : 'Gagal mengambil template sertifikat.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -394,6 +488,19 @@ export async function upsertCertificateTemplate(eventId: string, input: CertTemp
         numberTemplate: input.numberTemplate ?? 'CERT/{SLUG}/{REG_NO}',
         numberMode: input.numberMode ?? CertNumberMode.AUTO,
         showIssuedDate: input.showIssuedDate ?? true,
+        titleFont: input.titleFont,
+        titleColor: input.titleColor,
+        contentFont: input.contentFont,
+        contentColor: input.contentColor,
+        primaryColor: input.primaryColor,
+        showEventDate: input.showEventDate,
+        showEventLocation: input.showEventLocation,
+        headerText: input.headerText,
+        headerSubtitle: input.headerSubtitle,
+        headerFont: input.headerFont,
+        headerColor: input.headerColor,
+        showHeader: input.showHeader,
+        footerMarginBottom: input.footerMarginBottom,
       },
       create: {
         eventId,
@@ -401,6 +508,19 @@ export async function upsertCertificateTemplate(eventId: string, input: CertTemp
         numberTemplate: input.numberTemplate ?? 'CERT/{SLUG}/{REG_NO}',
         numberMode: input.numberMode ?? CertNumberMode.AUTO,
         showIssuedDate: input.showIssuedDate ?? true,
+        titleFont: input.titleFont,
+        titleColor: input.titleColor,
+        contentFont: input.contentFont,
+        contentColor: input.contentColor,
+        primaryColor: input.primaryColor,
+        showEventDate: input.showEventDate,
+        showEventLocation: input.showEventLocation,
+        headerText: input.headerText,
+        headerSubtitle: input.headerSubtitle,
+        headerFont: input.headerFont,
+        headerColor: input.headerColor,
+        showHeader: input.showHeader,
+        footerMarginBottom: input.footerMarginBottom,
       },
       include: {
         signatures: {
@@ -412,9 +532,11 @@ export async function upsertCertificateTemplate(eventId: string, input: CertTemp
     revalidatePath(BASE_PATH);
 
     return { success: true, data: template, message: 'Template sertifikat berhasil disimpan.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Upsert Certificate Template Error:', error);
-    return { success: false, error: error.message || 'Gagal menyimpan template sertifikat.' };
+    const errorMessage =
+      error instanceof Error ? error.message : 'Gagal menyimpan template sertifikat.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -447,9 +569,10 @@ export async function addSignature(templateId: string, input: SignatureInput) {
     revalidatePath(BASE_PATH);
 
     return { success: true, data: signature, message: 'TTD berhasil ditambahkan.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Add Signature Error:', error);
-    return { success: false, error: error.message || 'Gagal menambahkan TTD.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal menambahkan TTD.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -473,9 +596,10 @@ export async function updateSignature(signatureId: string, input: Partial<Signat
     revalidatePath(BASE_PATH);
 
     return { success: true, data: signature, message: 'TTD berhasil diperbarui.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update Signature Error:', error);
-    return { success: false, error: error.message || 'Gagal memperbarui TTD.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal memperbarui TTD.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -493,9 +617,10 @@ export async function deleteSignature(signatureId: string) {
     revalidatePath(BASE_PATH);
 
     return { success: true, message: 'TTD berhasil dihapus.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete Signature Error:', error);
-    return { success: false, error: error.message || 'Gagal menghapus TTD.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus TTD.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -518,9 +643,10 @@ export async function reorderSignatures(orderedIds: string[]) {
     revalidatePath(BASE_PATH);
 
     return { success: true, message: 'Urutan TTD berhasil diperbarui.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Reorder Signatures Error:', error);
-    return { success: false, error: error.message || 'Gagal mengubah urutan TTD.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal mengubah urutan TTD.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -546,9 +672,10 @@ export async function deleteCertificate(id: string) {
     revalidatePath(BASE_PATH);
 
     return { success: true, message: 'Sertifikat berhasil dihapus.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete Certificate Error:', error);
-    return { success: false, error: error.message || 'Gagal menghapus sertifikat.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal menghapus sertifikat.';
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -570,12 +697,27 @@ export async function getEventsWithCertificateEnabled() {
         slug: true,
         status: true,
         startDate: true,
+        location: true,
         certificateTemplate: {
           select: {
             id: true,
             backgroundUrl: true,
             numberTemplate: true,
             numberMode: true,
+            showIssuedDate: true,
+            titleFont: true,
+            titleColor: true,
+            contentFont: true,
+            contentColor: true,
+            primaryColor: true,
+            showEventDate: true,
+            showEventLocation: true,
+            headerText: true,
+            headerSubtitle: true,
+            headerFont: true,
+            headerColor: true,
+            showHeader: true,
+            footerMarginBottom: true,
             signatures: {
               orderBy: { order: 'asc' },
             },
@@ -586,8 +728,51 @@ export async function getEventsWithCertificateEnabled() {
     });
 
     return { success: true, data: events };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get Events With Cert Enabled Error:', error);
-    return { success: false, error: error.message || 'Gagal mengambil data event.' };
+    const errorMessage = error instanceof Error ? error.message : 'Gagal mengambil data event.';
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Synchronize and generate certificates for all events with certificate enabled
+ */
+export async function generateCertificatesForAllEvents() {
+  try {
+    const events = await prisma.event.findMany({
+      where: { certificateEnabled: true, deletedAt: null },
+    });
+
+    let totalCreated = 0;
+    for (const event of events) {
+      const res = await generateCertificatesForEvent(event.id);
+      if (res.success && res.count) {
+        totalCreated += res.count;
+      }
+    }
+
+    return {
+      success: true,
+      count: totalCreated,
+      message: `Berhasil sinkronisasi sertifikat untuk semua event. Total ${totalCreated} sertifikat baru dibuat.`,
+    };
+  } catch (error: unknown) {
+    console.error('Generate All Certificates Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Gagal sinkronisasi seluruh event.',
+    };
+  }
+}
+
+/**
+ * Check if current user has certificates.read permission (Admin role)
+ */
+export async function checkUserIsAdmin() {
+  try {
+    return await verifyPermission('certificates.read');
+  } catch {
+    return false;
   }
 }

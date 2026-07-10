@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "certificate_templates" ADD COLUMN     "content_color" TEXT,
+ADD COLUMN     "content_font" TEXT,
+ADD COLUMN     "footer_margin_bottom" INTEGER DEFAULT 0,
+ADD COLUMN     "header_color" TEXT,
+ADD COLUMN     "header_font" TEXT,
+ADD COLUMN     "header_subtitle" TEXT DEFAULT 'Sertifikat Partisipasi Resmi',
+ADD COLUMN     "header_text" TEXT DEFAULT 'SITIVENT',
+ADD COLUMN     "primary_color" TEXT,
+ADD COLUMN     "show_event_date" BOOLEAN DEFAULT true,
+ADD COLUMN     "show_event_location" BOOLEAN DEFAULT false,
+ADD COLUMN     "show_header" BOOLEAN DEFAULT true,
+ADD COLUMN     "show_issued_date" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "title_color" TEXT,
+ADD COLUMN     "title_font" TEXT;

@@ -209,6 +209,12 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
           },
         },
         certificates: {
+          where: {
+            event: {
+              certificateEnabled: true,
+              deletedAt: null,
+            },
+          },
           select: {
             id: true,
             downloadUrl: true,

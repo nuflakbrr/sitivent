@@ -1,10 +1,6 @@
 'use client';
 import { use, useEffect, useState } from 'react';
-import {
-  getCertificateById,
-  updateDownloadTime,
-  getCertificateTemplate,
-} from '@/services/certificates';
+import { getCertificateById, updateDownloadTime, checkUserIsAdmin } from '@/services/certificates';
 import { Button } from '@/components/ui/button';
 import { Printer, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -18,18 +14,23 @@ export default function CertificatePage(props: PageProps) {
   const params = use(props.params);
   const [cert, setCert] = useState<any>(null);
   const [template, setTemplate] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await getCertificateById(params.id);
+        const [data, isUserAdmin] = await Promise.all([
+          getCertificateById(params.id),
+          checkUserIsAdmin(),
+        ]);
+        setIsAdmin(isUserAdmin);
         if (data) {
           setCert(data);
           await updateDownloadTime(params.id);
-          // Load template for this event
-          const tmpl = await getCertificateTemplate(data.eventId);
-          if (tmpl.success) setTemplate(tmpl.data);
+          if (data.event?.certificateTemplate) {
+            setTemplate(data.event.certificateTemplate);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -82,13 +83,29 @@ export default function CertificatePage(props: PageProps) {
   const signatures = template?.signatures ?? [];
   const backgroundUrl = template?.backgroundUrl ?? null;
   const showIssuedDate = template?.showIssuedDate ?? true;
+  const titleFont = template?.titleFont ?? 'Inter';
+  const titleColor = template?.titleColor ?? '#000000';
+  const contentFont = template?.contentFont ?? 'Inter';
+  const contentColor = template?.contentColor ?? '#333333';
+  const primaryColor = template?.primaryColor ?? '#3b82f6';
+  const showEventDate = template?.showEventDate ?? true;
+  const showEventLocation = template?.showEventLocation ?? false;
+  const headerText = template?.headerText ?? 'SITIVENT';
+  const headerSubtitle = template?.headerSubtitle ?? 'Sertifikat Partisipasi Resmi';
+  const headerFont = template?.headerFont ?? 'Times New Roman';
+  const headerColor = template?.headerColor ?? '#000000';
+  const showHeader = template?.showHeader ?? true;
+  const footerMarginBottom = template?.footerMarginBottom ?? 0;
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 p-4 sm:p-8 flex flex-col items-center justify-center print:p-0 print:bg-white">
       {/* Action Bar (Hidden on Print) */}
       <div className="w-full max-w-4xl flex items-center justify-between mb-6 no-print print:hidden">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/participant/dashboard" className="flex items-center gap-2">
+          <Link
+            href={isAdmin ? '/admin/master/certificates' : '/participant/dashboard'}
+            className="flex items-center gap-2"
+          >
             <ArrowLeft className="h-4 w-4" /> Kembali
           </Link>
         </Button>
@@ -105,8 +122,18 @@ export default function CertificatePage(props: PageProps) {
         className="w-full max-w-4xl aspect-[1.414/1] bg-white text-zinc-900 relative shadow-2xl overflow-hidden flex flex-col justify-between items-center print:shadow-none print:m-0 print:w-full print:h-full print:aspect-auto"
         style={
           !backgroundUrl
-            ? { padding: '2rem 4rem', border: '12px double #d4d4d8', borderRadius: '1.5rem' }
-            : { padding: '2rem 4rem' }
+            ? {
+                padding: '2rem 4rem',
+                border: '12px double #d4d4d8',
+                borderRadius: '1.5rem',
+                color: contentColor,
+                fontFamily: contentFont,
+              }
+            : {
+                padding: '2rem 4rem',
+                color: contentColor,
+                fontFamily: contentFont,
+              }
         }
       >
         {/* ── Custom Background ── */}
@@ -115,10 +142,8 @@ export default function CertificatePage(props: PageProps) {
             <img
               src={backgroundUrl}
               alt="certificate background"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-fill"
             />
-            {/* Slight overlay so text is readable */}
-            <div className="absolute inset-0 bg-white/30" />
           </div>
         )}
 
@@ -133,77 +158,118 @@ export default function CertificatePage(props: PageProps) {
         {/* All content sits above background */}
         <div className="relative z-10 w-full flex flex-col justify-between items-center h-full">
           {/* Top Header */}
-          <div className="w-full flex flex-col items-center text-center space-y-2">
+          <div
+            className="w-full flex flex-col items-center text-center space-y-2"
+            style={{ visibility: showHeader ? 'visible' : 'hidden' }}
+          >
             <div className="flex items-center gap-2">
-              <Award className="h-10 w-10 text-primary animate-pulse" />
-              <span className="font-serif font-bold text-2xl tracking-wider text-zinc-800 uppercase">
-                SITIVENT
+              <Award className="h-10 w-10 animate-pulse" style={{ color: primaryColor }} />
+              <span
+                className="font-bold text-2xl tracking-wider uppercase"
+                style={{ color: headerColor, fontFamily: headerFont }}
+              >
+                {headerText}
               </span>
             </div>
-            <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase font-mono">
-              Sertifikat Partisipasi Resmi
+            <span
+              className="text-[10px] font-bold tracking-widest uppercase font-mono"
+              style={{ color: headerColor }}
+            >
+              {headerSubtitle}
             </span>
-            <div className="w-24 h-0.5 bg-primary mx-auto mt-2" />
+            <div className="w-24 h-0.5 mx-auto mt-2" style={{ backgroundColor: primaryColor }} />
           </div>
 
           {/* Main Content */}
           <div className="w-full flex flex-col items-center text-center my-6 space-y-6">
-            <h2 className="font-serif text-3xl sm:text-5xl font-semibold tracking-wide text-zinc-800 uppercase">
+            <h2
+              className="text-3xl sm:text-5xl font-semibold tracking-wide uppercase"
+              style={{ fontFamily: titleFont, color: titleColor }}
+            >
               SERTIFIKAT
             </h2>
-            <span className="text-sm font-medium text-muted-foreground italic font-serif">
+            <span className="text-sm font-medium italic font-serif">
               Dengan bangga diberikan kepada:
             </span>
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-4xl font-bold border-b-2 border-zinc-200 px-6 pb-2 inline-block text-zinc-900 capitalize">
+              <h1
+                className="text-2xl sm:text-4xl font-bold border-b-2 px-6 pb-2 inline-block capitalize"
+                style={{
+                  fontFamily: titleFont,
+                  color: titleColor,
+                  borderColor: `${contentColor}33`,
+                }}
+              >
                 {cert.user.name || cert.user.email}
               </h1>
-              <p className="text-xs text-muted-foreground font-mono mt-1">
-                No. Sertifikat: {cert.certificateNumber}
-              </p>
+              <p className="text-xs font-mono mt-1">No. Sertifikat: {cert.certificateNumber}</p>
             </div>
-            <p className="text-sm text-zinc-700 max-w-xl mx-auto leading-relaxed">
-              Atas partisipasi aktif sebagai peserta dalam event{' '}
-              <strong className="text-zinc-900 font-semibold">{cert.event.title}</strong> yang
-              diselenggarakan pada tanggal{' '}
-              <strong className="text-zinc-900 font-semibold">
-                {formatDate(cert.event.startDate)}
+            <p className="text-sm max-w-xl mx-auto leading-relaxed">
+              Atas partisipasi aktif sebagai peserta dalam{' '}
+              <strong className="font-semibold" style={{ color: titleColor }}>
+                {cert.event.title}
               </strong>{' '}
-              di <strong className="text-zinc-900 font-semibold">{cert.event.location}</strong>.
+              yang diselenggarakan
+              {showEventDate && (
+                <>
+                  {' '}
+                  pada tanggal{' '}
+                  <strong className="font-semibold" style={{ color: titleColor }}>
+                    {formatDate(cert.event.startDate)}
+                  </strong>
+                </>
+              )}
+              {showEventLocation && (
+                <>
+                  {' '}
+                  di{' '}
+                  <strong className="font-semibold" style={{ color: titleColor }}>
+                    {cert.event.location}
+                  </strong>
+                </>
+              )}
+              .
             </p>
           </div>
 
           {/* Footer Area — Signatures */}
-          <div className="w-full border-t border-zinc-100 pt-4">
+          <div
+            className="w-full border-t pt-4"
+            style={{ borderColor: `${contentColor}1a`, marginBottom: `${footerMarginBottom}px` }}
+          >
             {signatures.length > 0 ? (
               <div className="flex items-end justify-center gap-12 flex-wrap">
                 {/* Issue date on the left — conditional */}
                 {showIssuedDate && (
                   <div className="text-left space-y-1">
-                    <p className="text-[10px] text-muted-foreground font-semibold">
-                      TANGGAL TERBIT
+                    <p className="text-[11px] font-semibold">TANGGAL TERBIT</p>
+                    <p className="text-xs font-bold" style={{ color: titleColor }}>
+                      {formatDate(cert.createdAt)}
                     </p>
-                    <p className="text-xs font-bold text-zinc-800">{formatDate(cert.createdAt)}</p>
                   </div>
                 )}
 
                 {/* Render each signature */}
                 {signatures.map((sig: any) => (
                   <div key={sig.id} className="flex flex-col items-center space-y-1">
-                    <div className="h-14 w-28 relative flex items-center justify-center">
+                    <div className="h-20 w-36 relative flex items-center justify-center">
                       <img
                         src={sig.signatureUrl}
                         alt={sig.name}
                         className="max-h-full max-w-full object-contain"
                       />
                     </div>
-                    <div className="border-t border-zinc-200 pt-1 px-3 text-center">
-                      <p className="text-[10px] font-bold text-zinc-700 uppercase font-mono tracking-wide">
+                    <div
+                      className="border-t pt-1 px-3 text-center"
+                      style={{ borderColor: `${contentColor}33` }}
+                    >
+                      <p
+                        className="text-xs font-bold uppercase font-mono tracking-wide"
+                        style={{ color: titleColor }}
+                      >
                         {sig.name}
                       </p>
-                      {sig.title && (
-                        <p className="text-[9px] text-zinc-500 font-mono">{sig.title}</p>
-                      )}
+                      {sig.title && <p className="text-[10px] font-mono">{sig.title}</p>}
                     </div>
                   </div>
                 ))}
@@ -212,14 +278,24 @@ export default function CertificatePage(props: PageProps) {
               /* Fallback if no signatures configured */
               <div className="flex justify-between items-end">
                 <div className="text-left space-y-1">
-                  <p className="text-[10px] text-muted-foreground font-semibold">TANGGAL TERBIT</p>
-                  <p className="text-xs font-bold text-zinc-800">{formatDate(cert.createdAt)}</p>
+                  <p className="text-[11px] font-semibold">TANGGAL TERBIT</p>
+                  <p className="text-xs font-bold" style={{ color: titleColor }}>
+                    {formatDate(cert.createdAt)}
+                  </p>
                 </div>
                 <div className="flex flex-col items-center space-y-1">
-                  <div className="h-10 w-24 relative flex items-center justify-center">
-                    <span className="font-serif italic text-zinc-400 text-sm">SITIVENT System</span>
+                  <div className="h-14 w-32 relative flex items-center justify-center">
+                    <span
+                      className="font-serif italic text-sm"
+                      style={{ color: `${contentColor}66` }}
+                    >
+                      SITIVENT System
+                    </span>
                   </div>
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase font-mono tracking-wider border-t border-zinc-200 pt-1 px-4">
+                  <p
+                    className="text-xs font-bold uppercase font-mono tracking-wider border-t pt-1 px-4"
+                    style={{ borderColor: `${contentColor}33` }}
+                  >
                     Panitia Penyelenggara
                   </p>
                 </div>
@@ -231,19 +307,47 @@ export default function CertificatePage(props: PageProps) {
 
       <style jsx global>{`
         @media print {
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+          * {
+            box-sizing: border-box !important;
+          }
+          html,
           body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
-            color: black !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            overflow: hidden !important;
+            font-size: 19px !important;
           }
           .no-print {
             display: none !important;
           }
           #certificate-container {
+            width: 100vw !important;
+            height: 70.72vw !important;
+            max-height: 100vh !important;
+            max-width: 141.42vh !important;
+            margin: auto !important;
+            padding: 3rem 4rem 5rem 4rem !important;
             border: none !important;
             box-shadow: none !important;
-            padding: 2cm !important;
-            width: 100% !important;
-            height: 100% !important;
+            border-radius: 0 !important;
+            position: absolute !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
           }
         }
       `}</style>
