@@ -67,7 +67,7 @@ const PermissionsCMS: FC = () => {
         onConfirm={onBulkDelete}
         loading={deleteBulkMutation.isPending}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <Heading
           title={`Hak Akses (${meta.total})`}
           description="Daftar hak akses yang tersedia."
