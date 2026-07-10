@@ -11,7 +11,7 @@ export async function proxy(request: NextRequest) {
   const isParticipantPath = pathname.startsWith('/participant');
   const isAuthPath = pathname.startsWith('/login');
 
-  const cmsSegments = ['managements'];
+  const cmsSegments = ['managements', 'master', 'transactions', 'attendance'];
   const isCMSPath = cmsSegments.some((segment) => pathname.startsWith(`/admin/${segment}`));
 
   // Jika bukan path yang diproteksi, langsung lewat saja (optimasi)
@@ -95,6 +95,10 @@ export async function proxy(request: NextRequest) {
     if (isCMSPath && isAuthenticated) {
       const redirectMap: Record<string, string> = {
         '/admin/managements': '/admin/managements/permissions',
+        '/admin/master': '/admin/master/events',
+        '/admin/transactions': '/admin/transactions/registrations',
+        '/admin/attendance': '/admin/attendance/scan',
+        '/admin': '/admin/dashboard',
       };
 
       if (redirectMap[pathname]) {
