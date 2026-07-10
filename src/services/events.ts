@@ -288,6 +288,11 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
     revalidatePath(BASE_PATH);
     revalidatePath(`${BASE_PATH}/${id}`);
 
+    if (event.status === EventStatus.COMPLETED && event.certificateEnabled) {
+      const { generateCertificatesForEvent } = await import('./certificates');
+      await generateCertificatesForEvent(event.id);
+    }
+
     return {
       success: true,
       data: event as unknown as Event,

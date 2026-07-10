@@ -65,7 +65,9 @@ export async function registerToEvent(eventId: string) {
     }
 
     // 6. Generate registration number & QR token
-    const regNumber = `REG-${event.id.slice(-5).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+    const regNumber = Array.from(crypto.randomBytes(12))
+      .map((b) => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b % 36])
+      .join('');
     const qrToken = crypto.randomBytes(16).toString('hex');
 
     // 7. Simpan registrasi

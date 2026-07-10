@@ -4,7 +4,6 @@ import {
   Calendar,
   MapPin,
   Clock,
-  QrCode,
   Award,
   CheckCircle2,
   XCircle,
@@ -19,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import ShowQrButton from './_components/ShowQrButton';
 
 const formatDate = (date: Date) => {
   return new Date(date).toLocaleDateString('id-ID', {
@@ -174,19 +174,11 @@ export default async function ParticipantDashboard() {
             </div>
             {upcomingEvent && upcomingEvent.qrToken && (
               <div className="p-6 pt-0">
-                <Card className="bg-muted/50 border-dashed border-2 border-muted">
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <QrCode className="w-10 h-10 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <p className="font-semibold text-xs text-foreground uppercase tracking-wider">
-                        Kode QR Kehadiran
-                      </p>
-                      <p className="text-[10px] text-muted-foreground truncate font-mono">
-                        {upcomingEvent.qrToken}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ShowQrButton
+                  qrToken={upcomingEvent.qrToken}
+                  eventTitle={upcomingEvent.title}
+                  registrationNumber={upcomingEvent.registrationNumber}
+                />
               </div>
             )}
           </Card>
