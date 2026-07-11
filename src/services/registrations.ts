@@ -1,10 +1,108 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { verifySession } from './security';
+import { verifySession, verifyPermission } from './security';
 import { RegistrationStatus, PaymentStatus } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
+import { queueEmail } from './emails';
+
+export async function getRegistrations(
+  page: number = 1,
+  limit: number = 10,
+  search: string = '',
+  eventId?: string,
+  status?: string
+) {
+  const hasAccess = await verifyPermission('registrations.read');
+  if (!hasAccess) {
+    return {
+      success: false,
+      data: [],
+      meta: { total: 0, page: 1, lastPage: 0 },
+      error: 'Anda tidak memiliki hak akses untuk melihat data ini.',
+    } as any;
+  }
+
+  try {
+    const skip = (page - 1) * limit;
+
+    const where = {
+      deletedAt: null,
+      ...(eventId ? { eventId } : {}),
+      ...(status ? { status: status as any } : {}),
+      ...(search
+        ? {
+            OR: [
+              { registrationNumber: { contains: search, mode: 'insensitive' as const } },
+              { user: { name: { contains: search, mode: 'insensitive' as const } } },
+              { user: { email: { contains: search, mode: 'insensitive' as const } } },
+              { event: { title: { contains: search, mode: 'insensitive' as const } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.registration.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              title: true,
+              price: true,
+              startDate: true,
+            },
+          },
+        },
+      }),
+      prisma.registration.count({ where }),
+    ]);
+
+    return {
+      success: true,
+      data,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
+  } catch (error) {
+    console.error('Get Registrations Error:', error);
+    return {
+      success: false,
+      data: [],
+      meta: { total: 0, page: 1, lastPage: 0 },
+      error: 'Terjadi kesalahan sistem saat memproses data registrasi.',
+    };
+  }
+}
+
+export async function getEventsForFilter() {
+  try {
+    const events = await prisma.event.findMany({
+      where: { deletedAt: null },
+      select: { id: true, title: true },
+      orderBy: { title: 'asc' },
+    });
+    return { success: true, data: events };
+  } catch (error) {
+    console.error('Get Events For Filter Error:', error);
+    return { success: false, data: [] };
+  }
+}
 
 export async function registerToEvent(eventId: string) {
   try {
@@ -73,8 +171,9 @@ export async function registerToEvent(eventId: string) {
     // 7. Simpan registrasi
     const isFree = event.price === 0;
 
+    let createdReg;
     if (isFree) {
-      await prisma.registration.create({
+      createdReg = await prisma.registration.create({
         data: {
           eventId,
           userId,
@@ -82,9 +181,27 @@ export async function registerToEvent(eventId: string) {
           qrToken,
           status: RegistrationStatus.REGISTERED,
         },
+        include: {
+          user: true,
+          event: true,
+        },
       });
+
+      // Send Registration Success Email
+      const emailBody = `
+        <h2>Registrasi Berhasil!</h2>
+        <p>Halo ${createdReg.user.name || createdReg.user.email},</p>
+        <p>Anda telah berhasil terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
+        <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
+        <p>Sampai jumpa di lokasi event!</p>
+      `;
+      await queueEmail(
+        createdReg.user.email,
+        `Registrasi Berhasil: ${createdReg.event.title}`,
+        emailBody
+      );
     } else {
-      await prisma.registration.create({
+      createdReg = await prisma.registration.create({
         data: {
           eventId,
           userId,
@@ -97,7 +214,26 @@ export async function registerToEvent(eventId: string) {
             },
           },
         },
+        include: {
+          user: true,
+          event: true,
+        },
       });
+
+      // Send Waiting Payment Email
+      const emailBody = `
+        <h2>Registrasi Berhasil - Menunggu Pembayaran</h2>
+        <p>Halo ${createdReg.user.name || createdReg.user.email},</p>
+        <p>Anda telah terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
+        <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
+        <p>Silakan lakukan pembayaran sebesar <strong>Rp ${createdReg.event.price.toLocaleString('id-ID')}</strong>.</p>
+        <p>Terima kasih!</p>
+      `;
+      await queueEmail(
+        createdReg.user.email,
+        `Menunggu Pembayaran: ${createdReg.event.title}`,
+        emailBody
+      );
     }
 
     revalidatePath('/participant/dashboard');
@@ -135,5 +271,80 @@ export async function getEventRegistrationStatus(eventId: string) {
     return reg;
   } catch {
     return null;
+  }
+}
+
+export async function cancelRegistration(registrationId: string) {
+  try {
+    const session = await verifySession();
+    if (!session || !session.user) {
+      return { success: false, error: 'Anda harus masuk terlebih dahulu.' };
+    }
+
+    const reg = await prisma.registration.findUnique({
+      where: { id: registrationId },
+      include: { event: true, payment: true },
+    });
+
+    if (!reg || reg.deletedAt) {
+      return { success: false, error: 'Registrasi tidak ditemukan.' };
+    }
+
+    const isOwner = reg.userId === session.user.id;
+    const hasAccess = isOwner || (await verifyPermission('registrations.update'));
+
+    if (!hasAccess) {
+      return {
+        success: false,
+        error: 'Anda tidak memiliki hak akses untuk membatalkan pendaftaran ini.',
+      };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.registration.update({
+        where: { id: registrationId },
+        data: { status: RegistrationStatus.CANCELLED },
+      });
+
+      if (reg.payment) {
+        await tx.payment.update({
+          where: { registrationId },
+          data: { status: PaymentStatus.FAILED },
+        });
+      }
+    });
+
+    revalidatePath('/participant/dashboard');
+    revalidatePath(`/events/${reg.event.slug}`);
+    revalidatePath('/admin/transactions/registrations');
+
+    return { success: true, message: 'Pendaftaran berhasil dibatalkan.' };
+  } catch (error) {
+    console.error('Cancel Registration Error:', error);
+    return { success: false, error: 'Gagal membatalkan pendaftaran.' };
+  }
+}
+
+export async function deleteRegistration(registrationId: string) {
+  try {
+    const hasAccess = await verifyPermission('registrations.delete');
+    if (!hasAccess) {
+      return {
+        success: false,
+        error: 'Anda tidak memiliki hak akses untuk menghapus registrasi ini.',
+      };
+    }
+
+    await prisma.registration.update({
+      where: { id: registrationId },
+      data: { deletedAt: new Date() },
+    });
+
+    revalidatePath('/admin/transactions/registrations');
+
+    return { success: true, message: 'Registrasi berhasil dihapus.' };
+  } catch (error) {
+    console.error('Delete Registration Error:', error);
+    return { success: false, error: 'Gagal menghapus registrasi.' };
   }
 }

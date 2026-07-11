@@ -325,3 +325,26 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+model EmailQueue {
+  id          String      @id @default(cuid())
+  to          String
+  subject     String
+  body        String
+  attachments String?
+  status      EmailStatus @default(PENDING)
+  attempts    Int         @default(0)
+  error       String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("email_queues")
+}
+

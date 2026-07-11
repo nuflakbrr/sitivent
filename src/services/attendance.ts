@@ -10,7 +10,11 @@ export async function scanQrCode(qrToken: string) {
     // 1. Verifikasi izin scanner
     const hasScanPermission = await verifyPermission('attendance.scan');
     if (!hasScanPermission) {
-      return { success: false, error: 'UNAUTHORIZED', message: 'Anda tidak memiliki hak akses untuk memindai QR Code.' };
+      return {
+        success: false,
+        error: 'UNAUTHORIZED',
+        message: 'Anda tidak memiliki hak akses untuk memindai QR Code.',
+      };
     }
 
     const session = await verifySession();
@@ -36,28 +40,48 @@ export async function scanQrCode(qrToken: string) {
 
     // Validasi token tidak ditemukan
     if (!registration) {
-      return { success: false, error: 'INVALID_QR', message: 'QR Code tidak ditemukan atau tidak valid.' };
+      return {
+        success: false,
+        error: 'INVALID_QR',
+        message: 'QR Code tidak ditemukan atau tidak valid.',
+      };
     }
 
     const event = registration.event;
 
     // 3. Validasi event OFFLINE
     if (event.eventType !== 'OFFLINE') {
-      return { success: false, error: 'ONLINE_EVENT', message: 'Presensi hanya dilakukan pada event OFFLINE.' };
+      return {
+        success: false,
+        error: 'ONLINE_EVENT',
+        message: 'Presensi hanya dilakukan pada event OFFLINE.',
+      };
     }
 
     // 4. Validasi event selesai
     if (event.status === 'COMPLETED' || new Date() > new Date(event.endDate)) {
-      return { success: false, error: 'EVENT_COMPLETED', message: 'Attendance tidak boleh dilakukan setelah event selesai.' };
+      return {
+        success: false,
+        error: 'EVENT_COMPLETED',
+        message: 'Attendance tidak boleh dilakukan setelah event selesai.',
+      };
     }
 
     // 5. Validasi status pendaftaran dan duplikasi presensi
     if (registration.status === 'CHECKED_IN') {
-      return { success: false, error: 'QR_ALREADY_USED', message: 'QR Code sudah pernah digunakan.' };
+      return {
+        success: false,
+        error: 'QR_ALREADY_USED',
+        message: 'QR Code sudah pernah digunakan.',
+      };
     }
 
     if (registration.status !== 'REGISTERED') {
-      return { success: false, error: 'NOT_REGISTERED', message: 'Peserta yang tidak memiliki status REGISTERED tidak dapat melakukan check-in.' };
+      return {
+        success: false,
+        error: 'NOT_REGISTERED',
+        message: 'Peserta yang tidak memiliki status REGISTERED tidak dapat melakukan check-in.',
+      };
     }
 
     // 6. Jalankan check-in dalam transaksi: update registration status & log attendance
@@ -90,7 +114,11 @@ export async function scanQrCode(qrToken: string) {
     };
   } catch (error) {
     console.error('Scan QR Code Error:', error);
-    return { success: false, error: 'SYSTEM_ERROR', message: 'Terjadi kesalahan sistem saat memproses presensi.' };
+    return {
+      success: false,
+      error: 'SYSTEM_ERROR',
+      message: 'Terjadi kesalahan sistem saat memproses presensi.',
+    };
   }
 }
 
