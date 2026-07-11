@@ -1,69 +1,56 @@
-'use client';
 import type { FC } from 'react';
 
 const steps = [
   {
-    number: '01',
-    title: 'Jalankan Command',
-    description:
-      'Buka terminal favorit Anda dan jalankan "npx bikinproject@latest". Tidak perlu instalasi global yang memberatkan sistem.',
+    step: 1,
+    title: 'Pilih Event',
+    description: 'Jelajahi daftar event dan pilih yang sesuai minat atau kebutuhanmu.',
   },
   {
-    number: '02',
-    title: 'Pilih Konfigurasi',
+    step: 2,
+    title: 'Daftar & Bayar',
     description:
-      'Pilih framework (Next.js, React, Laravel), bahasa (TS/JS), dan CSS framework melalui antarmuka CLI yang interaktif.',
+      'Isi formulir pendaftaran, unggah bukti bayar, dan tunggu konfirmasi dari tim kami.',
   },
   {
-    number: '03',
-    title: 'Project Siap!',
-    description:
-      'BikinProject akan men-generate starter project lengkap dengan best practices, siap untuk Anda kembangkan lebih lanjut.',
+    step: 3,
+    title: 'Hadir & Dapat Sertifikat',
+    description: 'Scan QR kehadiran saat acara, lalu unduh e-certificate dari dashboard peserta.',
   },
 ];
 
-const Steps: FC = () => {
+const HowItWorks: FC = () => {
   return (
-    <section className="py-24 bg-white dark:bg-zinc-950">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
-          <div className="lg:w-1/2 space-y-8">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-zinc-950 dark:text-white leading-tight">
-              Langkah Sederhana <br /> Untuk Project Terpercaya
-            </h2>
-            <p className="text-lg text-zinc-700 dark:text-zinc-400 font-medium tracking-tight">
-              Kami menyederhanakan proses kompleks menjadi langkah-langkah yang mudah dipahami,
-              memastikan Anda selalu terlibat dalam setiap progres.
-            </p>
-            <div className="pt-4">
-              <button className="px-8 py-4 bg-zinc-950 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-zinc-500/10">
-                Mulai Konsultasi
-              </button>
-            </div>
-          </div>
+    <section id="cara-kerja" className="py-14 bg-white border-t border-slate-100">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="text-center mb-10">
+          <span className="text-xs font-bold uppercase tracking-widest text-indigo-500">
+            Cara Kerja
+          </span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">
+            Tiga langkah, beres.
+          </h2>
+        </div>
 
-          <div className="lg:w-1/2 w-full space-y-8">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-6 p-6 rounded-3xl border-2 border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all duration-300 group"
-              >
-                <div className="text-4xl font-black text-blue-600/20 dark:text-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors duration-300 shrink-0">
-                  {step.number}
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-zinc-950 dark:text-white">{step.title}</h3>
-                  <p className="text-zinc-700 dark:text-zinc-400 leading-relaxed font-medium text-justify">
-                    {step.description}
-                  </p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {steps.map((s) => (
+            <div
+              key={s.step}
+              className="flex flex-col items-center md:items-start text-center md:text-left gap-3 p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shrink-0">
+                {s.step}
               </div>
-            ))}
-          </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-base">{s.title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mt-1">{s.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 };
 
-export default Steps;
+export default HowItWorks;

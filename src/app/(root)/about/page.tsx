@@ -1,68 +1,114 @@
 import type { FC } from 'react';
-
-import { genPageMetadata } from '@/app/seo';
+import type { Metadata } from 'next';
+import { Shield, Users, Award, Zap } from 'lucide-react';
 import { siteMetadata } from '@/data/siteMetadata';
 
-export const metadata = genPageMetadata({
-  title: 'Tentang BikinProject',
+export const metadata: Metadata = {
+  title: 'Tentang SITIVENT — Platform Manajemen Event',
   description:
-    'Pelajari lebih lanjut tentang BikinProject, motivasi di baliknya, dan bagaimana alat ini dapat membantu Anda membangun proyek dengan lebih cepat.',
-});
+    'SITIVENT adalah platform manajemen event dan tiket digital untuk seminar, workshop, webinar, dan bootcamp di Indonesia.',
+};
 
 const About: FC = () => {
   return (
-    <section className="flex items-center justify-center max-w-7xl mx-auto min-h-screen">
-      <div className="container">
-        <div className="flex flex-wrap">
-          <div className="w-full px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              <div className="h-64 md:h-auto bg-gray-100 dark:bg-gray-800 overflow-hidden rounded-lg shadow-lg">
-                <img
-                  src="https://images.unsplash.com/photo-1610465299996-30f240ac2b1c?auto=format&q=75&fit=crop&w=600&h=750"
-                  loading="lazy"
-                  alt="Laptop"
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
+    <section className="min-h-screen bg-slate-50 pt-28 pb-16">
+      {/* Hero band */}
+      <div className="bg-indigo-600 py-16 text-center relative overflow-hidden mb-16">
+        <div className="absolute inset-0 pointer-events-none opacity-10">
+          <div className="absolute -top-16 -right-16 w-64 h-64 bg-white rounded-full" />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-white rounded-full" />
+        </div>
+        <div className="relative container mx-auto px-4 max-w-3xl space-y-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+            Tentang SITIVENT
+          </h1>
+          <p className="text-indigo-200 text-lg font-medium max-w-xl mx-auto leading-relaxed">
+            Satu platform untuk menemukan, mendaftar, dan mengikuti event teknologi terbaik di
+            Indonesia.
+          </p>
+        </div>
+      </div>
 
-              <div className="md:pt-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-center md:text-left mb-4 md:mb-6">
-                  Tentang BikinProject.
-                </h1>
+      <div className="container mx-auto px-4 max-w-5xl space-y-16">
+        {/* About section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-5">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Apa itu SITIVENT?
+            </h2>
+            <p className="text-slate-600 leading-relaxed text-base">
+              <strong className="text-indigo-600">SITIVENT</strong> adalah sistem manajemen event
+              berbasis web yang dirancang untuk mempermudah proses pendaftaran, pembayaran, dan
+              kehadiran peserta pada berbagai jenis acara — mulai dari seminar, workshop, webinar,
+              hingga bootcamp.
+            </p>
+            <p className="text-slate-600 leading-relaxed text-base">
+              Platform ini hadir sebagai jembatan antara penyelenggara event dan peserta, memastikan
+              setiap proses berjalan transparan, cepat, dan terorganisir — dari pendaftaran awal
+              hingga penerbitan sertifikat digital.
+            </p>
+          </div>
+          <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-xl">
+            <img
+              src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&q=80&fit=crop&w=800&h=600"
+              alt="Event audience"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-indigo-900/40 to-transparent" />
+          </div>
+        </div>
 
-                <p className="sm:text-lg mb-6 md:mb-8 text-justify">
-                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 p-1 px-2 rounded font-mono font-bold">
-                    BikinProject
-                  </span>{' '}
-                  adalah sebuah CLI-based starter project generator yang dirancang untuk mempercepat
-                  proses inisialisasi aplikasi dengan standar industri. Proyek ini mendukung
-                  berbagai framework populer seperti Next.js, React, dan Laravel.
-                </p>
-
-                <p className="sm:text-lg mb-6 md:mb-8 text-justify">
-                  Dibuatnya BikinProject berawal dari kebutuhan{' '}
-                  <a
-                    href={siteMetadata.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 font-bold underline transition duration-100"
+        {/* Values */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight text-center">
+            Nilai-Nilai Kami
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                icon: Zap,
+                title: 'Efisiensi',
+                desc: 'Proses pendaftaran cepat dan mudah, tanpa kerumitan.',
+                color: 'text-amber-600 bg-amber-50 border-amber-100',
+              },
+              {
+                icon: Shield,
+                title: 'Transparansi',
+                desc: 'Setiap transaksi dan status terpantau secara real-time.',
+                color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+              },
+              {
+                icon: Users,
+                title: 'Inklusif',
+                desc: 'Terbuka untuk semua kalangan, dari pelajar hingga profesional.',
+                color: 'text-sky-600 bg-sky-50 border-sky-100',
+              },
+              {
+                icon: Award,
+                title: 'Bermutu',
+                desc: 'Event terkurasi dengan materi berkualitas dan instruktur berpengalaman.',
+                color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+              },
+            ].map((v) => {
+              const Icon = v.icon;
+              return (
+                <div
+                  key={v.title}
+                  className={`p-5 rounded-2xl border flex flex-col gap-3 ${v.color}`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center border ${v.color}`}
                   >
-                    Saya
-                  </a>{' '}
-                  akan standarisasi struktur proyek saat memulai development baru. Alih-alih
-                  melakukan setup manual yang repetitif, BikinProject mengotomatisasi segalanya
-                  mulai dari pemilihan bahasa, styling framework, hingga struktur folder terbaik.
-                </p>
-
-                <div className="sm:text-lg mb-6 md:mb-8 text-justify">
-                  Hanya dengan satu perintah di terminal, Anda bisa langsung fokus membangun fitur
-                  tanpa pusing dengan boilerplate:
-                  <div className="mt-4 p-4 bg-zinc-900 rounded-xl font-mono text-sm text-emerald-400 border border-zinc-800">
-                    $ npx bikinproject@latest
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm">{v.title}</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed mt-1">{v.desc}</p>
                   </div>
                 </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>

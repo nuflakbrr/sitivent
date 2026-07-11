@@ -4,134 +4,165 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
+import { Menu, X } from 'lucide-react';
 
-import ThemeToggle from '@/components/Common/ThemeToggle';
 import { cn } from '@/lib/utils';
-
 import { navlinks } from './constant/navLinks';
-import styles from './Navbar.module.css';
 
 const Navbar: FC = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  // Navbar fixed position if scrolling
   useEffect(() => {
-    window.onscroll = () => {
-      const header = document.querySelector('header');
-      const fixNav = header?.offsetTop ?? 0;
-
-      if (window.pageYOffset > fixNav) {
-        header?.classList.add(styles.navbarFixed);
-      } else {
-        header?.classList.remove(styles.navbarFixed);
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Hamburger menu handler
-  const hamburgerHandler = () => {
-    const hamburger = document.querySelector('#hamburger');
-    const navMenu = document.querySelector('#navMenu');
+  // Close mobile menu on route change
+  useEffect(() => setIsOpen(false), [pathname]);
 
-    setIsOpen(!isOpen);
-
-    if (isOpen) {
-      hamburger?.classList.remove(styles.hamburgerActive);
-      navMenu?.classList.add('hidden');
-    } else {
-      hamburger?.classList.add(styles.hamburgerActive);
-      navMenu?.classList.remove('hidden');
-    }
-  };
-
-  // isMenuActive handler
   const isMenuActive = (path: string) => {
-    const isHomePage = pathname === '/' && path === '/';
-
-    if (isHomePage) {
-      return true;
-    }
-
+    if (pathname === '/' && path === '/') return true;
     return pathname !== '/' && path !== '/' && pathname.includes(path);
   };
 
+  const navLinkClass = (path: string) =>
+    cn(
+      'relative px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center',
+      'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-300',
+      scrolled
+        ? 'text-slate-600 hover:text-indigo-600 after:bg-indigo-600'
+        : 'text-white/80 hover:text-white after:bg-white',
+      isMenuActive(path)
+        ? scrolled
+          ? 'text-indigo-600 after:w-full'
+          : 'text-white font-semibold after:w-full'
+        : 'after:w-0'
+    );
+
   return (
-    <header className="bg-transparent absolute top-0 left-0 w-full flex items-center z-10">
-      <div className="container mx-auto">
-        <div className="flex items-center justify-between relative">
-          <div className="px-4">
+    <>
+      <header
+        className={cn(
+          'fixed top-0 left-0 w-full z-50 transition-all duration-300',
+          scrolled ? 'bg-white/95 backdrop-blur-md border-b border-slate-100' : 'bg-transparent'
+        )}
+      >
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
             <Link
               href="/"
-              className="inline-flex items-center gap-2 font-primary font-bold text-xl lg:text-2xl py-6"
-              aria-label="logo"
+              aria-label="SITIVENT"
+              className="inline-flex items-center gap-2 shrink-0"
             >
-              📦️ BikinProject
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white font-black text-sm shadow-sm">
+                S
+              </span>
+              <span
+                className={cn(
+                  'font-extrabold text-lg tracking-tight transition-colors duration-300',
+                  scrolled ? 'text-slate-900' : 'text-white'
+                )}
+              >
+                SITIVENT
+              </span>
             </Link>
-          </div>
-          <div className="flex items-center px-4">
-            <button
-              id="hamburger"
-              name="hamburger"
-              type="button"
-              className="right-4 block absolute lg:hidden"
-              onClick={hamburgerHandler}
-            >
-              <span
-                className={`${styles.hamburgerLine} origin-top-left transition duration-300 ease-in-out`}
-              ></span>
-              <span
-                className={`${styles.hamburgerLine} transition duration-300 ease-in-out`}
-              ></span>
-              <span
-                className={`${styles.hamburgerLine} origin-bottom-left transition duration-300 ease-in-out`}
-              ></span>
-            </button>
 
-            <nav
-              id="navMenu"
-              className="hidden absolute py-5 bg-white shadow-lg rounded-lg max-w-[250px] w-full right-4 top-full lg:block lg:static lg:bg-transparent lg:max-w-full lg:shadow-none lg:rounded-none"
-            >
-              <ul className="block lg:flex lg:items-center">
-                {navlinks?.map((a, i) => (
-                  <li className="group" key={i}>
-                    <Link
-                      href={a.path as Route}
-                      className={cn(
-                        styles.navLink,
-                        isMenuActive(a.path) && styles.navLinkActive,
-                        'mx-8 lg:mx-4 flex'
-                      )}
-                    >
-                      {a.title}
-                    </Link>
-                  </li>
-                ))}
-                <li className="ml-8 lg:ml-6 flex items-center gap-4">
-                  <Link
-                    href="/login"
-                    className="text-zinc-700 dark:text-zinc-300 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    Masuk
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    Daftar
-                  </Link>
-                </li>
-
-                <li className="ml-8 lg:ml-4 flex items-center">
-                  <ThemeToggle />
-                </li>
-              </ul>
+            {/* Desktop nav */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {navlinks.map((link) => (
+                <Link key={link.path} href={link.path as Route} className={navLinkClass(link.path)}>
+                  {link.title}
+                </Link>
+              ))}
             </nav>
+
+            {/* Desktop CTA */}
+            <div className="hidden lg:flex items-center gap-2">
+              <Link
+                href={'/login' as Route}
+                className={cn(
+                  'text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200',
+                  scrolled
+                    ? 'text-slate-600 hover:text-indigo-600'
+                    : 'text-white/80 hover:text-white'
+                )}
+              >
+                Masuk
+              </Link>
+              <Link
+                href={'/register' as Route}
+                className="text-sm font-bold px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              >
+                Daftar
+              </Link>
+            </div>
+
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              onClick={() => setIsOpen((o) => !o)}
+              aria-label="Toggle navigation"
+              className={cn(
+                'lg:hidden p-2 rounded-lg transition-colors',
+                scrolled ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'
+              )}
+            >
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile nav drawer */}
+      <div
+        className={cn(
+          'fixed inset-x-0 top-16 z-40 lg:hidden transition-all duration-300 ease-in-out',
+          isOpen
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
+        )}
+      >
+        <div className="mx-4 mt-1 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+          <nav className="p-3">
+            <ul className="space-y-0.5">
+              {navlinks.map((link) => (
+                <li key={link.path}>
+                  <Link
+                    href={link.path as Route}
+                    className={cn(
+                      'flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                      isMenuActive(link.path)
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    )}
+                  >
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="px-4 pb-4 pt-1 flex flex-col gap-2 border-t border-slate-50">
+            <Link
+              href={'/login' as Route}
+              className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              Masuk
+            </Link>
+            <Link
+              href={'/register' as Route}
+              className="w-full text-center py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+            >
+              Daftar
+            </Link>
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 };
 
