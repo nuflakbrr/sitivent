@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import Loader from '@/components/Common/Loader';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -44,9 +45,8 @@ export default function CertificatePage(props: PageProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="mt-4 text-sm font-medium">Memuat sertifikat...</p>
+      <div className="flex items-center justify-center w-full h-full min-h-screen">
+        <Loader />
       </div>
     );
   }
