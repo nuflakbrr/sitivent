@@ -10,12 +10,13 @@ export async function proxy(request: NextRequest) {
   const isAdminPath = pathname.startsWith('/admin');
   const isParticipantPath = pathname.startsWith('/participant');
   const isAuthPath = pathname.startsWith('/login');
+  const isRegisterPath = pathname.startsWith('/register');
 
   const cmsSegments = ['managements', 'master', 'transactions', 'attendance'];
   const isCMSPath = cmsSegments.some((segment) => pathname.startsWith(`/admin/${segment}`));
 
   // Jika bukan path yang diproteksi, langsung lewat saja (optimasi)
-  if (!isAdminPath && !isParticipantPath && !isAuthPath && !isCMSPath) {
+  if (!isAdminPath && !isParticipantPath && !isAuthPath && !isCMSPath && !isRegisterPath) {
     return NextResponse.next();
   }
 
@@ -81,7 +82,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Blocker 3: Jika akses /login tapi SUDAH login -> Tendang ke dashboard yang sesuai
-    if (isAuthPath && isAuthenticated) {
+    if ((isAuthPath || isRegisterPath) && isAuthenticated) {
       if (hasAdminAccess) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       } else {
@@ -117,5 +118,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/participant/:path*', '/login'],
+  matcher: ['/admin/:path*', '/participant/:path*', '/login', '/register'],
 };
