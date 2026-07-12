@@ -20,20 +20,19 @@ const isUUID = (str: string) =>
 
 const labelMapping: Record<string, string> = {
   dashboard: 'Dashboard',
-  managements: 'Manajemen',
-  publications: 'Publikasi',
-  services: 'Pelayanan',
   master: 'Data Master',
-  'portfolio-categories': 'Kategori Portofolio',
-  portfolio: 'Portofolio',
-  clients: 'Klien',
-  testimonials: 'Testimoni',
-  'article-categories': 'Kategori Artikel',
-  articles: 'Artikel',
+  'event-categories': 'Kategori Event',
+  events: 'Event',
+  certificates: 'Sertifikat',
+  transactions: 'Transaksi',
+  registrations: 'Pendaftaran',
+  payments: 'Pembayaran',
+  attendance: 'Kehadiran',
+  scan: 'Scan QR',
+  managements: 'Manajemen',
   users: 'Pengguna',
   roles: 'Jabatan',
   permissions: 'Hak Akses',
-  'youtube-links': 'YouTube Link',
   new: 'Tambah',
 };
 
@@ -56,14 +55,17 @@ export function CMSHeader() {
 
         // Resolve dynamic segments based on parent
         const resolvableParents = [
-          'portfolio-categories',
-          'clients',
-          'portfolio',
-          'youtube-links',
-          'articles',
+          'event-categories',
+          'events',
+          'certificates',
+          'transactions',
+          'registrations',
+          'payments',
+          'attendance',
+          'scan',
           'users',
           'roles',
-          'testimonials',
+          'permissions',
         ];
         if (prevSegment && resolvableParents.includes(prevSegment)) {
           const label = await resolveLabel(segment, prevSegment);
@@ -113,7 +115,13 @@ export function CMSHeader() {
               const isLast = index === pathSegments.length - 1;
               const label = formatSegment(segment);
 
-              const staticSegments = ['managements', 'publications', 'services', 'master'];
+              const staticSegments = [
+                'transactions',
+                'registrations',
+                'payments',
+                'attendance',
+                'scan',
+              ];
               const isNonClickable = staticSegments.includes(segment);
 
               return (
