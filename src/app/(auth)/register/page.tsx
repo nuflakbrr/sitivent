@@ -1,83 +1,222 @@
-import Link from 'next/link';
 import type { FC } from 'react';
-import Image from 'next/image';
-import { AlertCircle } from 'lucide-react';
-import { Ovo, Raleway } from 'next/font/google';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { CheckCircle2 } from 'lucide-react';
 
 import { genPageMetadata } from '@/app/seo';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
+import RegisterForm from './_components/RegisterForm';
 
-const ovo = Ovo({
-  subsets: ['latin'],
-  variable: '--font-ovo',
-  weight: '400',
+export const metadata: Metadata = genPageMetadata({
+  title: 'Daftar Akun',
+  description: 'Buat akun Sitivent gratis dan mulai temukan event terbaik untukmu.',
 });
 
-const raleway = Raleway({
-  subsets: ['latin'],
-  variable: '--font-raleway',
-});
-
-export const metadata = genPageMetadata({
-  title: 'Registrasi Ditutup',
-  description:
-    'Layanan registrasi hanya bisa dilakukan oleh Super Admin, silakan hubungi Super Admin.',
-});
+const perks = [
+  'Akses ratusan event gratis maupun berbayar',
+  'Tiket digital langsung di dashboard kamu',
+  'Notifikasi event terbaru sesuai minatmu',
+  'Sertifikat keikutsertaan digital',
+];
 
 const Register: FC = () => {
   return (
-    <section
-      className={cn(
-        'min-h-screen flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950 font-sans',
-        ovo.variable,
-        raleway.variable
-      )}
+    <div
+      className="min-h-screen flex"
       style={{
-        fontFamily: 'var(--font-raleway), sans-serif',
+        background: '#FAF9F5',
+        fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900/60 dark:backdrop-blur-md rounded-[2rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl overflow-hidden">
-        <div className="pt-10 px-8 text-center">
-          <div className="relative w-64 h-16 mx-auto mb-2">
-            <Image
-              src="/assets/img/ttn-logo.jpg"
-              alt="TTN Logo"
-              fill
-              className="object-contain dark:invert"
-              priority
-            />
+      {/* ── LEFT PANEL — branding ── */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-[52%] xl:w-[55%] p-12 xl:p-16 relative overflow-hidden"
+        style={{ background: '#141413' }}
+      >
+        {/* Decorative blobs */}
+        <div
+          className="absolute -top-32 -right-32 w-[460px] h-[460px] rounded-full opacity-[0.07]"
+          style={{ background: 'radial-gradient(circle, #788C5D, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-0 -left-20 w-[320px] h-[320px] rounded-full opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle, #D97757, transparent 70%)' }}
+        />
+
+        {/* Logo */}
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 group"
+            aria-label="Beranda Sitivent"
+          >
+            <span
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-serif font-bold text-lg shadow-lg"
+              style={{ background: '#D97757' }}
+            >
+              S
+            </span>
+            <span
+              className="font-serif text-2xl font-bold tracking-tight"
+              style={{ color: '#FAF9F5' }}
+            >
+              Sitivent
+            </span>
+          </Link>
+        </div>
+
+        {/* Hero copy */}
+        <div className="space-y-8 relative z-10">
+          <div className="space-y-4">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border"
+              style={{
+                borderColor: 'rgba(120,140,93,0.4)',
+                color: '#788C5D',
+                background: 'rgba(120,140,93,0.08)',
+              }}
+            >
+              ✦ Gratis Selamanya
+            </div>
+
+            <h1
+              className="font-serif text-4xl xl:text-5xl font-bold leading-[1.15]"
+              style={{ color: '#FAF9F5' }}
+            >
+              Mulai perjalanan <span style={{ color: '#788C5D' }}>event</span>-mu{' '}
+              <span style={{ color: '#D97757' }}>hari ini</span>.
+            </h1>
+
+            <p className="text-base leading-relaxed max-w-md" style={{ color: '#87867F' }}>
+              Daftar akun gratis dan dapatkan akses ke ratusan event pilihan — dari workshop kreatif
+              hingga seminar nasional.
+            </p>
           </div>
-          <p className="font-sans text-[10px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-bold mt-2">
-            Content Management System
-          </p>
-          <div className="w-12 h-[2px] bg-[#4e7145]/60 dark:bg-[#4e7145]/40 mx-auto mt-5" />
+
+          {/* Perk list */}
+          <ul className="space-y-3">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-center gap-3">
+                <CheckCircle2 size={18} style={{ color: '#788C5D', flexShrink: 0 }} />
+                <span className="text-sm" style={{ color: '#D1CFC5' }}>
+                  {perk}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Testimonial card */}
+          <div
+            className="rounded-2xl p-5 space-y-3"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.07)',
+            }}
+          >
+            <p className="text-sm italic leading-relaxed" style={{ color: '#D1CFC5' }}>
+              &ldquo;Sitivent bikin aku nemu event-event keren yang nggak pernah aku tahu
+              sebelumnya. Highly recommended!&rdquo;
+            </p>
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-serif"
+                style={{ background: '#D97757' }}
+              >
+                A
+              </div>
+              <div>
+                <p className="text-xs font-bold" style={{ color: '#FAF9F5' }}>
+                  Anisa R.
+                </p>
+                <p
+                  className="text-[10px] uppercase tracking-widest font-bold"
+                  style={{ color: '#87867F' }}
+                >
+                  Peserta aktif
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="p-8 space-y-6">
-          <Alert
-            variant="destructive"
-            className="bg-destructive/5 dark:bg-destructive/10 border-destructive/20 rounded-2xl p-4 text-left"
-          >
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle className="font-bold text-destructive">Registrasi Dibatasi</AlertTitle>
-            <AlertDescription className="text-muted-foreground mt-1.5 leading-relaxed">
-              Oops! Layanan registrasi hanya bisa dilakukan oleh{' '}
-              <span className="font-bold text-foreground">Super Admin</span>, silahkan hubungi Super
-              Admin.
-            </AlertDescription>
-          </Alert>
-
-          <Button
-            asChild
-            className="w-full h-12 rounded-xl bg-[#4e7145] hover:bg-[#3d5936] text-white font-bold transition-all shadow-md shadow-[#4e7145]/20 active:scale-[0.98]"
-          >
-            <Link href="/">Kembali ke Beranda</Link>
-          </Button>
-        </div>
+        {/* Footer */}
+        <p className="text-[11px]" style={{ color: '#3D3D3A' }}>
+          &copy; {new Date().getFullYear()} Sitivent. Hak cipta dilindungi.
+        </p>
       </div>
-    </section>
+
+      {/* ── RIGHT PANEL — form ── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:px-12 xl:px-20">
+        {/* Mobile logo */}
+        <div className="lg:hidden mb-8 flex flex-col items-center gap-3">
+          <Link href="/" className="inline-flex items-center gap-3" aria-label="Beranda">
+            <span
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-serif font-bold text-lg shadow"
+              style={{ background: '#D97757' }}
+            >
+              S
+            </span>
+            <span
+              className="font-serif text-2xl font-bold tracking-tight"
+              style={{ color: '#141413' }}
+            >
+              Sitivent
+            </span>
+          </Link>
+        </div>
+
+        {/* Card */}
+        <div
+          className="w-full max-w-md rounded-3xl p-8 xl:p-10 shadow-2xl"
+          style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #E3DACC',
+            boxShadow: '0 20px 60px rgba(20,20,19,0.10)',
+          }}
+        >
+          {/* Heading */}
+          <div className="mb-8">
+            <p
+              className="text-[10px] font-bold uppercase tracking-widest mb-1"
+              style={{
+                color: '#788C5D',
+                fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+              }}
+            >
+              Bergabung sekarang — gratis
+            </p>
+            <h2 className="font-serif text-3xl font-bold" style={{ color: '#141413' }}>
+              Buat akun baru
+            </h2>
+            <p className="text-sm mt-2" style={{ color: '#87867F' }}>
+              Isi data di bawah dan mulai ikuti event favoritmu.
+            </p>
+          </div>
+
+          <RegisterForm />
+        </div>
+
+        {/* Footer note */}
+        <p className="mt-8 text-xs text-center" style={{ color: '#87867F' }}>
+          Dengan mendaftar, kamu menyetujui{' '}
+          <Link
+            href="/terms"
+            className="font-semibold hover:underline"
+            style={{ color: '#D97757' }}
+          >
+            Syarat &amp; Ketentuan
+          </Link>{' '}
+          dan{' '}
+          <Link
+            href="/privacy"
+            className="font-semibold hover:underline"
+            style={{ color: '#D97757' }}
+          >
+            Kebijakan Privasi
+          </Link>{' '}
+          kami.
+        </p>
+      </div>
+    </div>
   );
 };
 

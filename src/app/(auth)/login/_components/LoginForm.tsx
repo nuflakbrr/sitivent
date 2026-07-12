@@ -1,28 +1,25 @@
 'use client';
 import type { FC } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
+import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
 import { loginSchema } from '@/schemas/auth';
 import type { LoginValues } from '@/services/auth';
 import { signIn } from '@/lib/authClient';
 
 const LoginForm: FC = () => {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
   const { mutate: handleLogin, isPending } = useMutation({
@@ -46,7 +43,7 @@ const LoginForm: FC = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success('Login Berhasil! Selamat Datang Kembali.');
+      toast.success('Login berhasil! Selamat datang kembali.');
       router.push('/admin/dashboard');
       router.refresh();
     },
@@ -55,75 +52,111 @@ const LoginForm: FC = () => {
     },
   });
 
-  const onSubmit = (values: LoginValues) => {
-    handleLogin(values);
-  };
+  const onSubmit = (values: LoginValues) => handleLogin(values);
+
+  const inputBase =
+    'w-full px-4 py-3 rounded-xl border-2 bg-white text-[#3D3D3A] placeholder-[#87867F] text-sm outline-none transition-all duration-200 focus:border-[#D97757] focus:shadow-[0_0_0_3px_rgba(217,119,87,0.12)]';
+
+  const errorBase = 'mt-1.5 text-xs text-[#B04A3F] font-medium';
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
-      <div className="space-y-4">
-        <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <FieldContent>
-            <Input
-              id="email"
-              type="email"
-              placeholder="john.doe@example.com"
-              disabled={isPending}
-              {...form.register('email')}
-              className="rounded-xl border-2 focus-visible:ring-blue-600 dark:bg-zinc-900"
-            />
-          </FieldContent>
-          {form.formState.errors.email && (
-            <FieldError>{form.formState.errors.email.message}</FieldError>
-          )}
-        </Field>
-
-        <Field>
-          <div className="flex items-center justify-between">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-          </div>
-          <FieldContent>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              disabled={isPending}
-              {...form.register('password')}
-              className="rounded-xl border-2 focus-visible:ring-blue-600 dark:bg-zinc-900"
-            />
-          </FieldContent>
-          {form.formState.errors.password && (
-            <FieldError>{form.formState.errors.password.message}</FieldError>
-          )}
-        </Field>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="login-email"
+          className="block text-xs font-bold uppercase tracking-widest text-[#87867F] mb-1.5"
+        >
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          placeholder="nama@email.com"
+          autoComplete="email"
+          disabled={isPending}
+          {...form.register('email')}
+          className={`${inputBase} ${
+            form.formState.errors.email ? 'border-[#B04A3F]' : 'border-[#E3DACC]'
+          } disabled:opacity-60 disabled:cursor-not-allowed`}
+        />
+        {form.formState.errors.email && (
+          <p className={errorBase}>{form.formState.errors.email.message}</p>
+        )}
       </div>
 
-      <Button
+      {/* Password */}
+      <div>
+        <label
+          htmlFor="login-password"
+          className="block text-xs font-bold uppercase tracking-widest text-[#87867F] mb-1.5"
+        >
+          Password
+        </label>
+        <div className="relative">
+          <input
+            id="login-password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            disabled={isPending}
+            {...form.register('password')}
+            className={`${inputBase} pr-11 ${
+              form.formState.errors.password ? 'border-[#B04A3F]' : 'border-[#E3DACC]'
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#87867F] hover:text-[#D97757] transition-colors"
+            tabIndex={-1}
+            aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+          >
+            {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+          </button>
+        </div>
+        {form.formState.errors.password && (
+          <p className={errorBase}>{form.formState.errors.password.message}</p>
+        )}
+      </div>
+
+      {/* Submit */}
+      <button
         type="submit"
-        className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-[#4e7145]/20 active:scale-[0.98]"
+        id="btn-login-submit"
         disabled={isPending}
+        className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D97757] hover:bg-[#c46843] active:scale-[0.98] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#D97757]/25 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
             Memproses...
           </>
         ) : (
-          'Masuk ke Dashboard'
+          <>
+            <LogIn size={16} />
+            Masuk ke Dashboard
+          </>
         )}
-      </Button>
+      </button>
 
-      {/* <div className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+      {/* Divider */}
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px bg-[#E3DACC]" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[#87867F]">atau</span>
+        <div className="flex-1 h-px bg-[#E3DACC]" />
+      </div>
+
+      {/* Register link */}
+      <p className="text-center text-sm text-[#87867F]">
         Belum punya akun?{' '}
-        <Button
-          variant="link"
-          className="h-auto p-0 text-blue-600 dark:text-blue-400 font-semibold"
-          type="button"
+        <Link
+          href="/register"
+          className="font-bold text-[#D97757] hover:text-[#c46843] transition-colors"
         >
-          Hubungi Admin
-        </Button>
-      </div> */}
+          Daftar sekarang
+        </Link>
+      </p>
     </form>
   );
 };

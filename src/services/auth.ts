@@ -3,10 +3,12 @@ import { z } from 'zod';
 import { headers, cookies } from 'next/headers';
 
 import { auth } from '@/lib/auth';
-import type { AuthResponse } from '@/interfaces/features/auth';
-import { loginSchema } from '@/schemas/auth';
+import type { AuthResponse, User } from '@/interfaces/features/auth';
+import { prisma } from '@/lib/prisma';
+import { loginSchema, registerSchema } from '@/schemas/auth';
 
 export type LoginValues = z.infer<typeof loginSchema>;
+export type RegisterValues = z.infer<typeof registerSchema>;
 
 /**
  * Mapping pesan error Better Auth ke Bahasa Indonesia
@@ -127,5 +129,64 @@ export async function logoutAction(): Promise<AuthResponse> {
       success: false,
       error: 'Terjadi kesalahan saat keluar dari sistem.',
     };
+  }
+}
+
+/**
+ * Server Action to register a new user with default role "Peserta".
+ */
+export async function registerAction(values: RegisterValues): Promise<AuthResponse> {
+  const validatedFields = registerSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return { success: false, error: 'Data input tidak valid.' };
+  }
+
+  try {
+    // Look up "Peserta" role from database
+    const pesertaRole = await prisma.role.findFirst({
+      where: { name: { equals: 'Peserta', mode: 'insensitive' } },
+      select: { id: true },
+    });
+
+    const response = await auth.api.signUpEmail({
+      body: {
+        name: validatedFields.data.name,
+        email: validatedFields.data.email,
+        password: validatedFields.data.password,
+        ...(pesertaRole ? { roleId: pesertaRole.id } : {}),
+      },
+      headers: await headers(),
+      asResponse: true,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const msg = (data as { message?: string }).message ?? '';
+      const lower = msg.toLowerCase();
+      if (lower.includes('email') && lower.includes('exist')) {
+        return { success: false, error: 'Email sudah terdaftar. Gunakan email lain.' };
+      }
+      return {
+        success: false,
+        error: 'Terjadi kesalahan saat registrasi. Periksa kembali data Anda.',
+      };
+    }
+
+    interface SignUpResponseBody {
+      user: User;
+    }
+    const body = data as SignUpResponseBody;
+    return {
+      success: true,
+      data: { user: body.user },
+    };
+  } catch (error: Error | unknown) {
+    const rawMessage = error instanceof Error ? error.message : '';
+    const lower = rawMessage.toLowerCase();
+    if (lower.includes('email') && (lower.includes('exist') || lower.includes('taken'))) {
+      return { success: false, error: 'Email sudah terdaftar. Gunakan email lain.' };
+    }
+    return { success: false, error: 'Terjadi kesalahan saat registrasi.' };
   }
 }

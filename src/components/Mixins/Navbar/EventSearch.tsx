@@ -7,7 +7,7 @@ import Image from 'next/image';
 import type { EventSearchResult, EventSearchResponse } from '@/interfaces/features/events';
 import { cn } from '@/lib/utils';
 import { EventType } from '@/generated/prisma/enums';
-import { useMounted } from '@/hooks/useMounted';
+
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface Props {
@@ -29,7 +29,6 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export const EventSearch: React.FC<Props> = ({ scrolled }) => {
-  const isMounted = useMounted();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -60,7 +59,6 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
 
   // Global shortcut and Mac check
   useEffect(() => {
-    if (!isMounted) return;
     setIsMac(navigator.userAgent.toLowerCase().includes('mac'));
 
     const handleShortcut = (e: KeyboardEvent) => {
@@ -71,7 +69,7 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
     };
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
-  }, [isMounted]);
+  }, []);
 
   // Autofocus input when modal opens
   useEffect(() => {
@@ -117,22 +115,6 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  if (!isMounted) {
-    return (
-      <button
-        type="button"
-        disabled
-        className={cn(
-          'flex items-center gap-2 px-3 py-1.5 rounded-full border opacity-50 cursor-not-allowed',
-          scrolled ? 'text-[#3D3D3A] border-[#D1CFC5]' : 'text-white/80 border-white/20'
-        )}
-      >
-        <Search className="w-4 h-4" />
-        <span className="text-xs font-medium">Cari</span>
-      </button>
-    );
-  }
-
   return (
     <>
       {/* Search Trigger Button */}
@@ -151,7 +133,10 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
           <Search className="w-4 h-4" />
           <span className="text-xs font-medium">Cari</span>
         </div>
-        <kbd className="hidden sm:inline-block text-[10px] font-mono opacity-60 ml-1">
+        <kbd
+          suppressHydrationWarning
+          className="hidden sm:inline-block text-[10px] font-mono opacity-60 ml-1"
+        >
           {isMac ? '⌘' : 'Ctrl'} + K
         </kbd>
       </button>
