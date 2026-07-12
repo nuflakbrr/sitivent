@@ -139,7 +139,7 @@ export const sideLinks: SideLinks = {
           title: 'Inbox',
           url: 'support/messages',
           icon: MessageCircle,
-          permission: 'messages.read',
+          permission: 'support.read',
         },
       ],
     },

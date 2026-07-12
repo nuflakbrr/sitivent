@@ -27,6 +27,24 @@ async function main() {
     { name: 'event.categories.update', description: 'Mengubah data event kategori' },
     { name: 'event.categories.delete', description: 'Menghapus event kategori' },
 
+    // --- Articles Module ---
+    { name: 'articles.read', description: 'Melihat daftar artikel' },
+    { name: 'articles.create', description: 'Membuat artikel baru' },
+    { name: 'articles.update', description: 'Mengubah data artikel' },
+    { name: 'articles.delete', description: 'Menghapus artikel' },
+
+    // --- Galleries Module ---
+    { name: 'galleries.read', description: 'Melihat daftar galeri' },
+    { name: 'galleries.create', description: 'Membuat galeri baru' },
+    { name: 'galleries.update', description: 'Mengubah data galeri' },
+    { name: 'galleries.delete', description: 'Menghapus galeri' },
+
+    // --- Testimonies Module ---
+    { name: 'testimonies.read', description: 'Melihat daftar testimoni' },
+    { name: 'testimonies.create', description: 'Membuat testimoni baru' },
+    { name: 'testimonies.update', description: 'Mengubah data testimoni' },
+    { name: 'testimonies.delete', description: 'Menghapus testimoni' },
+
     // --- Event Module ---
     { name: 'events.read', description: 'Melihat daftar event' },
     { name: 'events.create', description: 'Membuat event baru' },
