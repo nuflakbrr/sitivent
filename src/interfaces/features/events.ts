@@ -1,4 +1,5 @@
 import { EventStatus, EventType } from '@/generated/prisma/enums';
+import type { EventCategory } from './event-categories';
 
 export interface Event {
   id: string;
@@ -21,6 +22,8 @@ export interface Event {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
+  categoryId?: string | null;
+  category?: EventCategory | null;
   _count?: {
     registrations: number;
   };

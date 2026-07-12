@@ -25,6 +25,7 @@ export const eventSchema = z.object({
   price: z.coerce.number().int().min(0, 'Harga tidak boleh negatif.'),
   status: z.nativeEnum(EventStatus).default(EventStatus.DRAFT),
   certificateEnabled: z.boolean().default(false),
+  categoryId: z.string().optional().nullable(),
 });
 
 export const refinedEventSchema = eventSchema

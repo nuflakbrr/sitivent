@@ -53,7 +53,7 @@ export const sideLinks: SideLinks = {
           permission: 'event.categories.read',
         },
         {
-          title: 'Manajemen Event',
+          title: 'Event',
           url: 'master/events',
           icon: Calendar,
           permission: 'events.read',

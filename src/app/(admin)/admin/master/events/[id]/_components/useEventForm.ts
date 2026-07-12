@@ -36,6 +36,7 @@ export const useEventForm = (initialData: Event | null) => {
       price: initialData?.price ?? 0,
       status: initialData?.status || 'DRAFT',
       certificateEnabled: initialData?.certificateEnabled || false,
+      categoryId: initialData?.categoryId || '',
     },
   });
 

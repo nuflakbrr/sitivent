@@ -194,6 +194,7 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
         status: data.status,
         certificateEnabled: data.certificateEnabled,
         publishedAt: data.status === EventStatus.PUBLISHED ? new Date() : null,
+        categoryId: data.categoryId,
       },
     });
 
@@ -282,6 +283,7 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
         status: data.status,
         certificateEnabled: data.certificateEnabled,
         publishedAt: isPublishing ? new Date() : existing.publishedAt,
+        categoryId: data.categoryId,
       },
     });
 

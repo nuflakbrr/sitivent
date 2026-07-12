@@ -9,6 +9,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { Controller } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
 import type { Event } from '@/interfaces/features/events';
@@ -39,6 +40,7 @@ import { useEventForm } from './useEventForm';
 import { toast } from 'sonner';
 import { EventStatus, EventType } from '@/generated/prisma/enums';
 import { slugify } from '@/lib/slugify';
+import { getAllEventCategories } from '@/services/event-categories';
 
 type Props = {
   initialData: Event | null;
@@ -54,6 +56,11 @@ const EventForm: FC<Props> = ({ initialData }) => {
   const isCompleted = initialData?.status === EventStatus.COMPLETED;
   const isSuper = hasRole('superadmin');
   const canEdit = !isCompleted || isSuper;
+
+  const { data: categories } = useQuery({
+    queryKey: ['event-categories'],
+    queryFn: () => getAllEventCategories(),
+  });
 
   const title = initialData ? 'Ubah Event' : 'Tambah Event';
   const description = initialData ? 'Ubah data event yang ada.' : 'Buat event baru';
@@ -203,6 +210,53 @@ const EventForm: FC<Props> = ({ initialData }) => {
                       Slug Event <span className="text-red-600">*</span>
                     </FieldLabel>
                     <Input {...field} placeholder="contoh-slug-event" disabled={!canEdit} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              {/* Kategori Event */}
+              <Controller
+                name="categoryId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Kategori Event</FieldLabel>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {(categories || []).map((category) => {
+                        const isSelected = field.value === category.id;
+                        return (
+                          <button
+                            key={category.id}
+                            type="button"
+                            disabled={!canEdit}
+                            onClick={() => {
+                              field.onChange(isSelected ? null : category.id);
+                            }}
+                            className={cn(
+                              'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                              isSelected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted text-muted-foreground border-transparent hover:border-zinc-500',
+                              !canEdit && 'opacity-60 cursor-not-allowed'
+                            )}
+                          >
+                            {category.name}
+                          </button>
+                        );
+                      })}
+                      {(!categories || categories.length === 0) && (
+                        <p className="text-xs text-muted-foreground italic">
+                          Belum ada kategori.{' '}
+                          <Link
+                            href="/admin/master/event-categories"
+                            className="underline hover:text-foreground"
+                          >
+                            Buat kategori
+                          </Link>
+                        </p>
+                      )}
+                    </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
