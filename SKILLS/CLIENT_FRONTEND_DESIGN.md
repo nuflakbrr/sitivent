@@ -1,55 +1,253 @@
 ---
-name: frontend-design
-description: Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.
-license: Complete terms in LICENSE.txt
+name: html-output-format
+description: Use standalone, self-contained HTML instead of Markdown when the content is naturally spatial, visual, comparative, or interactive — exploring multiple options side by side, annotated diffs/PRs, module/architecture maps, design systems and component sheets, animation/interaction prototypes, SVG illustrations and flowcharts, slide decks, research/concept explainers, status and incident reports, and throwaway custom editing UIs (kanban boards, flag editors, prompt tuners). Trigger whenever Markdown would flatten information the reader needs to see spatially, compare at a glance, or interact with, into a linear wall of text. Produces a single .html file with inline CSS/JS, no build step, opens directly in a browser.
 ---
 
-# Frontend Design
+# The unreasonable effectiveness of HTML
 
-Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. This client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to this brief, and take one real aesthetic risk you can justify.
+Companion skill distilled from a 20-example gallery ("html-effectiveness") showing that a
+self-contained `.html` file often communicates better than a Markdown document — not because
+Markdown is bad, but because Markdown is fundamentally *linear text*, and a lot of what agents
+produce is not linear: it's spatial (diagrams, maps), comparative (options side by side, diff
+before/after), temporal-with-detail (timelines), or something the reader wants to *poke at*
+(prototypes, throwaway editors).
 
-## Ground it in the subject
+**Markdown stays the default.** Reach for HTML only when one of the signals below is present —
+otherwise a plain, well-structured Markdown/text answer is faster to produce and easier to paste
+elsewhere.
 
-If the brief does not pin down what the product or subject is, pin it yourself before designing: name one concrete subject, its audience, and the page's single job, and state your choice. If there's any information in your memory about the human's preferences, context about what they're building, or designs you've made before – use that as a hint. The subject's own world, its materials, instruments, artifacts, and vernacular, is where distinctive choices come from. Build with the brief's real content and subject matter throughout.
+## Decision heuristic
 
-## Design principles
+Ask: *would the reader's understanding change if they could see this spatially, compare it at a
+glance, or click on it — versus reading it top to bottom?* If yes, use HTML. Concretely:
 
-For web designs, the hero is a thesis. Open with the most characteristic thing in the subject's world, in whatever form makes sense for it: a headline, an image, an animation, a live demo, an interactive moment. Be deliberate with your choice: a big number with a small label, supporting stats, and a gradient accent is the template answer, only use if that's truly the best option.
+| Signal in the request | Why Markdown flattens it | Reach for pattern # |
+|---|---|---|
+| "give me a few options / directions" | Sequential walls of text you must hold in your head to compare | 1 |
+| "walk me through this diff / PR" | A diff is 2-D (old vs new, file vs file); prose linearizes it | 2 |
+| "help me understand this codebase/module" | Call graphs and dependencies are spatial, not linear | 2 |
+| "here's our design system / component" | The system's medium *is* HTML — screenshots or prose are a translation loss | 3 |
+| "show me the animation / interaction" | Motion and feel can't be described in prose, only demonstrated | 4 |
+| "draw a diagram / the figures for this doc" | Vector art beats an ASCII-art approximation or a wall of bullet steps | 5 |
+| "make a deck / slides" | A deck is spatial (one idea per screen) and sequenced, not paragraphs | 6 |
+| "explain how X works / teach me Y" | Explanations benefit from progressive disclosure, tabs, glossary lookup | 7 |
+| "status update / postmortem / report" | Skimmable structure (charts, colored timeline) beats a memo nobody reads closely | 8 |
+| "it's hard to describe what I want — let me just try it" | The user needs a UI to manipulate, then hand a result back, not a text box | 9 |
 
-Typography carries the personality of the page. Pair the display and body faces deliberately, not the same families you would reach for on any other project, and set a clear type scale with intentional weights, widths, and spacing. Make the type treatment itself a memorable part of the design, not a neutral delivery vehicle for the content.
+If none of these apply — a factual answer, a short explanation, code by itself, a simple list —
+just write Markdown/prose. Don't reach for HTML by default.
 
-Structure is information. Structural devices, numbering, eyebrows, dividers, labels, should encode something true about the content, not decorate it. Many generic designs use numbered markers (01 / 02 / 03), but that's only appropriate if the content actually is a sequence - like a real process or a typed timeline where order carries information the reader needs. Question if choices like numbered markers actually make sense before incorporating them.
+## Non-negotiable technical constraints
 
-Leverage motion deliberately. Think about where and if animation can serve the subject: a page-load sequence, a scroll-triggered reveal, hover micro-interactions, ambient atmosphere. An orchestrated moment usually lands harder than scattered effects; choose what the direction calls for. However, sometimes less is more, and extra animation contributes to the feeling that the design is AI-generated.
+Every artifact in the source gallery follows the same discipline. Keep it:
 
-Match complexity to the vision. Maximalist directions need elaborate execution; minimal directions need precision in spacing, type, and detail. Elegance is executing the chosen vision well.
+- **One file.** All CSS in a `<style>` block, all JS in a `<script>` block, no external
+  dependencies, no build step. It must open by double-clicking or via a raw file open in any
+  browser.
+- **No framework.** Vanilla HTML/CSS/JS. Frameworks imply tooling the reader doesn't have.
+- **Responsive-safe defaults.** `<meta name="viewport" content="width=device-width, initial-scale=1">`,
+  a `* { box-sizing: border-box; }` reset, and `html { scroll-behavior: smooth; }` for anchor
+  navigation.
+- **A restrained, consistent palette** rather than default browser styling or rainbow colors —
+  see the token set below. Consistency across an artifact matters more than which palette you
+  pick; reuse the same tokens for headings, borders, and accents throughout one document.
+- **Real content over Lorem Ipsum.** Every example uses concrete, specific fictional data (real
+  file names, real-looking metrics, real timestamps) — specificity is what makes it feel true
+  and readable versus an obvious placeholder.
+- **An escape hatch back to text.** Anything interactive that produces a decision or an edit
+  (see pattern 9) ends with a "Copy" / "Copy diff" / "Export as Markdown" button that serializes
+  the current state to plain text/Markdown via `navigator.clipboard.writeText(...)`. The user
+  stays in the loop and can paste the result straight back into the conversation or a commit —
+  the UI is a means to an edit, not a dead end.
 
-Consider written content carefully. Often a design brief may not contain real content, and it's up to you to come up with copy. Copy can make a design feel as templated as the design itself. See the below section on writing for more guidance.
+### Suggested design tokens
 
-## Process: brainstorm, explore, plan, critique, build, critique again
+A warm, muted palette used consistently across the source examples — reuse it (or adapt hues
+while keeping the same *structure*: one ink, one accent, one secondary accent, a warm neutral,
+a gray ramp, three font stacks) rather than reinventing tokens per document:
 
-For calibration: AI-generated design right now clusters around three looks: (1) a warm cream background (near #F4F1EA) with a high-contrast serif display and a terracotta accent; (2) a near-black background with a single bright acid-green or vermilion accent; (3) a broadsheet-style layout with hairline rules, zero border-radius, and dense newspaper-like columns. All three are legitimate for some briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly — the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, don't spend that freedom on one of these defaults. Just like a human designer who's hired, there's often a careful balance between doing what you're good at and taking each project as a chance to experiment and learn.
+```css
+:root {
+  --ivory:    #FAF9F5;  /* page background */
+  --slate:    #141413;  /* primary text / ink */
+  --clay:     #D97757;  /* primary accent */
+  --olive:    #788C5D;  /* secondary accent */
+  --oat:      #E3DACC;  /* warm neutral fill */
+  --rust:     #B04A3F;  /* danger / attention (optional) */
+  --gray-100: #F0EEE6;  /* subtle fill */
+  --gray-300: #D1CFC5;  /* borders */
+  --gray-500: #87867F;  /* muted text */
+  --gray-700: #3D3D3A;  /* body text */
+  --white:    #FFFFFF;  /* card/panel surfaces */
 
-Work in two passes. First, brainstorm a short design plan based on the human's design brief: create a compact token system with color, type, layout, and signature. Color: describe the palette as 4–6 named hex values. Type: the typefaces for 2+ roles (a characterful display face that's used with restraint, a complementary body face, and a utility face for captions or data if needed). Layout: a layout concept, using one-sentence prose descriptions and ASCII wireframes to ideate and compare. Signature: the single unique element this page will be remembered by that embodies the brief in an appropriate way.
+  --serif: ui-serif, Georgia, "Times New Roman", serif;   /* headings / editorial voice */
+  --sans:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; /* UI / body */
+  --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;      /* code, labels, metadata */
+}
+```
 
-Then review that plan against the brief before building: if any part of it reads like the generic default you would produce for any similar page (work through a similar prompt to see if you arrive somewhere similar) rather than a choice made for this specific brief — revise that part, say what you changed and why. Only after you've confirmed the relative uniqueness of your design plan should you start to write the code, following the revised plan exactly and deriving every color and type decision from it.
+Typical usage: serif for large headings (editorial feel), sans for body and UI chrome, mono for
+code, file paths, timestamps, eyebrow labels and small caps metadata. Borders `1.5px solid
+var(--gray-300)`, radii around 8–12px, shadows kept very soft (`0 4px 14px rgba(20,20,19,.08)`).
 
-When writing the code, be careful of structuring your CSS selector specificities. It's easy to generate CSS classes that cancel each other out (especially with a type-based selector like .section and a element-based selector like .cta). This can happen often with paddings/margins between sections.
+## Pattern catalog
 
-Try to do a lot of this planning and iteration in your thinking, and only show ideas to the user when you have higher confidence it'll delight them.
+Nine categories, each mapped to the concrete structural/interaction pattern that made the
+source example work. Use these as scaffolding, not templates to copy verbatim — build the
+specific content the request calls for.
 
-## Restraint and self-critique
+### 1 · Exploration & Planning
+Use when the user hasn't committed to a direction yet, or needs a decision handed off.
 
-Spend your boldness in one place. Let the signature element be the one memorable thing, keep everything around it quiet and disciplined, and cut any decoration that does not serve the brief. Not taking a risk can be a risk itself! Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected. Critique your own work as you build, taking screenshots if your environment supports it – a picture is worth 1000 tokens. Consider Chanel's advice: before leaving the house, take a look in the mirror and remove one accessory. Human creators have memory and always try to do something new, so if you have a space to quickly jot down notes about what you've tried, it can help you in future passes.
+- **Multi-approach comparison** — N columns (cards), one approach per column, each with a
+  short verdict/trade-off line at the bottom so the reader can point at one instead of holding
+  three sequential essays in their head.
+- **Visual design directions** — same idea for layout/palette options: render them live (real
+  CSS, not a description of colors) in a small grid so the reader reacts to something real.
+- **Implementation plan** — a vertical timeline of milestones (dot + connecting line down the
+  left, content to the right) paired with a small data-flow diagram, inline mockup snippets, and
+  a risk table. This is the artifact you hand to whoever implements the plan.
 
-## More on writing in design
+### 2 · Code Review & Understanding
+Use when discussing a diff, a PR, or an unfamiliar module.
 
-Words appear in a design for one reason: to make it easier to understand, and therefore easier to use. They are design material, not decoration. Bring the same intentionality to copy that you would bring to spacing and color. Before writing anything, ask what the design needs to say, and how it can best be said to help the person navigate the experience.
+- **Annotated diff** — render actual diff rows, not a prose description of the diff:
+  ```html
+  <div class="diff-row hunk"><span class="ln"></span><span class="mark"></span><span class="code">@@ -0,0 +1,58 @@</span></div>
+  <div class="diff-row add"><span class="ln">1</span><span class="mark">+</span><span class="code">import { useMutation } from '@tanstack/react-query';</span></div>
+  <div class="diff-row del"><span class="ln">2</span><span class="mark">−</span><span class="code">import { useState } from 'react';</span></div>
+  ```
+  Style `.add` with a green-tinted background, `.del` with a red/rust tint, `.hunk` muted. Attach
+  margin notes/callouts next to specific lines for review comments, and a severity tag
+  (`needs attention`, `nit`, `question`) per file or per hunk so reviewers can triage at a glance.
+- **PR writeup for reviewers** — the author's side: motivation up top, a before/after, then a
+  file-by-file tour explaining *why*, ending with where to focus review attention.
+- **Module map** — boxes-and-arrows, not a bullet list of "X imports Y". Draw entry points,
+  highlight the hot path, connect dependencies with lines. SVG or absolutely-positioned divs
+  both work; keep it small enough to read as a diagram, not a chart.
 
-Write from the end user's side of the screen. Name things by what people control and recognize, never by how the system is built. A person manages notifications, not webhook config. Describe what something does in plain terms rather than selling it. Being specific is always better than being clever.
+### 3 · Design
+Use when the artifact *is* about a design system or component — HTML is the native medium.
 
-Use active voice as default. A control should say exactly what happens when it's used: "Save changes," not "Submit." An action keeps the same name through the whole flow, so the button that says "Publish" produces a toast that says "Published." The vocabulary of an interface is the signposting for someone navigating the product. Cohesion and consistency are how people learn their way around.
+- **Living design system** — pull tokens (color/type/spacing) and render them as literal
+  swatches the reader can eyeball and copy the value from: a colored chip, its hex, and its
+  token name side by side; a type scale rendered at actual size; spacing tokens shown as bars.
+- **Component variant matrix** — every size/state/intent of one component laid out on a single
+  sheet (a grid of the component instances), with live controls (sliders/toggles for
+  padding/density) that re-render every instance at once, and hovering a variant reveals its
+  exact prop combination as a tooltip/label.
 
-Treat failure and emptiness as moments for direction, not mood. Explain what went wrong and how to fix it, in the interface's voice rather than a person's. Errors don't apologize, and they are never vague about what happened. An empty screen is an invitation to act.
+### 4 · Prototyping
+Use when motion or interaction is the point — it can't be described, only felt.
 
-Keep the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.
+- **Animation sandbox** — isolate the transition, add sliders for duration/easing so the exact
+  curve can be tuned before it's wired into the real app; swap the CSS custom property driving
+  the easing at runtime (`--ease: cubic-bezier(...)`) rather than hardcoding it.
+- **Clickable flow** — 3–5 linked "screens" (divs styled as app screens) with real click targets
+  that navigate between them — enough fidelity to feel whether the interaction is right, no more.
+
+### 5 · Illustrations & Diagrams
+Use when you'd otherwise draw an ASCII diagram or describe a shape in words.
+
+- **SVG figure sheet** — draw the actual figures inline as `<svg>`, one per section, so each can
+  be tweaked and copied out individually into the final document. Inline SVG is a real drawing
+  surface, not a static asset.
+- **Interactive flowchart** — real flowchart shapes (rect = step, diamond = decision) connected
+  by lines, where clicking a node reveals detail (what runs, timing, failure path) instead of
+  cramming every detail onto the diagram itself:
+  ```js
+  document.querySelectorAll('.node').forEach(n => {
+    n.addEventListener('click', () => showDetail(n.dataset.step));
+  });
+  ```
+
+### 6 · Decks
+Use for "make me a deck / slides out of this".
+
+- A handful of `<section class="slide">` elements, one per screen, `display:none` on all but the
+  active one, plus ~20 lines of JS listening for arrow keys to advance/retreat. No export step,
+  no Keynote — arrow-key through it in the meeting directly from the file.
+
+### 7 · Research & Learning
+Use for "explain how X works" or "teach me Y" where the topic has real structure.
+
+- **Feature explainer** — TL;DR box up top, then `<details><summary>` blocks for
+  progressively-disclosed steps (open the first by default), tabbed code/config samples
+  (`data-tabs` + a tab bar that toggles an `active` class and shows/hides panels), and an FAQ at
+  the end.
+- **Concept explainer** — teach through a live, manipulable diagram (e.g. nodes on a ring you
+  can add/remove) rather than static prose, a comparison table for trade-offs, and a hover-linked
+  glossary: wrap jargon in `<span class="term" data-term="node">node</span>` and show a
+  definition on hover/focus so the reader never has to leave the passage to look something up.
+
+### 8 · Reports
+Use for recurring documents — status updates, postmortems — that people currently skim.
+
+- **Weekly status** — what shipped / what slipped / what's next, plus one small inline chart
+  (a handful of styled bars is enough — no charting library needed) so the shape of the week is
+  visible in a glance before anyone reads a word.
+- **Incident timeline** — a vertical timeline down the left (dot + time + body per event,
+  color the dot by severity: detection, impact, mitigation, resolution), followed by relevant
+  log excerpts and a follow-up action checklist:
+  ```html
+  <div class="tl-entry">
+    <span class="tl-dot impact"></span>
+    <span class="tl-time">14:06</span>
+    <div class="tl-body">Error rate crosses 5%; on-call paged.</div>
+  </div>
+  ```
+
+### 9 · Custom Editing Interfaces
+Use when it's genuinely hard to describe what's wanted in a text box — build a throwaway editor
+for the *exact* thing being worked on. Always **end with an export/copy button** that turns
+whatever was done in the UI back into text the user can paste into the conversation or commit.
+This is what keeps the human in the loop while tightening the iteration loop.
+
+- **Triage/kanban board** — draggable cards across columns (`draggable="true"`,
+  `dragstart`/`dragover`/`drop` handlers moving a card's column state), ending with a button that
+  serializes the final column ordering to Markdown and copies it:
+  ```js
+  card.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', card.dataset.id));
+  copyBtn.addEventListener('click', () => navigator.clipboard.writeText(buildMarkdown(state)));
+  ```
+- **Settings/flag editor** — toggles grouped by area, dependency validation that disables/warns
+  when a prerequisite is off, and a "Copy diff" button (disabled until something actually
+  changed) that copies only the changed keys — not the whole state — so it pastes cleanly into a
+  config file or PR description.
+- **Live template/prompt tuner** — an editable template pane (`contenteditable="true"
+  spellcheck="false"`) with variable slots highlighted, and 2–3 sample-input panes that re-render
+  the filled template live on every keystroke (`editor.addEventListener('input', rerender)`), so
+  the effect of a wording change is visible across all samples at once before committing to it.
+
+## Reusable building blocks
+
+Small pieces that recur across multiple patterns above — reach for these instead of reinventing
+markup each time:
+
+- **Collapsible section:** native `<details><summary>…</summary>…</details>` — no JS needed,
+  keyboard-accessible for free.
+- **Tabs:** a `.tabbar` of buttons toggling an `active` class, paired `.tab-panel` elements shown
+  only when their id matches the active tab.
+- **Hover glossary term:** `<span class="term" data-term="x">` + a CSS `::after`/tooltip or a
+  small JS listener reading `data-term` to populate a definition popover.
+- **Severity/status tag:** a small pill (`border-radius: 999px`, small mono/sans caps text)
+  colored by state — reuse across diffs, reports, and flag editors instead of inventing new
+  color language each time.
+- **Copy-to-clipboard export:** `navigator.clipboard.writeText(serialize(state)).then(flashOk)`
+  — the universal escape hatch for every editor pattern.
+
+## Checklist before shipping an HTML artifact
+
+1. Does this actually need to be HTML, or would Markdown/prose serve the reader just as well?
+   (Default to Markdown — only escalate when a signal from the heuristic table applies.)
+2. Single file, no external assets, no build step — opens directly in a browser.
+3. Consistent tokens used throughout (not default browser styles, not a new palette per section).
+4. Content is specific and real, not placeholder filler.
+5. If interactive: is there a copy/export path back to plain text so the user isn't stuck in the
+   UI with no way to bring the result back into the conversation?
+6. Reasonably responsive — check it doesn't break at narrow widths if it might be viewed on a
+   laptop split-screen or a phone.
+
+---
+*Distilled from the "html-effectiveness" example gallery (20 self-contained HTML demos organized
+into 9 categories, plus an index page) accompanying a blog post on HTML as an agent output format.*
