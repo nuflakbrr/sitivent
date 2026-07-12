@@ -13,20 +13,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String?
-  emailVerified Boolean   @default(false) @map("email_verified")
-  image         String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  role          String?
-  banned        Boolean?  @default(false)
-  banReason     String?   @map("ban_reason")
-  banExpires    DateTime? @map("ban_expires")
-  roleId        String?   @map("role_id")
-  sessions      Session[]
-  accounts      Account[]
+  id                 String         @id @default(uuid())
+  email              String         @unique
+  name               String?
+  emailVerified      Boolean        @default(false) @map("email_verified")
+  image              String?
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  role               String?
+  banned             Boolean?       @default(false)
+  banReason          String?        @map("ban_reason")
+  banExpires         DateTime?      @map("ban_expires")
+  roleId             String?        @map("role_id")
+  sessions           Session[]
+  accounts           Account[]
   roles              Role[]
   registrations      Registration[]
   verifiedPayments   Payment[]
@@ -164,28 +164,28 @@ model EventCategory {
 }
 
 model Event {
-  id                   String      @id @default(cuid())
+  id                   String               @id @default(cuid())
   title                String
-  slug                 String      @unique
+  slug                 String               @unique
   description          String
   banner               String?
-  startDate            DateTime    @map("start_date")
-  endDate              DateTime    @map("end_date")
-  startTime            String      @map("start_time")
-  endTime              String      @map("end_time")
+  startDate            DateTime             @map("start_date")
+  endDate              DateTime             @map("end_date")
+  startTime            String               @map("start_time")
+  endTime              String               @map("end_time")
   location             String
-  eventType            EventType   @map("event_type")
-  registrationDeadline DateTime    @map("registration_deadline")
+  eventType            EventType            @map("event_type")
+  registrationDeadline DateTime             @map("registration_deadline")
   quota                Int
   price                Int
-  status               EventStatus @default(DRAFT)
-  certificateEnabled   Boolean     @default(false) @map("certificate_enabled")
-  publishedAt          DateTime?   @map("published_at")
-  createdAt            DateTime    @default(now()) @map("created_at")
-  updatedAt            DateTime       @updatedAt @map("updated_at")
-  deletedAt            DateTime?      @map("deleted_at")
-  categoryId           String?     @map("category_id")
-  category             EventCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status               EventStatus          @default(DRAFT)
+  certificateEnabled   Boolean              @default(false) @map("certificate_enabled")
+  publishedAt          DateTime?            @map("published_at")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+  deletedAt            DateTime?            @map("deleted_at")
+  categoryId           String?              @map("category_id")
+  category             EventCategory?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   registrations        Registration[]
   certificates         Certificate[]
   certificateTemplate  CertificateTemplate?
@@ -249,29 +249,29 @@ enum CertNumberMode {
 }
 
 model CertificateTemplate {
-  id                  String                 @id @default(cuid())
-  eventId             String                 @unique @map("event_id")
-  event               Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  backgroundUrl       String?                @map("background_url")
-  numberTemplate      String                 @default("CERT/{SLUG}/{REG_NO}") @map("number_template")
-  numberMode          CertNumberMode         @default(AUTO) @map("number_mode")
-  showIssuedDate      Boolean                @default(true) @map("show_issued_date")
-  titleFont           String?                @map("title_font")
-  titleColor          String?                @map("title_color")
-  contentFont         String?                @map("content_font")
-  contentColor        String?                @map("content_color")
-  primaryColor        String?                @map("primary_color")
-  showEventDate       Boolean?               @default(true) @map("show_event_date")
-  showEventLocation   Boolean?               @default(false) @map("show_event_location")
-  headerText          String?                @default("SITIVENT") @map("header_text")
-  headerSubtitle      String?                @default("Sertifikat Partisipasi Resmi") @map("header_subtitle")
-  headerFont          String?                @map("header_font")
-  headerColor         String?                @map("header_color")
-  showHeader          Boolean?               @default(true) @map("show_header")
-  footerMarginBottom  Int?                   @default(0) @map("footer_margin_bottom")
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @updatedAt @map("updated_at")
-  signatures          CertificateSignature[]
+  id                 String                 @id @default(cuid())
+  eventId            String                 @unique @map("event_id")
+  event              Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  backgroundUrl      String?                @map("background_url")
+  numberTemplate     String                 @default("CERT/{SLUG}/{REG_NO}") @map("number_template")
+  numberMode         CertNumberMode         @default(AUTO) @map("number_mode")
+  showIssuedDate     Boolean                @default(true) @map("show_issued_date")
+  titleFont          String?                @map("title_font")
+  titleColor         String?                @map("title_color")
+  contentFont        String?                @map("content_font")
+  contentColor       String?                @map("content_color")
+  primaryColor       String?                @map("primary_color")
+  showEventDate      Boolean?               @default(true) @map("show_event_date")
+  showEventLocation  Boolean?               @default(false) @map("show_event_location")
+  headerText         String?                @default("SITIVENT") @map("header_text")
+  headerSubtitle     String?                @default("Sertifikat Partisipasi Resmi") @map("header_subtitle")
+  headerFont         String?                @map("header_font")
+  headerColor        String?                @map("header_color")
+  showHeader         Boolean?               @default(true) @map("show_header")
+  footerMarginBottom Int?                   @default(0) @map("footer_margin_bottom")
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+  signatures         CertificateSignature[]
 
   @@map("certificate_templates")
 }
@@ -361,4 +361,3 @@ model EmailQueue {
 
   @@map("email_queues")
 }
-
