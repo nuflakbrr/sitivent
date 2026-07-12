@@ -9,8 +9,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
   type CarouselApi,
 } from '@/components/ui/carousel';
 
@@ -22,11 +20,12 @@ const slides = [
     sub: 'Intensif 2 hari bersama praktisi industri. Sertifikat resmi tersedia.',
     cta: 'Lihat Workshop',
     href: '/events',
-    badge: 'Online',
-    badgeColor: 'bg-emerald-400',
-    from: '#1e1b4b',
-    to: '#312e81',
-    accent: '#818cf8',
+    tag: 'Online',
+    tagColor: '#788C5D',
+    // Warm dark with clay bloom
+    bg: 'linear-gradient(135deg, #1A1410 0%, #2A1E14 100%)',
+    bloom: '#D97757',
+    accent: '#D97757',
   },
   {
     id: 2,
@@ -35,11 +34,12 @@ const slides = [
     sub: 'Diskusi panel bersama engineer dari startup unicorn Indonesia.',
     cta: 'Daftar Seminar',
     href: '/events',
-    badge: 'Offline · Jakarta',
-    badgeColor: 'bg-blue-400',
-    from: '#0c1a2e',
-    to: '#0e3a5c',
-    accent: '#38bdf8',
+    tag: 'Offline · Jakarta',
+    tagColor: '#3D3D3A',
+    // Deep slate with olive bloom
+    bg: 'linear-gradient(135deg, #141413 0%, #1F1E1B 100%)',
+    bloom: '#788C5D',
+    accent: '#788C5D',
   },
   {
     id: 3,
@@ -48,15 +48,16 @@ const slides = [
     sub: 'Program intensif terbuka untuk semua. Kuota terbatas, daftar sekarang.',
     cta: 'Daftar Gratis',
     href: '/events',
-    badge: 'Gratis',
-    badgeColor: 'bg-amber-400',
-    from: '#1a1200',
-    to: '#3b2800',
-    accent: '#fbbf24',
+    tag: 'Gratis',
+    tagColor: '#D97757',
+    // Warm ivory tone with rust bloom
+    bg: 'linear-gradient(135deg, #1E1814 0%, #2C1F15 100%)',
+    bloom: '#B04A3F',
+    accent: '#D97757',
   },
 ];
 
-const SLIDE_HEIGHT = 'clamp(400px, 58vh, 580px)';
+const SLIDE_HEIGHT = 'clamp(420px, 60vh, 600px)';
 
 const autoplayPlugin = Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true });
 
@@ -90,68 +91,91 @@ const HeroBanner: FC = () => {
             className="pl-0 relative overflow-hidden"
             style={{
               height: SLIDE_HEIGHT,
-              background: `linear-gradient(135deg, ${s.from} 0%, ${s.to} 100%)`,
+              background: s.bg,
             }}
           >
-            {/* Decorative glows */}
+            {/* Color bloom */}
             <div
-              className="absolute right-[-8%] top-[-15%] w-[50%] aspect-square rounded-full opacity-20 pointer-events-none"
-              style={{ background: `radial-gradient(circle, ${s.accent} 0%, transparent 70%)` }}
+              className="absolute right-[-5%] top-[-10%] w-[45%] aspect-square rounded-full opacity-30 pointer-events-none blur-3xl"
+              style={{ background: `radial-gradient(circle, ${s.bloom} 0%, transparent 70%)` }}
             />
             <div
-              className="absolute left-[30%] bottom-[-20%] w-[35%] aspect-square rounded-full opacity-10 pointer-events-none"
-              style={{ background: `radial-gradient(circle, ${s.accent} 0%, transparent 70%)` }}
+              className="absolute left-[10%] bottom-[-15%] w-[30%] aspect-square rounded-full opacity-15 pointer-events-none blur-3xl"
+              style={{ background: `radial-gradient(circle, ${s.bloom} 0%, transparent 70%)` }}
+            />
+            {/* Warm grid */}
+            <div
+              className="absolute inset-0 opacity-[0.025] pointer-events-none"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to right, #FAF9F5 1px, transparent 1px), linear-gradient(to bottom, #FAF9F5 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+              }}
             />
 
-            {/* Slide content */}
-            <div className="relative z-10 container mx-auto px-4 max-w-6xl h-full flex items-center">
-              <div className="max-w-2xl space-y-5 pt-24 pb-14">
+            {/* Content */}
+            <div className="relative z-10 container mx-auto px-6 max-w-6xl h-full flex items-center">
+              <div className="max-w-2xl space-y-6 pt-28 pb-16">
+                {/* Eyebrow */}
                 <div className="flex items-center gap-3">
                   <span
-                    className={`text-[11px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full text-slate-900 ${s.badgeColor}`}
+                    className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                    style={{
+                      background: s.tagColor,
+                      color: '#FFFFFF',
+                      fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                    }}
                   >
-                    {s.badge}
+                    {s.tag}
                   </span>
-                  <span className="text-sm font-medium text-white/70">{s.eyebrow}</span>
+                  <span
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: 'rgba(240,238,230,0.7)' }}
+                  >
+                    {s.eyebrow}
+                  </span>
                 </div>
 
+                {/* Headline — editorial serif */}
                 <h1
-                  className="font-extrabold text-white leading-[1.08]"
+                  className="leading-[1.1] tracking-tight"
                   style={{
-                    fontSize: 'clamp(1.75rem, 4vw, 3.25rem)',
-                    textShadow: '0 2px 20px rgba(0,0,0,0.4)',
+                    fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                    fontWeight: 500,
+                    fontSize: 'clamp(1.9rem, 4.5vw, 3.25rem)',
+                    color: '#FAF9F5',
+                    letterSpacing: '-0.01em',
                   }}
                 >
                   {s.headline}
                 </h1>
 
-                <p className="text-white/70 text-base md:text-lg font-medium max-w-lg leading-relaxed">
+                <p
+                  className="text-base md:text-lg max-w-xl leading-relaxed"
+                  style={{ color: 'rgba(240,238,230,0.7)' }}
+                >
                   {s.sub}
                 </p>
 
-                <Link
-                  href={s.href as Route}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 text-slate-900 font-bold rounded-xl text-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] shadow-lg"
-                  style={{ background: s.accent }}
-                >
-                  {s.cta}
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
+                <div className="pt-1">
+                  <Link
+                    href={s.href as Route}
+                    className="inline-flex items-center gap-2 px-7 py-3.5 font-semibold rounded-xl text-sm transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+                    style={{
+                      background: s.accent,
+                      color: '#FFFFFF',
+                      boxShadow: `0 8px 24px ${s.accent}55`,
+                    }}
+                  >
+                    {s.cta}
+                    <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                  </Link>
+                </div>
               </div>
             </div>
           </CarouselItem>
         ))}
       </CarouselContent>
-
-      {/* Prev / Next — override default -left-12 / -right-12 positioning to sit inside */}
-      {/* <CarouselPrevious
-        variant="ghost"
-        className="left-4 top-1/2 border-none bg-black/30 hover:bg-black/50 text-white hover:text-white backdrop-blur-sm"
-      />
-      <CarouselNext
-        variant="ghost"
-        className="right-4 top-1/2 border-none bg-black/30 hover:bg-black/50 text-white hover:text-white backdrop-blur-sm"
-      /> */}
 
       {/* Dot indicators */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
@@ -164,7 +188,7 @@ const HeroBanner: FC = () => {
             style={{
               width: i === current ? '24px' : '8px',
               height: '8px',
-              background: i === current ? slide.accent : 'rgba(255,255,255,0.4)',
+              background: i === current ? slide.accent : 'rgba(240,238,230,0.3)',
             }}
           />
         ))}

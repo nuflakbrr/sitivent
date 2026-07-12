@@ -45,3 +45,16 @@ export interface EventPaginationResponse {
     lastPage: number;
   };
 }
+
+export interface EventSearchResult {
+  id: string;
+  title: string;
+  slug: string;
+  banner: string | null;
+  startDate: string;
+  eventType: EventType;
+}
+
+export interface EventSearchResponse {
+  data: EventSearchResult[];
+}

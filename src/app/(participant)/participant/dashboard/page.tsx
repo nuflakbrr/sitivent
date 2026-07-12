@@ -1,20 +1,8 @@
 import type { Route } from 'next';
 import Link from 'next/link';
-import {
-  Calendar,
-  MapPin,
-  Clock,
-  Award,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  FileDown,
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Award, CheckCircle2, AlertCircle, FileDown } from 'lucide-react';
 
 import { getParticipantDashboardData } from '@/services/dashboard';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -26,6 +14,47 @@ const formatDate = (date: Date) => {
     month: 'long',
     year: 'numeric',
   });
+};
+
+// Status label & color per warm palette
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case 'CHECKED_IN':
+      return {
+        label: 'Hadir',
+        bg: 'rgba(120,140,93,0.12)',
+        color: '#788C5D',
+        border: 'rgba(120,140,93,0.25)',
+      };
+    case 'REGISTERED':
+      return {
+        label: 'Terdaftar',
+        bg: 'rgba(20,20,19,0.06)',
+        color: '#3D3D3A',
+        border: 'rgba(20,20,19,0.15)',
+      };
+    case 'WAITING_PAYMENT':
+      return {
+        label: 'Menunggu Bayar',
+        bg: 'rgba(217,119,87,0.1)',
+        color: '#D97757',
+        border: 'rgba(217,119,87,0.25)',
+      };
+    case 'CANCELLED':
+      return {
+        label: 'Dibatalkan',
+        bg: 'rgba(176,74,63,0.1)',
+        color: '#B04A3F',
+        border: 'rgba(176,74,63,0.2)',
+      };
+    default:
+      return {
+        label: status,
+        bg: 'rgba(135,134,127,0.1)',
+        color: '#87867F',
+        border: 'rgba(135,134,127,0.2)',
+      };
+  }
 };
 
 export default async function ParticipantDashboard() {
@@ -42,7 +71,7 @@ export default async function ParticipantDashboard() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <p className="text-muted-foreground">Gagal memuat data dashboard peserta.</p>
+        <p style={{ color: '#87867F' }}>Gagal memuat data dashboard peserta.</p>
       </div>
     );
   }
@@ -50,159 +79,351 @@ export default async function ParticipantDashboard() {
   const { upcomingEvent, history, summary } = data;
 
   return (
-    <div className="space-y-8">
-      {/* Header & Title */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-8 pb-10">
+      {/* Header */}
+      <div
+        className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b"
+        style={{ borderColor: '#E3DACC' }}
+      >
         <div>
-          <h1 id="dashboard-title" className="text-3xl font-extrabold tracking-tight">
+          <span
+            className="text-[11px] font-bold uppercase tracking-widest block mb-2"
+            style={{
+              fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+              color: '#87867F',
+            }}
+          >
+            Dashboard Peserta
+          </span>
+          <h1
+            id="dashboard-title"
+            className="leading-tight"
+            style={{
+              fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+              fontWeight: 500,
+              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+              color: '#141413',
+              letterSpacing: '-0.01em',
+            }}
+          >
             Halo, {session.user.name}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="mt-1.5 text-sm" style={{ color: '#87867F' }}>
             Selamat datang kembali di dashboard peserta SITIVENT.
           </p>
         </div>
       </div>
 
       {/* Summary Grid Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        <Card className="border-none shadow-md bg-linear-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20">
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Total Terdaftar
-              </p>
-              <h3 className="text-3xl font-extrabold tracking-tight mt-1">
-                {summary.totalRegistered}
-              </h3>
-            </div>
-            <div className="p-3 bg-blue-500/15 rounded-xl text-blue-600 dark:text-blue-400">
-              <Calendar className="w-6 h-6" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Total Terdaftar */}
+        <div
+          className="p-6 rounded-xl flex items-center justify-between transition-all duration-200"
+          style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #D1CFC5',
+            boxShadow: '0 2px 8px rgba(20,20,19,0.05)',
+          }}
+        >
+          <div className="space-y-1">
+            <p
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{
+                color: '#87867F',
+                fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+              }}
+            >
+              Total Terdaftar
+            </p>
+            <h3
+              className="text-4xl font-medium mt-1"
+              style={{
+                fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                color: '#141413',
+              }}
+            >
+              {summary.totalRegistered}
+            </h3>
+          </div>
+          <div
+            className="p-3.5 rounded-xl"
+            style={{
+              background: 'rgba(217,119,87,0.1)',
+              border: '1.5px solid rgba(217,119,87,0.2)',
+            }}
+          >
+            <Calendar className="w-6 h-6" style={{ color: '#D97757' }} />
+          </div>
+        </div>
 
-        <Card className="border-none shadow-md bg-linear-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20">
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Hadir (Check-In)
-              </p>
-              <h3 className="text-3xl font-extrabold tracking-tight mt-1">
-                {summary.totalCheckedIn}
-              </h3>
-            </div>
-            <div className="p-3 bg-emerald-500/15 rounded-xl text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Hadir */}
+        <div
+          className="p-6 rounded-xl flex items-center justify-between transition-all duration-200"
+          style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #D1CFC5',
+            boxShadow: '0 2px 8px rgba(20,20,19,0.05)',
+          }}
+        >
+          <div className="space-y-1">
+            <p
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{
+                color: '#87867F',
+                fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+              }}
+            >
+              Hadir (Check-In)
+            </p>
+            <h3
+              className="text-4xl font-medium mt-1"
+              style={{
+                fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                color: '#141413',
+              }}
+            >
+              {summary.totalCheckedIn}
+            </h3>
+          </div>
+          <div
+            className="p-3.5 rounded-xl"
+            style={{
+              background: 'rgba(120,140,93,0.1)',
+              border: '1.5px solid rgba(120,140,93,0.2)',
+            }}
+          >
+            <CheckCircle2 className="w-6 h-6" style={{ color: '#788C5D' }} />
+          </div>
+        </div>
 
-        <Card className="border-none shadow-md bg-linear-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20">
-          <CardContent className="p-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Menunggu Pembayaran
-              </p>
-              <h3 className="text-3xl font-extrabold tracking-tight mt-1">
-                {summary.totalPendingPayment}
-              </h3>
-            </div>
-            <div className="p-3 bg-amber-500/15 rounded-xl text-amber-600 dark:text-amber-400">
-              <Clock className="w-6 h-6" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Menunggu Pembayaran */}
+        <div
+          className="p-6 rounded-xl flex items-center justify-between transition-all duration-200"
+          style={{
+            background: '#FFFFFF',
+            border: '1.5px solid #D1CFC5',
+            boxShadow: '0 2px 8px rgba(20,20,19,0.05)',
+          }}
+        >
+          <div className="space-y-1">
+            <p
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{
+                color: '#87867F',
+                fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+              }}
+            >
+              Menunggu Pembayaran
+            </p>
+            <h3
+              className="text-4xl font-medium mt-1"
+              style={{
+                fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                color: '#141413',
+              }}
+            >
+              {summary.totalPendingPayment}
+            </h3>
+          </div>
+          <div
+            className="p-3.5 rounded-xl"
+            style={{
+              background: 'rgba(176,74,63,0.08)',
+              border: '1.5px solid rgba(176,74,63,0.18)',
+            }}
+          >
+            <Clock className="w-6 h-6" style={{ color: '#B04A3F' }} />
+          </div>
+        </div>
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Upcoming Event Widget (col-span-1) */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="shadow-md border-none ring-0 h-full flex flex-col justify-between">
-            <div>
-              <CardHeader className="border-b border-foreground/5 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" /> Event Terdekat
-                </CardTitle>
-                <CardDescription>Event terdekat yang akan Anda ikuti</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 pt-6">
-                {upcomingEvent ? (
-                  <div className="space-y-6">
-                    <div className="aspect-video w-full rounded-md overflow-hidden bg-muted border border-foreground/10 relative">
-                      {upcomingEvent.banner ? (
-                        <img
-                          src={upcomingEvent.banner}
-                          alt={upcomingEvent.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Upcoming Event Widget */}
+        <div className="lg:col-span-1">
+          <div
+            className="rounded-xl overflow-hidden flex flex-col h-full transition-all duration-200"
+            style={{
+              background: '#FFFFFF',
+              border: '1.5px solid #D1CFC5',
+              boxShadow: '0 2px 8px rgba(20,20,19,0.05)',
+            }}
+          >
+            {/* Card header */}
+            <div
+              className="px-6 py-4 border-b flex items-center gap-2"
+              style={{ background: '#FAF9F5', borderColor: '#E3DACC' }}
+            >
+              <Calendar className="w-4.5 h-4.5" style={{ color: '#D97757' }} />
+              <h2
+                className="text-sm font-semibold"
+                style={{
+                  fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                  color: '#141413',
+                }}
+              >
+                Event Terdekat
+              </h2>
+              <p className="ml-auto text-xs" style={{ color: '#87867F' }}>
+                Yang akan Anda ikuti
+              </p>
+            </div>
+
+            <div className="p-6 flex flex-col flex-1">
+              {upcomingEvent ? (
+                <div className="space-y-5 flex-1">
+                  {/* Banner */}
+                  <div
+                    className="aspect-video w-full rounded-lg overflow-hidden"
+                    style={{ background: '#E3DACC', border: '1.5px solid #D1CFC5' }}
+                  >
+                    {upcomingEvent.banner ? (
+                      <img
+                        src={upcomingEvent.banner}
+                        alt={upcomingEvent.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #E3DACC, #D1CFC5)' }}
+                      >
+                        <span
+                          className="text-2xl font-medium"
+                          style={{
+                            fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                            color: '#3D3D3A',
+                          }}
+                        >
                           {upcomingEvent.title.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      <h3 className="font-bold text-lg leading-tight text-foreground">
-                        {upcomingEvent.title}
-                      </h3>
-                      <div className="space-y-2 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-primary shrink-0" />
-                          <span>{formatDate(upcomingEvent.startDate)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-primary shrink-0" />
-                          <span>
-                            {upcomingEvent.startTime} - {upcomingEvent.endTime} WIB
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary shrink-0" />
-                          <span className="line-clamp-1">{upcomingEvent.location}</span>
-                        </div>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-3">
+                    <h3
+                      className="font-semibold text-base leading-snug line-clamp-2"
+                      style={{
+                        fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                        color: '#141413',
+                      }}
+                    >
+                      {upcomingEvent.title}
+                    </h3>
+                    <div className="space-y-2 text-xs" style={{ color: '#87867F' }}>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 shrink-0" style={{ color: '#D1CFC5' }} />
+                        <span>{formatDate(upcomingEvent.startDate)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 shrink-0" style={{ color: '#D1CFC5' }} />
+                        <span>
+                          {upcomingEvent.startTime} - {upcomingEvent.endTime} WIB
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 shrink-0" style={{ color: '#D1CFC5' }} />
+                        <span className="line-clamp-1">{upcomingEvent.location}</span>
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="text-center py-12 text-muted-foreground flex flex-col items-center justify-center gap-2">
-                    <AlertCircle className="w-8 h-8 text-muted-foreground/60" />
-                    <span>Belum ada event terdekat yang didaftar.</span>
+                </div>
+              ) : (
+                <div
+                  className="text-center py-12 flex flex-col items-center justify-center gap-3 flex-1"
+                  style={{ color: '#87867F' }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: '#F0EEE6' }}
+                  >
+                    <AlertCircle className="w-6 h-6" style={{ color: '#D1CFC5' }} />
                   </div>
-                )}
-              </CardContent>
+                  <p className="text-sm">Belum ada event terdekat yang didaftar.</p>
+                  <Link
+                    href={'/events' as Route}
+                    className="text-sm font-semibold mt-1 transition-colors"
+                    style={{ color: '#D97757' }}
+                  >
+                    Jelajahi Event →
+                  </Link>
+                </div>
+              )}
             </div>
+
             {upcomingEvent && upcomingEvent.qrToken && (
-              <div className="p-6 pt-0">
-                <ShowQrButton
-                  qrToken={upcomingEvent.qrToken}
-                  eventTitle={upcomingEvent.title}
-                  registrationNumber={upcomingEvent.registrationNumber}
-                />
+              <div className="px-6 pb-6 pt-0" style={{ borderTop: '1.5px solid #F0EEE6' }}>
+                <div className="pt-4">
+                  <ShowQrButton
+                    qrToken={upcomingEvent.qrToken}
+                    eventTitle={upcomingEvent.title}
+                    registrationNumber={upcomingEvent.registrationNumber}
+                  />
+                </div>
               </div>
             )}
-          </Card>
+          </div>
         </div>
 
-        {/* Right Column: Event Registration History (col-span-2) */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="shadow-md border-none ring-0">
-            <CardHeader className="border-b border-foreground/5 pb-4">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" /> Riwayat Event
-              </CardTitle>
-              <CardDescription>Daftar seluruh event yang pernah Anda daftarkan</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+        {/* Right: Event Registration History */}
+        <div className="lg:col-span-2">
+          <div
+            className="rounded-xl overflow-hidden h-full"
+            style={{
+              background: '#FFFFFF',
+              border: '1.5px solid #D1CFC5',
+              boxShadow: '0 2px 8px rgba(20,20,19,0.05)',
+            }}
+          >
+            {/* Card header */}
+            <div
+              className="px-6 py-4 border-b flex items-center gap-2"
+              style={{ background: '#FAF9F5', borderColor: '#E3DACC' }}
+            >
+              <Award className="w-4.5 h-4.5" style={{ color: '#D97757' }} />
+              <h2
+                className="text-sm font-semibold"
+                style={{
+                  fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                  color: '#141413',
+                }}
+              >
+                Riwayat Event
+              </h2>
+              <p className="ml-auto text-xs" style={{ color: '#87867F' }}>
+                Seluruh event yang pernah Anda daftarkan
+              </p>
+            </div>
+
+            <div className="p-6">
               {history.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  Anda belum pernah mendaftar ke event apapun.
+                <div
+                  className="text-center py-12 flex flex-col items-center gap-3"
+                  style={{ color: '#87867F' }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: '#F0EEE6' }}
+                  >
+                    <Award className="w-6 h-6" style={{ color: '#D1CFC5' }} />
+                  </div>
+                  <p className="text-sm">Anda belum pernah mendaftar ke event apapun.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-foreground/5 text-xs text-muted-foreground uppercase font-semibold">
+                      <tr
+                        className="text-[10px] font-bold uppercase"
+                        style={{
+                          color: '#87867F',
+                          fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                          letterSpacing: '0.08em',
+                          borderBottom: '1.5px solid #E3DACC',
+                        }}
+                      >
                         <th className="pb-3 pr-4">Event</th>
                         <th className="pb-3 px-4">Tanggal</th>
                         <th className="pb-3 px-4">Status</th>
@@ -210,72 +431,96 @@ export default async function ParticipantDashboard() {
                         <th className="pb-3 pl-4 text-right">Sertifikat</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-foreground/5">
+                    <tbody>
                       {history.map((item) => {
                         const canDownloadCert =
                           item.status === 'CHECKED_IN' &&
                           item.event.certificateEnabled &&
                           item.certificates.length > 0;
+                        const statusStyle = getStatusStyle(item.status);
 
                         return (
-                          <tr key={item.id} className="group">
+                          <tr
+                            key={item.id}
+                            className="group transition-colors duration-150"
+                            style={{ borderBottom: '1px solid #F0EEE6' }}
+                          >
                             <td className="py-4 pr-4">
-                              <p className="font-semibold text-sm text-foreground line-clamp-1">
+                              <p
+                                className="font-semibold text-sm line-clamp-1"
+                                style={{
+                                  color: '#141413',
+                                  fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                                }}
+                              >
                                 {item.event.title}
                               </p>
-                              <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                              <p
+                                className="text-xs mt-0.5"
+                                style={{
+                                  color: '#87867F',
+                                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                                }}
+                              >
                                 {item.registrationNumber}
                               </p>
                             </td>
-                            <td className="py-4 px-4 whitespace-nowrap text-xs text-muted-foreground">
+                            <td
+                              className="py-4 px-4 whitespace-nowrap text-xs"
+                              style={{ color: '#87867F' }}
+                            >
                               {formatDate(item.event.startDate)}
                             </td>
                             <td className="py-4 px-4 whitespace-nowrap">
-                              <Badge
-                                variant={
-                                  item.status === 'CHECKED_IN'
-                                    ? 'default'
-                                    : item.status === 'REGISTERED'
-                                      ? 'secondary'
-                                      : item.status === 'WAITING_PAYMENT'
-                                        ? 'outline'
-                                        : 'destructive'
-                                }
-                                className="text-[10px] px-1.5 py-0"
+                              <span
+                                className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                                style={{
+                                  background: statusStyle.bg,
+                                  color: statusStyle.color,
+                                  border: `1px solid ${statusStyle.border}`,
+                                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                                }}
                               >
-                                {item.status}
-                              </Badge>
+                                {statusStyle.label}
+                              </span>
                             </td>
                             <td className="py-4 px-4 whitespace-nowrap">
                               {item.status === 'CHECKED_IN' ? (
-                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <span
+                                  className="text-xs font-semibold flex items-center gap-1"
+                                  style={{ color: '#788C5D' }}
+                                >
                                   <CheckCircle2 className="w-3.5 h-3.5" /> Hadir
                                 </span>
                               ) : (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <span
+                                  className="text-xs flex items-center gap-1"
+                                  style={{ color: '#87867F' }}
+                                >
                                   <Clock className="w-3.5 h-3.5" /> Belum Hadir
                                 </span>
                               )}
                             </td>
                             <td className="py-4 pl-4 text-right whitespace-nowrap">
                               {canDownloadCert ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 px-2 flex items-center gap-1 text-xs"
-                                  asChild
+                                <a
+                                  href={item.certificates[0].downloadUrl}
+                                  download
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200"
+                                  style={{
+                                    color: '#D97757',
+                                    borderColor: 'rgba(217,119,87,0.3)',
+                                    background: 'rgba(217,119,87,0.05)',
+                                  }}
                                 >
-                                  <a
-                                    href={item.certificates[0].downloadUrl}
-                                    download
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <FileDown className="w-3.5 h-3.5" /> Unduh
-                                  </a>
-                                </Button>
+                                  <FileDown className="w-3.5 h-3.5" /> Unduh
+                                </a>
                               ) : (
-                                <span className="text-xs text-muted-foreground">-</span>
+                                <span className="text-xs" style={{ color: '#D1CFC5' }}>
+                                  —
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -285,8 +530,8 @@ export default async function ParticipantDashboard() {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

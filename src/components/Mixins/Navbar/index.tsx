@@ -21,9 +21,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { navlinks } from './constant/navLinks';
+import { EventSearch } from './EventSearch';
 
-// Initials helper
-const getInitials = (name: string) =>
+interface MeResponse {
+  isAdmin: boolean;
+}
+
+interface NavbarUserDropdownProps {
+  user: { name: string; email: string; image?: string | null };
+  scrolled: boolean;
+  isAdmin: boolean;
+}
+
+const getInitials = (name: string): string =>
   name
     ? name
         .split(' ')
@@ -33,12 +43,7 @@ const getInitials = (name: string) =>
         .toUpperCase()
     : 'U';
 
-// Auth section (shared desktop + mobile)
-const NavbarUserDropdown: FC<{
-  user: { name: string; email: string; image?: string | null };
-  scrolled: boolean;
-  isAdmin: boolean;
-}> = ({ user, scrolled, isAdmin }) => {
+const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({ user, scrolled, isAdmin }) => {
   const router = useRouter();
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/participant/dashboard';
 
@@ -52,7 +57,7 @@ const NavbarUserDropdown: FC<{
       router.push('/');
       router.refresh();
     },
-    onError: (err: any) => toast.error(err.message || 'Terjadi kesalahan.'),
+    onError: (err: Error) => toast.error(err.message || 'Terjadi kesalahan.'),
   });
 
   return (
@@ -61,38 +66,49 @@ const NavbarUserDropdown: FC<{
         <Button
           variant="ghost"
           className={cn(
-            'relative h-9 w-9 rounded-full ring-2 transition-all',
-            scrolled ? 'ring-slate-200 hover:ring-indigo-300' : 'ring-white/30 hover:ring-white/60'
+            'relative h-9 w-9 rounded-full ring-2 transition-all p-0',
+            scrolled ? 'ring-[#D1CFC5] hover:ring-[#D97757]' : 'ring-white/30 hover:ring-white/60'
           )}
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || undefined} alt={user.name} />
-            <AvatarFallback className="bg-indigo-600 text-white text-xs font-bold">
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
+            <AvatarFallback
+              style={{ background: '#D97757', color: '#FFFFFF' }}
+              className="text-xs font-bold"
+            >
               {getInitials(user.name)}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 rounded-xl" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal px-3 py-2">
-          <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+      <DropdownMenuContent
+        className="w-56 rounded-xl border border-[#D1CFC5] shadow-md"
+        style={{ background: '#FFFFFF' }}
+        align="end"
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal px-3 py-2.5">
+          <p className="text-sm font-semibold text-[#141413] truncate">{user.name}</p>
+          <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-[#E3DACC]" />
         <DropdownMenuItem asChild>
-          <Link href={dashboardHref as Route} className="cursor-pointer flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
+          <Link
+            href={dashboardHref as Route}
+            className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+          >
+            <LayoutDashboard className="h-4 w-4" />
             Dashboard
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-[#E3DACC]" />
         <DropdownMenuItem
           variant="destructive"
-          className="cursor-pointer"
+          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm"
           disabled={isPending}
           onClick={() => handleLogout()}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="h-4 w-4" />
           {isPending ? 'Keluar...' : 'Keluar'}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -106,10 +122,9 @@ const Navbar: FC = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Server-side role check — RBAC uses roles[] relation, not session.user.role string
-  const { data: meData } = useQuery<{ isAdmin: boolean }>({
+  const { data: meData } = useQuery<MeResponse>({
     queryKey: ['auth-me'],
-    queryFn: () => fetch('/api/auth/me').then((r) => r.json()),
+    queryFn: () => fetch('/api/auth/me').then((r) => r.json() as Promise<MeResponse>),
     enabled: !!session?.user,
     staleTime: 5 * 60 * 1000,
   });
@@ -121,52 +136,41 @@ const Navbar: FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => setIsOpen(false), [pathname]);
 
-  const isMenuActive = (path: string) => {
+  const isMenuActive = (path: string): boolean => {
     if (pathname === '/' && path === '/') return true;
     return pathname !== '/' && path !== '/' && pathname.includes(path);
   };
-
-  const navLinkClass = (path: string) =>
-    cn(
-      'relative px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center',
-      'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-300',
-      scrolled
-        ? 'text-slate-600 hover:text-indigo-600 after:bg-indigo-600'
-        : 'text-white/80 hover:text-white after:bg-white',
-      isMenuActive(path)
-        ? scrolled
-          ? 'text-indigo-600 after:w-full'
-          : 'text-white font-semibold after:w-full'
-        : 'after:w-0'
-    );
 
   return (
     <>
       <header
         className={cn(
           'fixed top-0 left-0 w-full z-50 transition-all duration-300',
-          scrolled ? 'bg-white/95 backdrop-blur-md border-b border-slate-100' : 'bg-transparent'
+          scrolled ? 'bg-[#FFFFFF]/96 backdrop-blur-md border-b border-[#E3DACC]' : 'bg-transparent'
         )}
       >
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 gap-4">
             {/* Logo */}
             <Link
               href="/"
               aria-label="SITIVENT"
               className="inline-flex items-center gap-2 shrink-0"
             >
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white font-black text-sm shadow-sm">
+              <span
+                className="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-sm"
+                style={{ background: '#D97757', color: '#FFFFFF' }}
+              >
                 S
               </span>
               <span
                 className={cn(
                   'font-extrabold text-lg tracking-tight transition-colors duration-300',
-                  scrolled ? 'text-slate-900' : 'text-white'
+                  scrolled ? 'text-[#141413]' : 'text-white'
                 )}
+                style={{ fontFamily: 'ui-serif, Georgia, serif' }}
               >
                 SITIVENT
               </span>
@@ -175,14 +179,30 @@ const Navbar: FC = () => {
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center gap-1">
               {navlinks.map((link) => (
-                <Link key={link.path} href={link.path as Route} className={navLinkClass(link.path)}>
+                <Link
+                  key={link.path}
+                  href={link.path as Route}
+                  className={cn(
+                    'relative px-3 py-2 text-sm font-medium transition-colors duration-200',
+                    'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-300',
+                    scrolled
+                      ? 'text-[#3D3D3A] hover:text-[#D97757] after:bg-[#D97757]'
+                      : 'text-white/80 hover:text-white after:bg-white',
+                    isMenuActive(link.path)
+                      ? scrolled
+                        ? 'text-[#D97757] after:w-full'
+                        : 'text-white font-semibold after:w-full'
+                      : 'after:w-0'
+                  )}
+                >
                   {link.title}
                 </Link>
               ))}
             </nav>
 
-            {/* Desktop CTA */}
+            {/* Desktop right: search + auth */}
             <div className="hidden lg:flex items-center gap-2">
+              <EventSearch scrolled={scrolled} />
               {session?.user ? (
                 <NavbarUserDropdown user={session.user} scrolled={scrolled} isAdmin={isAdmin} />
               ) : (
@@ -192,7 +212,7 @@ const Navbar: FC = () => {
                     className={cn(
                       'text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200',
                       scrolled
-                        ? 'text-slate-600 hover:text-indigo-600'
+                        ? 'text-[#3D3D3A] hover:text-[#D97757]'
                         : 'text-white/80 hover:text-white'
                     )}
                   >
@@ -200,7 +220,8 @@ const Navbar: FC = () => {
                   </Link>
                   <Link
                     href={'/register' as Route}
-                    className="text-sm font-bold px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                    className="text-sm font-bold px-5 py-2.5 rounded-xl text-white shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                    style={{ background: '#D97757' }}
                   >
                     Daftar
                   </Link>
@@ -215,7 +236,7 @@ const Navbar: FC = () => {
               aria-label="Toggle navigation"
               className={cn(
                 'lg:hidden p-2 rounded-lg transition-colors',
-                scrolled ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'
+                scrolled ? 'text-[#3D3D3A] hover:bg-[#F0EEE6]' : 'text-white hover:bg-white/10'
               )}
             >
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -233,7 +254,10 @@ const Navbar: FC = () => {
             : 'opacity-0 -translate-y-2 pointer-events-none'
         )}
       >
-        <div className="mx-4 mt-1 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+        <div
+          className="mx-4 mt-1 rounded-2xl shadow-xl overflow-hidden border"
+          style={{ background: '#FFFFFF', borderColor: '#E3DACC' }}
+        >
           <nav className="p-3">
             <ul className="space-y-0.5">
               {navlinks.map((link) => (
@@ -243,9 +267,14 @@ const Navbar: FC = () => {
                     className={cn(
                       'flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors',
                       isMenuActive(link.path)
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'font-semibold'
+                        : 'text-[#3D3D3A] hover:text-[#141413]'
                     )}
+                    style={
+                      isMenuActive(link.path)
+                        ? { background: '#F5E8E3', color: '#D97757' }
+                        : { backgroundColor: 'transparent' }
+                    }
                   >
                     {link.title}
                   </Link>
@@ -253,29 +282,39 @@ const Navbar: FC = () => {
               ))}
             </ul>
           </nav>
-          <div className="px-4 pb-4 pt-1 flex flex-col gap-2 border-t border-slate-50">
+
+          <div
+            className="px-4 pb-4 pt-2 flex flex-col gap-2 border-t"
+            style={{ borderColor: '#E3DACC' }}
+          >
             {session?.user ? (
               <>
                 <div className="flex items-center gap-3 px-2 py-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={session.user.image || undefined}
+                      src={session.user.image ?? undefined}
                       alt={session.user.name ?? ''}
                     />
-                    <AvatarFallback className="bg-indigo-600 text-white text-xs font-bold">
+                    <AvatarFallback
+                      style={{ background: '#D97757', color: '#FFF' }}
+                      className="text-xs font-bold"
+                    >
                       {getInitials(session.user.name ?? '')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 truncate">
+                    <p className="text-sm font-semibold text-[#141413] truncate">
                       {session.user.name}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                    <p className="text-xs text-[#87867F] font-mono truncate">
+                      {session.user.email}
+                    </p>
                   </div>
                 </div>
                 <Link
-                  href={(isAdmin ? '/admin' : '/participant/dashboard') as Route}
-                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  href={(isAdmin ? '/admin/dashboard' : '/participant/dashboard') as Route}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                  style={{ background: '#F5E8E3', color: '#D97757' }}
                 >
                   Dashboard
                 </Link>
@@ -284,13 +323,15 @@ const Navbar: FC = () => {
               <>
                 <Link
                   href={'/login' as Route}
-                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-[#3D3D3A] hover:text-[#141413] transition-colors"
+                  style={{ background: '#F0EEE6' }}
                 >
                   Masuk
                 </Link>
                 <Link
                   href={'/register' as Route}
-                  className="w-full text-center py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-bold text-white transition-colors"
+                  style={{ background: '#D97757' }}
                 >
                   Daftar
                 </Link>

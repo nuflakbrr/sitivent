@@ -261,3 +261,9 @@ html {
     }
   }
 }
+
+/* Warm palette hover — pure CSS, no JS handlers */
+.event-card:hover {
+  box-shadow: 0 12px 40px rgba(20, 20, 19, 0.12) !important;
+  border-color: #D97757 !important;
+}

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { LogOut, User, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,77 +18,89 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/lib/authClient';
 
-export default function ParticipantNavbarClient({
-  user,
-}: {
+interface Props {
   user: {
     name: string;
     email: string;
     image?: string | null;
   };
-}) {
+}
+
+const getInitials = (name: string): string =>
+  name
+    ? name
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : 'U';
+
+export default function ParticipantNavbarClient({ user }: Props) {
   const router = useRouter();
 
   const { mutate: handleLogout, isPending } = useMutation({
     mutationFn: async () => {
       const { error } = await signOut();
-      if (error) {
-        throw new Error('Gagal keluar dari sistem.');
-      }
+      if (error) throw new Error('Gagal keluar dari sistem.');
     },
     onSuccess: () => {
       toast.success('Berhasil keluar. Sampai jumpa!');
       router.push('/login');
       router.refresh();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Terjadi kesalahan saat keluar.');
     },
   });
 
-  const getInitials = (name: string) => {
-    return name
-      ? name
-          .split(' ')
-          .map((n) => n[0])
-          .slice(0, 2)
-          .join('')
-          .toUpperCase()
-      : 'U';
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Button
+          variant="ghost"
+          className="relative h-9 w-9 rounded-full p-0 ring-2 ring-[#D1CFC5] hover:ring-[#D97757] transition-all"
+        >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || undefined} alt={user.name} />
-            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
+            <AvatarFallback
+              style={{ background: '#D97757', color: '#FFFFFF' }}
+              className="text-xs font-bold"
+            >
+              {getInitials(user.name)}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-          </div>
+      <DropdownMenuContent
+        className="w-56 rounded-xl border shadow-md"
+        style={{ background: '#FFFFFF', borderColor: '#D1CFC5' }}
+        align="end"
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal px-3 py-2.5">
+          <p className="text-sm font-semibold text-[#141413] truncate">{user.name}</p>
+          <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
         <DropdownMenuItem asChild>
-          <Link href="/participant/dashboard" className="cursor-pointer flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+          <Link
+            href="/participant/dashboard"
+            className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
         <DropdownMenuItem
-          className="cursor-pointer text-destructive focus:text-destructive flex items-center"
+          variant="destructive"
+          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm"
           disabled={isPending}
           onClick={() => handleLogout()}
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{isPending ? 'Keluar...' : 'Keluar'}</span>
+          <LogOut className="h-4 w-4" />
+          {isPending ? 'Keluar...' : 'Keluar'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

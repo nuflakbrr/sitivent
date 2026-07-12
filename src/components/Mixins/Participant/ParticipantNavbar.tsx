@@ -2,32 +2,54 @@ import type { FC } from 'react';
 import Link from 'next/link';
 import ParticipantNavbarClient from '@/components/Mixins/Participant/ParticipantNavbarClient';
 
-type Props = {
+interface Props {
   user: {
     name: string;
     email: string;
     image?: string | null;
   };
-};
+}
 
 export const ParticipantNavbar: FC<Props> = ({ user }) => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <header
+      className="sticky top-0 z-50 w-full border-b"
+      style={{
+        background: 'rgba(255,255,255,0.97)',
+        backdropFilter: 'blur(12px)',
+        borderColor: '#E3DACC',
+      }}
+    >
       <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4">
+        {/* Left: logo + nav */}
         <div className="flex items-center gap-6">
-          <Link href="/participant/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold tracking-tight text-primary">SITIVENT</span>
+          <Link href="/participant/dashboard" className="inline-flex items-center gap-2">
+            <span
+              className="flex items-center justify-center w-7 h-7 rounded-md font-black text-xs shadow-sm"
+              style={{ background: '#D97757', color: '#FFFFFF' }}
+            >
+              S
+            </span>
+            <span
+              className="text-lg font-extrabold tracking-tight"
+              style={{ fontFamily: 'ui-serif, Georgia, serif', color: '#141413' }}
+            >
+              SITIVENT
+            </span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+
+          <nav className="hidden md:flex items-center gap-1">
             <Link
               href="/participant/dashboard"
-              className="transition-colors hover:text-foreground/80 text-foreground"
+              className="relative px-3 py-2 text-sm font-medium transition-colors duration-200 text-[#3D3D3A] hover:text-[#D97757]"
             >
               Dashboard
             </Link>
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Right: user dropdown */}
+        <div className="flex items-center gap-3">
           <ParticipantNavbarClient user={user} />
         </div>
       </div>
