@@ -162,7 +162,7 @@ const Footer: FC = () => {
             <span style={{ color: '#D97757', fontFamily: 'ui-monospace, monospace' }}>{year}</span>{' '}
             INDEVPRO. Seluruh hak cipta dilindungi undang-undang.
           </p>
-          <div className="flex gap-6">
+          {/* <div className="flex gap-6">
             <Link
               href={'/privacy' as Route}
               className="transition-colors"
@@ -181,7 +181,7 @@ const Footer: FC = () => {
             >
               Syarat &amp; Ketentuan
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

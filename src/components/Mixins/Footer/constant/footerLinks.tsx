@@ -10,7 +10,7 @@ export const footerLinks = [
     title: 'Platform',
     links: [
       { name: 'Jelajahi Event', href: '/events' },
-      { name: 'Cara Kerja', href: '#cara-kerja' },
+      { name: 'Galeri', href: '/gallery' },
       { name: 'Tentang Kami', href: '/about' },
       { name: 'Kontak', href: '/contact' },
     ],
@@ -18,10 +18,8 @@ export const footerLinks = [
   {
     title: 'Peserta',
     links: [
-      { name: 'Daftar Akun', href: '/register' },
+      { name: 'Daftar Gratis', href: '/register' },
       { name: 'Masuk', href: '/login' },
-      { name: 'Dashboard', href: '/dashboard' },
-      { name: 'Sertifikat', href: '/certificates' },
     ],
   },
   {
