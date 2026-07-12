@@ -3,65 +3,61 @@ import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, CalendarDays } from 'lucide-react';
 import Autoplay from 'embla-carousel-autoplay';
+import Image from 'next/image';
+
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
+import type { Event } from '@/interfaces/features/events';
+import { EventType } from '@/generated/prisma/enums';
 
-const slides = [
-  {
-    id: 1,
-    eyebrow: 'Workshop Terbaru',
-    headline: 'Kuasai Next.js 15 dari Nol hingga Deploy',
-    sub: 'Intensif 2 hari bersama praktisi industri. Sertifikat resmi tersedia.',
-    cta: 'Lihat Workshop',
-    href: '/events',
-    tag: 'Online',
-    tagColor: '#788C5D',
-    // Warm dark with clay bloom
-    bg: 'linear-gradient(135deg, #1A1410 0%, #2A1E14 100%)',
-    bloom: '#D97757',
-    accent: '#D97757',
-  },
-  {
-    id: 2,
-    eyebrow: 'Seminar Eksklusif',
-    headline: 'Karier di Bidang AI: Peluang & Tantangan 2025',
-    sub: 'Diskusi panel bersama engineer dari startup unicorn Indonesia.',
-    cta: 'Daftar Seminar',
-    href: '/events',
-    tag: 'Offline · Jakarta',
-    tagColor: '#3D3D3A',
-    // Deep slate with olive bloom
-    bg: 'linear-gradient(135deg, #141413 0%, #1F1E1B 100%)',
-    bloom: '#788C5D',
-    accent: '#788C5D',
-  },
-  {
-    id: 3,
-    eyebrow: 'Bootcamp Gratis',
-    headline: 'Belajar UI/UX Design Gratis Selama 30 Hari',
-    sub: 'Program intensif terbuka untuk semua. Kuota terbatas, daftar sekarang.',
-    cta: 'Daftar Gratis',
-    href: '/events',
-    tag: 'Gratis',
-    tagColor: '#D97757',
-    // Warm ivory tone with rust bloom
-    bg: 'linear-gradient(135deg, #1E1814 0%, #2C1F15 100%)',
-    bloom: '#B04A3F',
-    accent: '#D97757',
-  },
-];
+interface Props {
+  events: Event[];
+}
 
 const SLIDE_HEIGHT = 'clamp(420px, 60vh, 600px)';
 
 const autoplayPlugin = Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true });
 
-const HeroBanner: FC = () => {
+const DESIGNS = [
+  {
+    // 1. Oren (Orange/Clay)
+    bg: 'linear-gradient(135deg, #1F1510 0%, #2F1E15 100%)',
+    bloom: '#D97757',
+    accent: '#D97757',
+  },
+  {
+    // 2. Hijau (Green/Olive)
+    bg: 'linear-gradient(135deg, #121A15 0%, #1A281F 100%)',
+    bloom: '#788C5D',
+    accent: '#788C5D',
+  },
+  {
+    // 3. Biru Cyan (Cyan/Teal)
+    bg: 'linear-gradient(135deg, #0F171A 0%, #15252D 100%)',
+    bloom: '#06B6D4',
+    accent: '#06B6D4',
+  },
+  {
+    // 4. Kuning (Amber/Gold)
+    bg: 'linear-gradient(135deg, #1A1710 0%, #2A2415 100%)',
+    bloom: '#D9A757',
+    accent: '#D9A757',
+  },
+  {
+    // 5. Merah (Rust/Crimson)
+    bg: 'linear-gradient(135deg, #1E1111 0%, #2F1A1A 100%)',
+    bloom: '#B04A3F',
+    accent: '#B04A3F',
+  },
+];
+
+const HeroBanner: FC<Props> = ({ events }) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -73,6 +69,26 @@ const HeroBanner: FC = () => {
       api.off('select', onSelect);
     };
   }, [api]);
+
+  if (!events || events.length === 0) return null;
+
+  const slides = events.map((e, index) => {
+    const design = DESIGNS[index % DESIGNS.length];
+    return {
+      id: e.id,
+      eyebrow: e.category?.name || 'Event Terbaru',
+      headline: e.title,
+      sub: e.description,
+      cta: 'Lihat Event',
+      href: `/events/${e.slug}`,
+      tag: e.eventType === EventType.ONLINE ? 'Online' : 'Offline',
+      tagColor: design.accent,
+      bg: design.bg,
+      bloom: design.bloom,
+      accent: design.accent,
+      image: e.banner || null,
+    };
+  });
 
   const slide = slides[current];
 
@@ -115,62 +131,76 @@ const HeroBanner: FC = () => {
 
             {/* Content */}
             <div className="relative z-10 container mx-auto px-6 max-w-6xl h-full flex items-center">
-              <div className="max-w-2xl space-y-6 pt-28 pb-16">
-                {/* Eyebrow */}
-                <div className="flex items-center gap-3">
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center w-full pt-28 pb-16">
+                {/* Left col: texts */}
+                <div
+                  className={
+                    s.image ? 'col-span-12 md:col-span-7 space-y-6' : 'col-span-12 space-y-6'
+                  }
+                >
+                  {/* Eyebrow */}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                      style={{
+                        background: s.tagColor,
+                        color: '#FFFFFF',
+                        fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                      }}
+                    >
+                      {s.tag}
+                    </span>
+                    <span
+                      className="text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: 'rgba(240,238,230,0.7)' }}
+                    >
+                      {s.eyebrow}
+                    </span>
+                  </div>
+
+                  {/* Headline — editorial serif */}
+                  <h1
+                    className="leading-[1.1] tracking-tight line-clamp-2"
                     style={{
-                      background: s.tagColor,
-                      color: '#FFFFFF',
-                      fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                      fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                      fontWeight: 500,
+                      fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
+                      color: '#FAF9F5',
+                      letterSpacing: '-0.01em',
                     }}
                   >
-                    {s.tag}
-                  </span>
-                  <span
-                    className="text-xs font-semibold uppercase tracking-wider"
+                    {s.headline}
+                  </h1>
+
+                  <p
+                    className="text-sm md:text-base max-w-xl leading-relaxed line-clamp-2"
                     style={{ color: 'rgba(240,238,230,0.7)' }}
                   >
-                    {s.eyebrow}
-                  </span>
+                    {s.sub}
+                  </p>
+
+                  <div className="pt-1">
+                    <Link
+                      href={s.href as Route}
+                      className="inline-flex items-center gap-2 px-7 py-3.5 font-semibold rounded-xl text-sm transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+                      style={{
+                        background: s.accent,
+                        color: '#FFFFFF',
+                        boxShadow: `0 8px 24px ${s.accent}55`,
+                      }}
+                    >
+                      {s.cta}
+                      <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Headline — editorial serif */}
-                <h1
-                  className="leading-[1.1] tracking-tight"
-                  style={{
-                    fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
-                    fontWeight: 500,
-                    fontSize: 'clamp(1.9rem, 4.5vw, 3.25rem)',
-                    color: '#FAF9F5',
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {s.headline}
-                </h1>
-
-                <p
-                  className="text-base md:text-lg max-w-xl leading-relaxed"
-                  style={{ color: 'rgba(240,238,230,0.7)' }}
-                >
-                  {s.sub}
-                </p>
-
-                <div className="pt-1">
-                  <Link
-                    href={s.href as Route}
-                    className="inline-flex items-center gap-2 px-7 py-3.5 font-semibold rounded-xl text-sm transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
-                    style={{
-                      background: s.accent,
-                      color: '#FFFFFF',
-                      boxShadow: `0 8px 24px ${s.accent}55`,
-                    }}
-                  >
-                    {s.cta}
-                    <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-                  </Link>
-                </div>
+                {/* Right col: image */}
+                {s.image && (
+                  <div className="hidden md:block md:col-span-5 relative w-full aspect-4/3 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                    <Image src={s.image} alt={s.headline} fill priority className="object-cover" />
+                  </div>
+                )}
               </div>
             </div>
           </CarouselItem>

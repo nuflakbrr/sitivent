@@ -4,6 +4,7 @@ import HeroBanner from './_components/HeroBanner';
 import CategoryLinks from './_components/CategoryLinks';
 import FeaturedEvents from './_components/FeaturedEvents';
 import Features from './_components/Features';
+import Stats from './_components/Stats';
 import CTABanner from './_components/CTABanner';
 import Steps from './_components/Steps';
 import type { EventCategory } from '@/interfaces/features/event-categories';
@@ -24,6 +25,7 @@ export default async function HomePage() {
       take: 8,
       orderBy: { startDate: 'asc' },
       include: {
+        category: true,
         registrations: {
           where: { status: { not: 'CANCELLED' } },
           select: { id: true },
@@ -35,11 +37,15 @@ export default async function HomePage() {
     }),
   ]);
 
+  // Take minimum 3 and maximum 5 for HeroBanner, fallback if fewer
+  const heroEvents = events.slice(0, 5);
+
   return (
     <div className="w-full">
-      <HeroBanner />
+      {heroEvents.length >= 3 && <HeroBanner events={heroEvents as any} />}
       <CategoryLinks categories={categories as EventCategory[]} />
-      <FeaturedEvents events={events} />
+      <FeaturedEvents events={events as any} />
+      <Stats />
       <Features />
       <CTABanner />
       {/* <Steps /> */}

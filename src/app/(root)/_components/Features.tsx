@@ -1,11 +1,5 @@
 import type { FC } from 'react';
-import { Shield, Zap, Award } from 'lucide-react';
-
-const stats = [
-  { value: '50+', label: 'Event Aktif' },
-  { value: '2.000+', label: 'Peserta Terdaftar' },
-  { value: '1.500+', label: 'Sertifikat Diterbitkan' },
-];
+import { Shield, Zap, Award, BookOpen, Users, Infinity as InfinityIcon } from 'lucide-react';
 
 const highlights = [
   {
@@ -32,6 +26,30 @@ const highlights = [
     bg: 'rgba(61,61,58,0.05)',
     border: 'rgba(61,61,58,0.12)',
   },
+  {
+    icon: BookOpen,
+    title: 'Materi Berkualitas',
+    desc: 'Kurikulum event disusun terstruktur oleh instruktur berpengalaman.',
+    accent: '#06B6D4',
+    bg: 'rgba(6,182,212,0.07)',
+    border: 'rgba(6,182,212,0.2)',
+  },
+  {
+    icon: Users,
+    title: 'Komunitas Aktif',
+    desc: 'Grup diskusi eksklusif setelah event untuk kolaborasi berkelanjutan.',
+    accent: '#D9A757',
+    bg: 'rgba(217,167,87,0.07)',
+    border: 'rgba(217,167,87,0.2)',
+  },
+  {
+    icon: InfinityIcon,
+    title: 'Akses Selamanya',
+    desc: 'Rekaman sesi dan materi pembelajaran dapat diakses kapan saja.',
+    accent: '#B04A3F',
+    bg: 'rgba(176,74,63,0.07)',
+    border: 'rgba(176,74,63,0.2)',
+  },
 ];
 
 const Features: FC = () => {
@@ -41,34 +59,23 @@ const Features: FC = () => {
       className="py-16 border-t"
       style={{ background: '#FFFFFF', borderColor: '#E3DACC' }}
     >
-      <div className="container mx-auto px-4 max-w-6xl space-y-14">
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4 md:gap-8">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <div
-                className="text-3xl md:text-5xl font-medium"
-                style={{
-                  fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
-                  color: '#D97757',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {s.value}
-              </div>
-              <div
-                className="text-xs md:text-sm font-medium mt-2 uppercase tracking-wider"
-                style={{
-                  color: '#87867F',
-                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
-                  fontSize: '10px',
-                  letterSpacing: '0.07em',
-                }}
-              >
-                {s.label}
-              </div>
-            </div>
-          ))}
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Header Section */}
+        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
+          <h2
+            className="text-2xl md:text-4xl font-medium tracking-tight"
+            style={{
+              fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+              color: '#141413',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Kenapa Harus Ikut Event Disini?
+          </h2>
+          <p className="text-xs md:text-sm leading-relaxed" style={{ color: '#87867F' }}>
+            Temukan keunggulan platform kami yang dirancang khusus untuk mendukung pertumbuhan
+            karier dan keahlian teknologi Anda.
+          </p>
         </div>
 
         {/* Highlights */}
