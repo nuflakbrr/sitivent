@@ -33,6 +33,7 @@ model User {
   certificates       Certificate[]
   scannedAttendances Attendance[]   @relation("ScannerToAttendance")
   auditLogs          AuditLog[]
+  supportMessages    SupportMessage[]
 
   @@map("users")
 }
@@ -361,3 +362,21 @@ model EmailQueue {
 
   @@map("email_queues")
 }
+
+model SupportMessage {
+  id          String   @id @default(cuid())
+  email       String
+  phone       String
+  name        String
+  title       String
+  category    String
+  chronology  String   @map("chronology") @db.Text
+  status      String   @default("PENDING") // PENDING, PROCESS, RESOLVED
+  userId      String?  @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("support_messages")
+}
+

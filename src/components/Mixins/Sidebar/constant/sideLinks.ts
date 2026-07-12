@@ -10,6 +10,9 @@ import {
   DollarSign,
   type LucideIcon,
   Grid2x2,
+  Image,
+  BookOpen,
+  MessageCircle,
 } from 'lucide-react';
 
 type SideLinks = {
@@ -64,6 +67,12 @@ export const sideLinks: SideLinks = {
           icon: Award,
           permission: 'certificates.read',
         },
+        {
+          title: 'Galeri',
+          url: 'master/galleries',
+          icon: Image,
+          permission: 'galleries.read',
+        },
       ],
     },
     {
@@ -101,7 +110,41 @@ export const sideLinks: SideLinks = {
       ],
     },
     {
-      title: 'Manajemen Sistem',
+      title: 'Publikasi',
+      url: 'publication',
+      hasChildren: true,
+      icon: BookOpen,
+      items: [
+        {
+          title: 'Artikel',
+          url: 'publication/articles',
+          icon: BookOpen,
+          permission: 'articles.read',
+        },
+        {
+          title: 'Testimoni',
+          url: 'publication/testimonies',
+          icon: MessageCircle,
+          permission: 'testimonies.read',
+        },
+      ],
+    },
+    {
+      title: 'Bantuan Pelanggan',
+      url: 'support',
+      hasChildren: true,
+      icon: MessageCircle,
+      items: [
+        {
+          title: 'Inbox',
+          url: 'support/messages',
+          icon: MessageCircle,
+          permission: 'messages.read',
+        },
+      ],
+    },
+    {
+      title: 'Manajemen',
       url: 'managements',
       hasChildren: true,
       icon: UserCog,
