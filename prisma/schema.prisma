@@ -151,6 +151,18 @@ enum EventStatus {
   COMPLETED
 }
 
+model EventCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  events      Event[]
+
+  @@map("event_categories")
+}
+
 model Event {
   id                   String      @id @default(cuid())
   title                String
@@ -172,6 +184,8 @@ model Event {
   createdAt            DateTime    @default(now()) @map("created_at")
   updatedAt            DateTime       @updatedAt @map("updated_at")
   deletedAt            DateTime?      @map("deleted_at")
+  categoryId           String?     @map("category_id")
+  category             EventCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   registrations        Registration[]
   certificates         Certificate[]
   certificateTemplate  CertificateTemplate?

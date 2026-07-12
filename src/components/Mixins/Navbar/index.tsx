@@ -1,18 +1,119 @@
 'use client';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
+import { useSession, signOut } from '@/lib/authClient';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { navlinks } from './constant/navLinks';
+
+// Initials helper
+const getInitials = (name: string) =>
+  name
+    ? name
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : 'U';
+
+// Auth section (shared desktop + mobile)
+const NavbarUserDropdown: FC<{
+  user: { name: string; email: string; image?: string | null };
+  scrolled: boolean;
+  isAdmin: boolean;
+}> = ({ user, scrolled, isAdmin }) => {
+  const router = useRouter();
+  const dashboardHref = isAdmin ? '/admin/dashboard' : '/participant/dashboard';
+
+  const { mutate: handleLogout, isPending } = useMutation({
+    mutationFn: async () => {
+      const { error } = await signOut();
+      if (error) throw new Error('Gagal keluar dari sistem.');
+    },
+    onSuccess: () => {
+      toast.success('Berhasil keluar. Sampai jumpa!');
+      router.push('/');
+      router.refresh();
+    },
+    onError: (err: any) => toast.error(err.message || 'Terjadi kesalahan.'),
+  });
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn(
+            'relative h-9 w-9 rounded-full ring-2 transition-all',
+            scrolled ? 'ring-slate-200 hover:ring-indigo-300' : 'ring-white/30 hover:ring-white/60'
+          )}
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.image || undefined} alt={user.name} />
+            <AvatarFallback className="bg-indigo-600 text-white text-xs font-bold">
+              {getInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56 rounded-xl" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal px-3 py-2">
+          <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
+          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={dashboardHref as Route} className="cursor-pointer flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          className="cursor-pointer"
+          disabled={isPending}
+          onClick={() => handleLogout()}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          {isPending ? 'Keluar...' : 'Keluar'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 const Navbar: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  // Server-side role check — RBAC uses roles[] relation, not session.user.role string
+  const { data: meData } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ['auth-me'],
+    queryFn: () => fetch('/api/auth/me').then((r) => r.json()),
+    enabled: !!session?.user,
+    staleTime: 5 * 60 * 1000,
+  });
+  const isAdmin = meData?.isAdmin ?? false;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -82,23 +183,29 @@ const Navbar: FC = () => {
 
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center gap-2">
-              <Link
-                href={'/login' as Route}
-                className={cn(
-                  'text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200',
-                  scrolled
-                    ? 'text-slate-600 hover:text-indigo-600'
-                    : 'text-white/80 hover:text-white'
-                )}
-              >
-                Masuk
-              </Link>
-              <Link
-                href={'/register' as Route}
-                className="text-sm font-bold px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
-              >
-                Daftar
-              </Link>
+              {session?.user ? (
+                <NavbarUserDropdown user={session.user} scrolled={scrolled} isAdmin={isAdmin} />
+              ) : (
+                <>
+                  <Link
+                    href={'/login' as Route}
+                    className={cn(
+                      'text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200',
+                      scrolled
+                        ? 'text-slate-600 hover:text-indigo-600'
+                        : 'text-white/80 hover:text-white'
+                    )}
+                  >
+                    Masuk
+                  </Link>
+                  <Link
+                    href={'/register' as Route}
+                    className="text-sm font-bold px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                  >
+                    Daftar
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile hamburger */}
@@ -147,18 +254,48 @@ const Navbar: FC = () => {
             </ul>
           </nav>
           <div className="px-4 pb-4 pt-1 flex flex-col gap-2 border-t border-slate-50">
-            <Link
-              href={'/login' as Route}
-              className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              Masuk
-            </Link>
-            <Link
-              href={'/register' as Route}
-              className="w-full text-center py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
-            >
-              Daftar
-            </Link>
+            {session?.user ? (
+              <>
+                <div className="flex items-center gap-3 px-2 py-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={session.user.image || undefined}
+                      alt={session.user.name ?? ''}
+                    />
+                    <AvatarFallback className="bg-indigo-600 text-white text-xs font-bold">
+                      {getInitials(session.user.name ?? '')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">
+                      {session.user.name}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  href={(isAdmin ? '/admin' : '/participant/dashboard') as Route}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={'/login' as Route}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href={'/register' as Route}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                >
+                  Daftar
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

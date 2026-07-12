@@ -9,6 +9,7 @@ import {
   Folder,
   DollarSign,
   type LucideIcon,
+  Grid2x2,
 } from 'lucide-react';
 
 type SideLinks = {
@@ -45,6 +46,12 @@ export const sideLinks: SideLinks = {
       hasChildren: true,
       icon: Folder,
       items: [
+        {
+          title: 'Kategori Event',
+          url: 'master/event-categories',
+          icon: Grid2x2,
+          permission: 'event.categories.read',
+        },
         {
           title: 'Manajemen Event',
           url: 'master/events',

@@ -21,6 +21,12 @@ async function main() {
     { name: 'user.delete', description: 'Menghapus pengguna' },
     { name: 'admin.access', description: 'Mengakses dashboard admin' },
 
+    // --- Event Categories Module ---
+    { name: 'event.categories.read', description: 'Melihat daftar event kategori' },
+    { name: 'event.categories.create', description: 'Membuat event kategori baru' },
+    { name: 'event.categories.update', description: 'Mengubah data event kategori' },
+    { name: 'event.categories.delete', description: 'Menghapus event kategori' },
+
     // --- Event Module ---
     { name: 'events.read', description: 'Melihat daftar event' },
     { name: 'events.create', description: 'Membuat event baru' },
