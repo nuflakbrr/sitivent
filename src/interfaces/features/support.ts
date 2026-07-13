@@ -24,6 +24,11 @@ export interface CreateSupportMessageInput {
 export interface SupportMessagesResponse {
   success: boolean;
   data?: SupportMessage[];
+  meta?: {
+    total: number;
+    page: number;
+    lastPage: number;
+  };
   error?: string;
 }
 

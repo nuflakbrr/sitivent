@@ -73,16 +73,43 @@ export async function createSupportMessageAction(
  * Admin action to fetch all support messages.
  * Requires "messages.read" permission.
  */
-export async function getSupportMessagesAction(): Promise<SupportMessagesResponse> {
-  const hasAccess = await verifyPermission('messages.read');
+export async function getSupportMessagesAction(
+  page: number = 1,
+  limit: number = 10,
+  search: string = '',
+  status: string = 'ALL'
+): Promise<SupportMessagesResponse> {
+  const hasAccess = await verifyPermission('support.read');
   if (!hasAccess) {
     return { success: false, error: 'Anda tidak memiliki akses ke data ini.' };
   }
 
   try {
-    const messages = await prisma.supportMessage.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(status && status !== 'ALL' ? { status } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' as const } },
+              { email: { contains: search, mode: 'insensitive' as const } },
+              { title: { contains: search, mode: 'insensitive' as const } },
+              { category: { contains: search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const [messages, total] = await Promise.all([
+      prisma.supportMessage.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.supportMessage.count({ where }),
+    ]);
 
     const mapped: SupportMessage[] = messages.map((m) => ({
       id: m.id,
@@ -101,6 +128,11 @@ export async function getSupportMessagesAction(): Promise<SupportMessagesRespons
     return {
       success: true,
       data: mapped,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      },
     };
   } catch (error) {
     console.error('Get Support Messages Error:', error);
@@ -119,7 +151,7 @@ export async function updateSupportMessageStatusAction(
   id: string,
   status: 'PENDING' | 'PROCESS' | 'RESOLVED'
 ): Promise<SupportMessageMutationResponse> {
-  const hasAccess = await verifyPermission('messages.read');
+  const hasAccess = await verifyPermission('support.update');
   if (!hasAccess) {
     return { success: false, error: 'Anda tidak memiliki akses untuk melakukan tindakan ini.' };
   }
