@@ -69,10 +69,10 @@ const EventForm: FC<Props> = ({ initialData }) => {
   // Auto generate slug from title when creating
   const eventTitle = form.watch('title');
   useEffect(() => {
-    if (!initialData && eventTitle) {
+    if (eventTitle) {
       form.setValue('slug', slugify(eventTitle), { shouldValidate: true });
     }
-  }, [eventTitle, initialData, form]);
+  }, [eventTitle, form]);
 
   const [isDragging, setIsDragging] = useState(false);
 
