@@ -80,6 +80,35 @@ export default async function ParticipantDashboard() {
 
   return (
     <div className="space-y-8 pb-10">
+      {/* Alert Email Belum Diverifikasi */}
+      {!session.user.emailVerified && (
+        <div
+          className="p-5 rounded-xl border flex items-start gap-3.5 transition-all duration-200"
+          style={{
+            background: 'rgba(217,119,87,0.06)',
+            borderColor: 'rgba(217,119,87,0.3)',
+            boxShadow: '0 2px 8px rgba(217,119,87,0.03)',
+          }}
+        >
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#D97757' }} />
+          <div className="space-y-1">
+            <h4
+              className="text-sm font-semibold"
+              style={{
+                fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                color: '#141413',
+              }}
+            >
+              Verifikasi Email Diperlukan
+            </h4>
+            <p className="text-xs leading-relaxed" style={{ color: '#87867F' }}>
+              Akun Anda belum memverifikasi alamat email. Silakan periksa kotak masuk utama
+              (Primary) atau folder spam/promosi email Anda untuk melakukan verifikasi akun.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div
         className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b"
