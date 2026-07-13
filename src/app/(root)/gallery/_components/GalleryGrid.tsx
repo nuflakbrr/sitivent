@@ -1,5 +1,5 @@
 'use client';
-import { useState, type FC } from 'react';
+import { useState, useEffect, useRef, useCallback, type FC } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Calendar, Tag } from 'lucide-react';
@@ -10,7 +10,56 @@ interface GalleryGridProps {
 }
 
 const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
+  const [items, setItems] = useState<Gallery[]>(initialItems);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(initialItems.length === 8);
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<Gallery | null>(null);
+
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  const loadNextPage = useCallback(async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const nextPage = page + 1;
+      const res = await fetch(`/api/gallery?page=${nextPage}&limit=8`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        const newItems = json.data;
+        if (newItems.length < 8) {
+          setHasMore(false);
+        }
+        setItems((prev) => [...prev, ...newItems]);
+        setPage(nextPage);
+      } else {
+        setHasMore(false);
+      }
+    } catch (e) {
+      console.error(e);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, hasMore, page]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, page, loading, loadNextPage]);
 
   const getBentoSpans = (index: number) => {
     const patterns = [
@@ -26,7 +75,7 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[180px]">
-        {initialItems.map((item, idx) => (
+        {items.map((item, idx) => (
           <div
             key={item.id}
             onClick={() => setSelectedItem(item)}
@@ -65,6 +114,16 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
           </div>
         ))}
       </div>
+
+      {/* Infinite Scroll Trigger Indicator */}
+      {hasMore && (
+        <div ref={observerRef} className="flex justify-center items-center py-10 mt-6">
+          <div
+            className="w-6 h-6 border-2 border-t-transparent animate-spin rounded-full"
+            style={{ borderColor: '#D97757', borderTopColor: 'transparent' }}
+          />
+        </div>
+      )}
 
       {/* Lightbox / Detail Modal */}
       <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>

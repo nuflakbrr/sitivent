@@ -24,6 +24,7 @@ export default async function PublicGalleryPage() {
         },
       },
     },
+    take: 10,
   });
 
   // 2. Map data to client schema
