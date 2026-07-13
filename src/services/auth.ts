@@ -177,6 +177,19 @@ export async function registerAction(values: RegisterValues): Promise<AuthRespon
       user: User;
     }
     const body = data as SignUpResponseBody;
+
+    // Send Welcome Email
+    const { queueEmail } = await import('./emails');
+    const welcomeBody = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+        <h2 style="color: #D97757; font-family: serif;">Selamat Datang di SITIVENT!</h2>
+        <p>Halo ${body.user.name || body.user.email},</p>
+        <p>Akun Anda telah berhasil dibuat di SITIVENT. Temukan seminar, workshop, webinar, dan bootcamp teknologi terbaik bersama kami!</p>
+        <p>Terima kasih telah bergabung!</p>
+      </div>
+    `;
+    await queueEmail(body.user.email, 'Selamat Datang di SITIVENT', welcomeBody);
+
     return {
       success: true,
       data: { user: body.user },
@@ -188,5 +201,30 @@ export async function registerAction(values: RegisterValues): Promise<AuthRespon
       return { success: false, error: 'Email sudah terdaftar. Gunakan email lain.' };
     }
     return { success: false, error: 'Terjadi kesalahan saat registrasi.' };
+  }
+}
+
+/**
+ * Mengirim email notifikasi perubahan password
+ */
+export async function sendPasswordChangeNotificationEmail(
+  email: string,
+  name?: string
+): Promise<{ success: boolean }> {
+  try {
+    const { queueEmail } = await import('./emails');
+    const body = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+        <h2 style="color: #D97757; font-family: serif;">Keamanan Akun: Password Diubah</h2>
+        <p>Halo ${name || email},</p>
+        <p>Password untuk akun SITIVENT Anda baru saja berhasil diperbarui/diubah.</p>
+        <p>Jika Anda tidak merasa melakukan perubahan ini, segera hubungi tim dukungan kami.</p>
+      </div>
+    `;
+    await queueEmail(email, 'Notifikasi Perubahan Password - SITIVENT', body);
+    return { success: true };
+  } catch (error) {
+    console.error('Send Password Change Email Error:', error);
+    return { success: false };
   }
 }

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { loginSchema } from '@/schemas/auth';
 import type { LoginValues } from '@/services/auth';
 import { signIn } from '@/lib/authClient';
+import type { Route } from 'next';
 
 const LoginForm: FC = () => {
   const router = useRouter();
@@ -118,6 +119,15 @@ const LoginForm: FC = () => {
         {form.formState.errors.password && (
           <p className={errorBase}>{form.formState.errors.password.message}</p>
         )}
+      </div>
+
+      <div className="flex justify-end -mt-2">
+        <Link
+          href={'/forgot-password' as Route}
+          className="text-xs font-semibold text-[#D97757] hover:underline"
+        >
+          Lupa password?
+        </Link>
       </div>
 
       {/* Submit */}

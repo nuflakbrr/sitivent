@@ -49,15 +49,6 @@ export async function scanQrCode(qrToken: string) {
 
     const event = registration.event;
 
-    // 3. Validasi event OFFLINE
-    if (event.eventType !== 'OFFLINE') {
-      return {
-        success: false,
-        error: 'ONLINE_EVENT',
-        message: 'Presensi hanya dilakukan pada event OFFLINE.',
-      };
-    }
-
     // 4. Validasi event selesai
     if (event.status === 'COMPLETED' || new Date() > new Date(event.endDate)) {
       return {
@@ -98,6 +89,26 @@ export async function scanQrCode(qrToken: string) {
         },
       }),
     ]);
+
+    // Send Attendance Verification Email
+    try {
+      const { queueEmail } = await import('./emails');
+      const emailBody = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif;">Kehadiran Event Terverifikasi</h2>
+          <p>Halo ${registration.user.name || registration.user.email},</p>
+          <p>Kehadiran Anda pada event <strong>${event.title}</strong> (${event.eventType}) telah berhasil diverifikasi pada pukul <strong>${new Date().toLocaleTimeString('id-ID')}</strong>.</p>
+          <p>Terima kasih atas partisipasi Anda!</p>
+        </div>
+      `;
+      await queueEmail(
+        registration.user.email,
+        `Kehadiran Terverifikasi: ${event.title}`,
+        emailBody
+      );
+    } catch (err) {
+      console.error('Queue Attendance Email Error:', err);
+    }
 
     revalidatePath('/admin/attendance/scan');
 

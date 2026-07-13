@@ -239,7 +239,7 @@ export async function generateCertificatesForEvent(eventId: string) {
       const reg = registrations[i];
       const seqIndex = i + 1;
       const certificateNumber = resolveNumber(formatTemplate, reg, seqIndex);
-      const existing = reg.certificates[0] || null;
+      const existing = reg.certificates || null;
 
       if (existing) {
         // Update if format has changed or if template background changed

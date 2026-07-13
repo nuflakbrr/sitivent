@@ -8,8 +8,8 @@ const getTransporter = () => {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!user || !pass) {
-    console.warn('⚠️ SMTP credentials not found. Emails will be simulated.');
+  if (!user || !pass || user.includes('username@ethereal.email') || pass === 'password') {
+    console.warn('⚠️ SMTP credentials not found or placeholder used. Emails will be simulated.');
     return null;
   }
 
@@ -80,7 +80,16 @@ export async function processEmailQueue() {
 
       try {
         if (!transporter) {
-          throw new Error('SMTP credentials not configured.');
+          console.log(
+            `\n========================================\n[SIMULATED EMAIL]\nTo: ${email.to}\nSubject: ${email.subject}\nBody: ${email.body}\n========================================\n`
+          );
+          await prisma.emailQueue.update({
+            where: { id: email.id },
+            data: {
+              status: EmailStatus.SENT,
+            },
+          });
+          continue;
         }
 
         let parsedAttachments = [];
@@ -92,8 +101,14 @@ export async function processEmailQueue() {
           }
         }
 
+        const senderEmail =
+          process.env.SMTP_FROM ||
+          (process.env.SMTP_USER && process.env.SMTP_USER.includes('@')
+            ? process.env.SMTP_USER
+            : 'onboarding@resend.dev');
+
         await transporter.sendMail({
-          from: `"SITIVENT" <${process.env.SMTP_USER || 'no-reply@sitivent.com'}>`,
+          from: `"SITIVENT" <${senderEmail}>`,
           to: email.to,
           subject: email.subject,
           html: email.body,
@@ -122,5 +137,18 @@ export async function processEmailQueue() {
     console.error('Process Email Queue Error:', error);
   } finally {
     isProcessing = false;
+    try {
+      const hasMore = await prisma.emailQueue.findFirst({
+        where: {
+          status: { in: [EmailStatus.PENDING, EmailStatus.FAILED] },
+          attempts: { lt: 3 },
+        },
+      });
+      if (hasMore) {
+        void processEmailQueue();
+      }
+    } catch (err) {
+      console.error('Check remaining emails error:', err);
+    }
   }
 }

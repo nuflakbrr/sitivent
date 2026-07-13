@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldGroup } from '@/components/ui/field';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { authClient } from '@/lib/authClient';
-import { updateUserEmail } from '@/services/profile';
 
 const translateAuthError = (message: string): string => {
   if (!message) return '';
@@ -55,7 +54,7 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
 
   // Profile fields state
   const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
+  const email = user.email;
 
   // Password fields state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -69,9 +68,6 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
   // Active tab state
   const [activeTab, setActiveTab] = useState<string>('profile');
 
-  // Confirmation modal state
-  const [isConfirmEmailOpen, setIsConfirmEmailOpen] = useState(false);
-
   // Submit profile details update
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,34 +75,9 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
       toast.error('Nama lengkap tidak boleh kosong.');
       return;
     }
-    if (!email.trim()) {
-      toast.error('Alamat email tidak boleh kosong.');
-      return;
-    }
 
-    const hasEmailChanged = email.trim().toLowerCase() !== user.email.toLowerCase();
-
-    if (hasEmailChanged) {
-      setIsConfirmEmailOpen(true);
-      return;
-    }
-
-    await executeSaveProfile(false);
-  };
-
-  const executeSaveProfile = async (hasEmailChanged: boolean) => {
     startProfileTransition(async () => {
       try {
-        let emailUpdateResult = false;
-        if (hasEmailChanged) {
-          const res = await updateUserEmail(email.trim().toLowerCase());
-          if (!res.success) {
-            toast.error(res.error || 'Gagal memperbarui email.');
-            return;
-          }
-          emailUpdateResult = true;
-        }
-
         // Update name
         const { error } = await authClient.updateUser({
           name: name.trim(),
@@ -117,16 +88,9 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
             error.message ? translateAuthError(error.message) : 'Gagal memperbarui nama profil.'
           );
         } else {
-          if (emailUpdateResult) {
-            toast.success('Profil & Email berhasil diperbarui. Silakan login kembali.');
-            await authClient.signOut();
-            router.push('/login');
-            router.refresh();
-          } else {
-            toast.success('Profil Anda berhasil diperbarui!');
-            router.refresh();
-            onClose();
-          }
+          toast.success('Profil Anda berhasil diperbarui!');
+          router.refresh();
+          onClose();
         }
       } catch (err) {
         console.error(err);
@@ -164,6 +128,9 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
             error.message ? translateAuthError(error.message) : 'Gagal memperbarui kata sandi.'
           );
         } else {
+          const { sendPasswordChangeNotificationEmail } = await import('@/services/auth');
+          void sendPasswordChangeNotificationEmail(user.email, user.name);
+
           toast.success('Kata sandi berhasil diperbarui! Silakan login kembali.');
           setCurrentPassword('');
           setNewPassword('');
@@ -208,17 +175,7 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
                   {/* Email Input */}
                   <Field>
                     <FieldLabel>Email</FieldLabel>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Masukkan alamat email"
-                      required
-                      disabled={isProfilePending}
-                    />
-                    <p className="text-[10px] text-muted-foreground/80 mt-1">
-                      Anda akan otomatis log out setelah mengubah email.
-                    </p>
+                    <Input type="email" value={email} required disabled />
                   </Field>
 
                   {/* Name Input */}
@@ -243,10 +200,7 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
                   >
                     Batal
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={isProfilePending || name.trim() === '' || email.trim() === ''}
-                  >
+                  <Button type="submit" disabled={isProfilePending || name.trim() === ''}>
                     {isProfilePending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -343,18 +297,6 @@ const UserSettingsModal: FC<UserSettingsModalProps> = ({ isOpen, onClose, user }
           </Tabs>
         </div>
       </Modal>
-
-      <AlertModal
-        isOpen={isConfirmEmailOpen}
-        onClose={() => setIsConfirmEmailOpen(false)}
-        onConfirm={() => {
-          setIsConfirmEmailOpen(false);
-          executeSaveProfile(true);
-        }}
-        loading={isProfilePending}
-        title="Apakah Anda yakin ingin mengubah email?"
-        desc="Anda akan otomatis keluar dari sesi saat ini dan harus login kembali menggunakan alamat email baru."
-      />
     </>
   );
 };

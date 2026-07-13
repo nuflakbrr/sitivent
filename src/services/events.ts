@@ -150,6 +150,47 @@ export async function getEventById(id: string): Promise<EventResponse> {
 }
 
 /**
+ * Helper to notify all users about a new published event
+ */
+async function sendEventNewsletter(event: Event) {
+  try {
+    const { queueEmail } = await import('./emails');
+    const users = await prisma.user.findMany({
+      where: { banned: false },
+      select: { email: true, name: true },
+    });
+
+    const dateStr = new Date(event.startDate).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    for (const u of users) {
+      const body = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif;">Event Baru Tersedia!</h2>
+          <p>Halo ${u.name || u.email},</p>
+          <p>Ada event menarik baru di SITIVENT! Segera daftarkan diri Anda.</p>
+          <div style="background-color: white; border: 1px solid #E3DACC; border-radius: 8px; padding: 16px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #141413; font-family: serif;">${event.title}</h3>
+            <p style="margin: 6px 0; font-size: 14px; color: #3D3D3A;"><strong>Tanggal:</strong> ${dateStr}</p>
+            <p style="margin: 6px 0; font-size: 14px; color: #3D3D3A;"><strong>Lokasi:</strong> ${event.location}</p>
+            <p style="margin: 6px 0; font-size: 14px; color: #3D3D3A;"><strong>Tipe:</strong> ${event.eventType}</p>
+          </div>
+          <p style="margin: 24px 0; text-align: center;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/events/${event.slug}" style="background-color: #D97757; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Lihat Detail & Daftar</a>
+          </p>
+        </div>
+      `;
+      await queueEmail(u.email, `Event Baru: ${event.title}`, body);
+    }
+  } catch (error) {
+    console.error('Send Event Newsletter Error:', error);
+  }
+}
+
+/**
  * Membuat Event baru
  */
 export async function createEvent(values: EventValues): Promise<EventResponse> {
@@ -197,6 +238,10 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
         categoryId: data.categoryId,
       },
     });
+
+    if (event.status === EventStatus.PUBLISHED) {
+      void sendEventNewsletter(event);
+    }
 
     revalidatePath(BASE_PATH);
 
@@ -286,6 +331,10 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
         categoryId: data.categoryId,
       },
     });
+
+    if (isPublishing) {
+      void sendEventNewsletter(event);
+    }
 
     revalidatePath(BASE_PATH);
     revalidatePath(`${BASE_PATH}/${id}`);

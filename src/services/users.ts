@@ -10,6 +10,22 @@ import { userSchema } from '@/schemas/users';
 import type { User, UserResponse, UserPaginationResponse } from '@/interfaces/features/users';
 import { verifyPermission } from './security';
 
+interface AdminAuthApi {
+  createUser(args: {
+    body: {
+      email: string;
+      password?: string;
+      name: string;
+    };
+  }): Promise<{ user: { id: string } }>;
+  setUserPassword(args: {
+    body: {
+      userId: string;
+      newPassword: string;
+    };
+  }): Promise<void>;
+}
+
 const BASE_PATH = '/admin/managements/users';
 
 export type UserValues = z.infer<typeof userSchema>;
@@ -136,7 +152,7 @@ export async function createUser(values: UserValues): Promise<UserResponse> {
     }
 
     // Gunakan Better Auth API untuk membuat user (menangani password hashing)
-    const result = await auth.api.createUser({
+    const result = await (auth.api as unknown as AdminAuthApi).createUser({
       body: {
         email: validatedFields.data.email,
         password: values.password,
@@ -212,7 +228,7 @@ export async function updateUser(id: string, values: UserValues): Promise<UserRe
 
     // Reset password jika diisi (hanya superadmin yang bisa mengirim field ini)
     if (validatedFields.data.newPassword && validatedFields.data.newPassword.trim() !== '') {
-      await auth.api.setUserPassword({
+      await (auth.api as unknown as AdminAuthApi).setUserPassword({
         body: {
           userId: id,
           newPassword: validatedFields.data.newPassword,
