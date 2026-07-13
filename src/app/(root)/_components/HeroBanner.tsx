@@ -135,7 +135,7 @@ const HeroBanner: FC<Props> = ({ events }) => {
                 {/* Left col: texts */}
                 <div
                   className={
-                    s.image ? 'col-span-12 md:col-span-7 space-y-6' : 'col-span-12 space-y-6'
+                    s.image ? 'col-span-12 md:col-span-6 space-y-6' : 'col-span-12 space-y-6'
                   }
                 >
                   {/* Eyebrow */}
@@ -172,12 +172,11 @@ const HeroBanner: FC<Props> = ({ events }) => {
                     {s.headline}
                   </h1>
 
-                  <p
-                    className="text-sm md:text-base max-w-xl leading-relaxed line-clamp-2"
+                  <div
+                    className="text-sm md:text-base max-w-xl leading-relaxed line-clamp-3"
                     style={{ color: 'rgba(240,238,230,0.7)' }}
-                  >
-                    {s.sub}
-                  </p>
+                    dangerouslySetInnerHTML={{ __html: s.sub }}
+                  />
 
                   <div className="pt-1">
                     <Link
@@ -197,7 +196,7 @@ const HeroBanner: FC<Props> = ({ events }) => {
 
                 {/* Right col: image */}
                 {s.image && (
-                  <div className="hidden md:block md:col-span-5 relative w-full aspect-4/3 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                  <div className="hidden md:block md:col-span-6 relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                     <Image src={s.image} alt={s.headline} fill priority className="object-cover" />
                   </div>
                 )}
