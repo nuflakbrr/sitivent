@@ -36,6 +36,7 @@ import { signOut } from '@/lib/authClient';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
 import UserSettingsModal from './UserSettingsModal';
+import AlertModal from '@/components/Common/Modals/AlertModal';
 
 export function UserSetting({
   user,
@@ -50,6 +51,7 @@ export function UserSetting({
   const router = useRouter();
   const { setTheme, theme } = useTheme();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const { mutate: handleLogout, isPending } = useMutation({
     mutationFn: async () => {
@@ -132,12 +134,11 @@ export function UserSetting({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => handleLogout()}
-              disabled={isPending}
+              onClick={() => setIsLogoutModalOpen(true)}
               className="text-destructive focus:text-destructive cursor-pointer"
             >
               <LogOut className="size-4" />
-              {isPending ? 'Keluar...' : 'Log out'}
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -146,6 +147,14 @@ export function UserSetting({
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         user={user}
+      />
+      <AlertModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={() => handleLogout()}
+        loading={isPending}
+        title="Keluar dari Sistem"
+        desc="Apakah Anda yakin ingin keluar dari akun Anda?"
       />
     </SidebarMenu>
   );

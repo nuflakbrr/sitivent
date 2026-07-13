@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { navlinks } from './constant/navLinks';
 import { EventSearch } from './EventSearch';
+import AlertModal from '@/components/Common/Modals/AlertModal';
 
 interface MeResponse {
   isAdmin: boolean;
@@ -46,6 +47,7 @@ const getInitials = (name: string): string =>
 const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({ user, scrolled, isAdmin }) => {
   const router = useRouter();
   const dashboardHref = isAdmin ? '/admin/dashboard' : '/participant/dashboard';
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const { mutate: handleLogout, isPending } = useMutation({
     mutationFn: async () => {
@@ -61,58 +63,68 @@ const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({ user, scrolled, isAdm
   });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            'relative h-9 w-9 rounded-full ring-2 transition-all p-0',
-            scrolled ? 'ring-[#D1CFC5] hover:ring-[#D97757]' : 'ring-white/30 hover:ring-white/60'
-          )}
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image ?? undefined} alt={user.name} />
-            <AvatarFallback
-              style={{ background: '#D97757', color: '#FFFFFF' }}
-              className="text-xs font-bold"
-            >
-              {getInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 rounded-xl border border-[#D1CFC5] shadow-md"
-        style={{ background: '#FFFFFF' }}
-        align="end"
-        forceMount
-      >
-        <DropdownMenuLabel className="font-normal px-3 py-2.5">
-          <p className="text-sm font-semibold text-[#141413] truncate">{user.name}</p>
-          <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-[#E3DACC]" />
-        <DropdownMenuItem asChild>
-          <Link
-            href={dashboardHref as Route}
-            className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className={cn(
+              'relative h-9 w-9 rounded-full ring-2 transition-all p-0',
+              scrolled ? 'ring-[#D1CFC5] hover:ring-[#D97757]' : 'ring-white/30 hover:ring-white/60'
+            )}
           >
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-[#E3DACC]" />
-        <DropdownMenuItem
-          variant="destructive"
-          className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm"
-          disabled={isPending}
-          onClick={() => handleLogout()}
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.image ?? undefined} alt={user.name} />
+              <AvatarFallback
+                style={{ background: '#D97757', color: '#FFFFFF' }}
+                className="text-xs font-bold"
+              >
+                {getInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-56 rounded-xl border border-[#D1CFC5] shadow-md"
+          style={{ background: '#FFFFFF' }}
+          align="end"
+          forceMount
         >
-          <LogOut className="h-4 w-4" />
-          {isPending ? 'Keluar...' : 'Keluar'}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuLabel className="font-normal px-3 py-2.5">
+            <p className="text-sm font-semibold text-[#141413] truncate">{user.name}</p>
+            <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-[#E3DACC]" />
+          <DropdownMenuItem asChild>
+            <Link
+              href={dashboardHref as Route}
+              className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-[#E3DACC]" />
+          <DropdownMenuItem
+            variant="destructive"
+            className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm"
+            onClick={() => setIsLogoutModalOpen(true)}
+          >
+            <LogOut className="h-4 w-4" />
+            Keluar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={() => handleLogout()}
+        loading={isPending}
+        title="Keluar dari Sistem"
+        desc="Apakah Anda yakin ingin keluar dari akun Anda?"
+      />
+    </>
   );
 };
 
