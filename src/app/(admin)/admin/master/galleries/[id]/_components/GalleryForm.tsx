@@ -1,16 +1,21 @@
 'use client';
-import { useEffect, useState, type FC } from 'react';
+import { useState, type FC, useEffect } from 'react';
+import { Trash, Image as ImageIcon, ArrowLeft } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import type { Gallery } from '@/interfaces/features/galleries';
+import { usePermission } from '@/providers/PermissionProvider';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import Heading from '@/components/Common/Heading';
+import AlertModal from '@/components/Common/Modals/AlertModal';
 import {
   Select,
   SelectContent,
@@ -18,22 +23,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { createGallery, updateGallery, getGalleryById } from '@/services/galleries';
-import { getAllEvents } from '@/services/events';
+import { Switch } from '@/components/ui/switch';
 import { uploadImage } from '@/services/uploads';
+import { createGallery, updateGallery, deleteGallery } from '@/services/galleries';
+import { getAllEvents } from '@/services/events';
 import { gallerySchema, type GalleryValues } from '@/schemas/galleries';
 import ImageUpload from './ImageUpload';
+import DragOverlay from './DragOverlay';
 import type { Route } from 'next';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-interface GalleryFormProps {
-  id: string;
-}
+type Props = {
+  initialData: Gallery | null;
+};
 
-const GalleryForm: FC<GalleryFormProps> = ({ id }) => {
+const GalleryForm: FC<Props> = ({ initialData }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isNew = id === 'new';
+  const { hasPermission } = usePermission();
+
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  const isNew = !initialData;
+  const title = initialData ? 'Ubah Foto' : 'Tambah Foto';
+  const description = initialData
+    ? 'Perbarui detail foto galeri.'
+    : 'Tambahkan dokumentasi foto baru ke galeri.';
+  const action = initialData ? 'Simpan Perubahan' : 'Tambah Foto';
 
   // Fetch list of events for dropdown selection
   const { data: events = [] } = useQuery({
@@ -41,45 +59,32 @@ const GalleryForm: FC<GalleryFormProps> = ({ id }) => {
     queryFn: () => getAllEvents(),
   });
 
-  // Fetch existing gallery item if modifying
-  const { data: existing, isLoading } = useQuery({
-    queryKey: ['gallery-item', id],
-    queryFn: () => getGalleryById(id),
-    enabled: !isNew,
-  });
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<GalleryValues>({
+  const form = useForm<GalleryValues>({
     resolver: zodResolver(gallerySchema),
     defaultValues: {
-      title: '',
-      description: '',
-      imageUrl: '',
-      featured: false,
-      eventId: null,
+      title: initialData?.title || '',
+      description: initialData?.description || '',
+      imageUrl: initialData?.imageUrl || '',
+      featured: initialData?.featured || false,
+      eventId: initialData?.eventId || null,
     },
   });
 
   useEffect(() => {
-    if (existing?.data) {
-      reset({
-        title: existing.data.title,
-        description: existing.data.description || '',
-        imageUrl: existing.data.imageUrl,
-        featured: existing.data.featured,
-        eventId: existing.data.eventId || null,
+    if (initialData) {
+      form.reset({
+        title: initialData.title,
+        description: initialData.description || '',
+        imageUrl: initialData.imageUrl,
+        featured: initialData.featured,
+        eventId: initialData.eventId || null,
       });
     }
-  }, [existing, reset]);
+  }, [initialData, form]);
 
-  const { mutate, isPending } = useMutation({
+  const submitMutation = useMutation({
     mutationFn: (values: GalleryValues) =>
-      isNew ? createGallery(values) : updateGallery(id, values),
+      isNew ? createGallery(values) : updateGallery(initialData.id, values),
     onSuccess: (res) => {
       if (!res.success) {
         toast.error(res.error || 'Terjadi kesalahan.');
@@ -92,12 +97,26 @@ const GalleryForm: FC<GalleryFormProps> = ({ id }) => {
     onError: () => toast.error('Terjadi kesalahan saat menyimpan.'),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteGallery(initialData!.id),
+    onSuccess: (res) => {
+      if (!res.success) {
+        toast.error(res.error || 'Gagal menghapus foto.');
+        return;
+      }
+      toast.success('Foto berhasil dihapus.');
+      queryClient.invalidateQueries({ queryKey: ['galleries'] });
+      router.push('/admin/master/galleries' as Route);
+    },
+    onError: () => toast.error('Terjadi kesalahan saat menghapus.'),
+  });
+
   const handleImageUpload = async (file: File) => {
     try {
       setIsUploading(true);
       const res = await uploadImage(file, 'galleries');
       if (res.success && res.url) {
-        setValue('imageUrl', res.url, { shouldValidate: true, shouldDirty: true });
+        form.setValue('imageUrl', res.url, { shouldValidate: true, shouldDirty: true });
         toast.success('Foto berhasil diunggah.');
       } else {
         toast.error(res.error || 'Gagal mengunggah foto.');
@@ -109,121 +128,201 @@ const GalleryForm: FC<GalleryFormProps> = ({ id }) => {
     }
   };
 
-  if (!isNew && isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent, onChange: (url: string) => void) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('File harus berupa gambar.');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Ukuran file maksimal 5MB.');
+        return;
+      }
+
+      const img = new window.Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const width = img.width;
+        const height = img.height;
+        URL.revokeObjectURL(img.src);
+
+        if (width < 400 || height < 400) {
+          toast.error(`Ukuran gambar terlalu kecil (${width}x${height}px). Minimal 400x400px.`);
+          return;
+        }
+
+        handleImageUpload(file);
+      };
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit((v) => mutate(v))} className="space-y-6 max-w-xl">
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="title">Judul Foto</FieldLabel>
-          <Controller
-            name="title"
-            control={control}
-            render={({ field }) => (
-              <Input id="title" placeholder="contoh: Sesi Pembukaan Seminar" {...field} />
-            )}
-          />
-          {errors.title && <FieldError>{errors.title.message}</FieldError>}
-        </Field>
+    <section className="space-y-6">
+      <AlertModal
+        isOpen={isAlertOpen}
+        onClose={() => setIsAlertOpen(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        loading={deleteMutation.isPending}
+      />
 
-        <Field>
-          <FieldLabel htmlFor="description">Deskripsi (opsional)</FieldLabel>
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                id="description"
-                placeholder="Tulis penjelasan singkat mengenai foto..."
-                className="h-24"
-                {...field}
-                value={field.value || ''}
-              />
-            )}
-          />
-          {errors.description && <FieldError>{errors.description.message}</FieldError>}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="eventId">Event Terkait (opsional)</FieldLabel>
-          <Controller
-            name="eventId"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value || 'none'}
-                onValueChange={(val) => field.onChange(val === 'none' ? null : val)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih event terkait..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Tidak ada</SelectItem>
-                  {events.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.eventId && <FieldError>{errors.eventId.message}</FieldError>}
-        </Field>
-
-        <Field className="flex items-center justify-between p-4 rounded-xl border bg-muted/20">
-          <div className="space-y-0.5">
-            <FieldLabel className="text-sm font-semibold">Tampilkan di Landing Page</FieldLabel>
-            <p className="text-xs text-muted-foreground">
-              Jadikan foto ini sebagai dokumentasi unggulan (Featured) pada Bento Grid Landing Page.
-            </p>
-          </div>
-          <Controller
-            name="featured"
-            control={control}
-            render={({ field }) => (
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            )}
-          />
-        </Field>
-
-        <Controller
-          name="imageUrl"
-          control={control}
-          render={({ field, fieldState }) => (
-            <div className="relative">
-              <ImageUpload
-                value={field.value}
-                isUploading={isUploading}
-                onUpload={handleImageUpload}
-                onSelect={(url: string) => field.onChange(url)}
-                onRemove={() => field.onChange('')}
-              />
-              {fieldState.invalid && <FieldError>{fieldState.error?.message}</FieldError>}
-            </div>
-          )}
-        />
-      </FieldGroup>
-
-      <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push('/admin/master/galleries' as Route)}
-        >
-          Batal
-        </Button>
-        <Button type="submit" disabled={isPending || isUploading}>
-          {isPending ? 'Menyimpan...' : 'Simpan Foto'}
-        </Button>
+      <div className="flex items-center justify-between">
+        <Heading title={title} description={description} />
+        {initialData && hasPermission('galleries.delete') && (
+          <Button
+            disabled={submitMutation.isPending || deleteMutation.isPending}
+            variant="destructive"
+            size="sm"
+            onClick={() => setIsAlertOpen(true)}
+            aria-label="Hapus Foto"
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        )}
       </div>
-    </form>
+      <Separator />
+
+      <form
+        onSubmit={form.handleSubmit((v) => submitMutation.mutate(v))}
+        className="space-y-8 w-full"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Kiri: Detail Informasi Foto */}
+          <div className="space-y-6">
+            <FieldGroup>
+              <Controller
+                name="title"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>
+                      Judul Foto <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Input {...field} placeholder="Masukkan judul foto dokumentasi" />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="description"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Deskripsi (opsional)</FieldLabel>
+                    <Textarea
+                      {...field}
+                      value={field.value || ''}
+                      placeholder="Tulis penjelasan singkat mengenai foto..."
+                      className="h-28"
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="eventId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Event Terkait (opsional)</FieldLabel>
+                    <Select
+                      value={field.value || 'none'}
+                      onValueChange={(val) => field.onChange(val === 'none' ? null : val)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih event terkait..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Tidak ada</SelectItem>
+                        {events.map((e) => (
+                          <SelectItem key={e.id} value={e.id}>
+                            {e.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="featured"
+                control={form.control}
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between items-center border p-4 rounded-xl"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <FieldLabel className="text-sm font-semibold">
+                        Tampilkan di Landing Page
+                      </FieldLabel>
+                      <span className="text-xs text-muted-foreground">
+                        Jadikan foto unggulan pada Bento Grid Landing Page.
+                      </span>
+                    </div>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </div>
+
+          {/* Kanan: Foto Galeri Upload */}
+          <div className="space-y-6">
+            <FieldGroup>
+              <Controller
+                name="imageUrl"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <div
+                    className="relative"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, field.onChange)}
+                  >
+                    <ImageUpload
+                      value={field.value}
+                      isUploading={isUploading}
+                      onUpload={handleImageUpload}
+                      onSelect={(url: string) => field.onChange(url)}
+                      onRemove={() => field.onChange('')}
+                    />
+                    <DragOverlay isDragging={isDragging} isReplacing={!!field.value} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </div>
+                )}
+              />
+            </FieldGroup>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-4 mt-6">
+          <Button variant="outline" type="button" asChild>
+            <Link href={'/admin/master/galleries' as Route}>Batal</Link>
+          </Button>
+          <Button type="submit" disabled={submitMutation.isPending || isUploading}>
+            {submitMutation.isPending ? 'Menyimpan...' : action}
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 };
 

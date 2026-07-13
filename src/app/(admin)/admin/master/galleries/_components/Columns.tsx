@@ -1,28 +1,20 @@
 'use client';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ChevronsUpDown, Star } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronsUpDown, Star, Search } from 'lucide-react';
 import Image from 'next/image';
 
 import type { Gallery } from '@/interfaces/features/galleries';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import ImagePreviewModal from '@/components/Common/Modals/ImagePreviewModal';
 import CellAction from './CellAction';
 
 const Columns: ColumnDef<Gallery>[] = [
   {
     accessorKey: 'imageUrl',
     header: 'Foto',
-    cell: ({ row }) => (
-      <div className="relative w-16 h-10 rounded-lg overflow-hidden border">
-        <Image
-          src={row.original.imageUrl}
-          alt={row.original.title}
-          fill
-          sizes="64px"
-          className="object-cover"
-        />
-      </div>
-    ),
+    cell: ({ row }) => <PhotoCell row={row} />,
   },
   {
     accessorKey: 'title',
@@ -36,7 +28,7 @@ const Columns: ColumnDef<Gallery>[] = [
       <div className="flex flex-col">
         <span className="font-semibold text-sm line-clamp-1">{row.original.title}</span>
         {row.original.event && (
-          <span className="text-xs text-muted-foreground line-clamp-1">
+          <span className="text-xs text-muted-foreground line-clamp-1 font-sans">
             Event: {row.original.event.title}
           </span>
         )}
@@ -75,5 +67,37 @@ const Columns: ColumnDef<Gallery>[] = [
     cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];
+
+const PhotoCell = ({ row }: { row: { original: Gallery } }) => {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const gallery = row.original;
+
+  return (
+    <>
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        imageSrc={gallery.imageUrl}
+        title={gallery.title}
+        aspectRatio="video"
+      />
+      <div
+        className="relative h-10 w-16 min-w-[64px] rounded-md overflow-hidden border bg-muted flex items-center justify-center cursor-zoom-in hover:ring-2 hover:ring-primary/20 transition-all group"
+        onClick={() => gallery.imageUrl && setIsPreviewOpen(true)}
+      >
+        <Image
+          src={gallery.imageUrl}
+          alt={gallery.title}
+          loading="lazy"
+          className="object-cover group-hover:scale-110 transition-transform duration-300"
+          fill
+        />
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Search className="h-4 w-4 text-white" />
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Columns;

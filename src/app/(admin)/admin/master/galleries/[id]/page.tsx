@@ -1,42 +1,30 @@
-'use client';
-import { use } from 'react';
-import { type FC } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import type { FC } from 'react';
+import { notFound } from 'next/navigation';
 
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import Heading from '@/components/Common/Heading';
+import type { Gallery } from '@/interfaces/features/galleries';
+import { getGalleryById } from '@/services/galleries';
 import GalleryForm from './_components/GalleryForm';
-import type { Route } from 'next';
 
-type PageProps = {
+type Props = {
   params: Promise<{ id: string }>;
 };
 
-const GalleryFormPage: FC<PageProps> = (props) => {
-  const params = use(props.params);
-  const isNew = params.id === 'new';
+const GalleryDetailCMS: FC<Props> = async ({ params }) => {
+  const { id } = await params;
+  const isEdit = id !== 'new';
 
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-4">
-        <Heading
-          title={isNew ? 'Tambah Foto' : 'Ubah Foto'}
-          description={
-            isNew ? 'Tambahkan dokumentasi foto baru ke galeri.' : 'Perbarui detail foto galeri.'
-          }
-        />
-        <Button variant="outline" asChild>
-          <Link href={'/admin/master/galleries' as Route}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Kembali
-          </Link>
-        </Button>
-      </div>
-      <Separator className="mb-6" />
-      <GalleryForm id={params.id} />
-    </section>
-  );
+  let initialData: Gallery | null = null;
+
+  if (isEdit) {
+    const result = await getGalleryById(id);
+    if (result.success && result.data) {
+      initialData = result.data as Gallery;
+    } else {
+      return notFound();
+    }
+  }
+
+  return <GalleryForm initialData={initialData} />;
 };
 
-export default GalleryFormPage;
+export default GalleryDetailCMS;
