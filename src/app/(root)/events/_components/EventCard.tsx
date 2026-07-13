@@ -159,39 +159,44 @@ export const EventCard: FC<EventCardProps> = ({ event, formattedStartDate }) => 
         <Separator style={{ borderColor: '#F0EEE6' }} />
         <div className="flex items-center justify-between">
           {/* Price tag */}
-          <div className="flex flex-col">
-            <span
-              className="text-[9px] font-bold uppercase tracking-widest font-mono"
-              style={{ color: '#87867F' }}
-            >
-              Biaya
-            </span>
-            {isFree ? (
-              <span className="font-extrabold text-lg mt-0.5" style={{ color: '#788C5D' }}>
-                Gratis
-              </span>
-            ) : (
-              <span className="font-extrabold text-lg mt-0.5" style={{ color: '#141413' }}>
-                {formatCurrency(event.price)}
-              </span>
-            )}
-          </div>
+          {event.status !== 'COMPLETED' && event.status !== 'CLOSED' && (
+            <>
+              <div className="flex flex-col">
+                <span
+                  className="text-[9px] font-bold uppercase tracking-widest font-mono"
+                  style={{ color: '#87867F' }}
+                >
+                  Biaya
+                </span>
+                {isFree ? (
+                  <span className="font-extrabold text-lg mt-0.5" style={{ color: '#788C5D' }}>
+                    Gratis
+                  </span>
+                ) : (
+                  <span className="font-extrabold text-lg mt-0.5" style={{ color: '#141413' }}>
+                    {formatCurrency(event.price)}
+                  </span>
+                )}
+              </div>
 
-          {/* Quota tag */}
-          <div className="flex flex-col items-end">
-            <span
-              className="text-[9px] font-bold uppercase tracking-widest font-mono"
-              style={{ color: '#87867F' }}
-            >
-              Sisa Kursi
-            </span>
-            <span
-              className="font-bold text-sm mt-0.5 flex items-center gap-1"
-              style={{ color: '#3D3D3A' }}
-            >
-              <Users className="h-3.5 w-3.5 opacity-60" style={{ color: '#D97757' }} /> {slotsLeft}
-            </span>
-          </div>
+              {/* Quota tag */}
+              <div className="flex flex-col items-end">
+                <span
+                  className="text-[9px] font-bold uppercase tracking-widest font-mono"
+                  style={{ color: '#87867F' }}
+                >
+                  Sisa Kursi
+                </span>
+                <span
+                  className="font-bold text-sm mt-0.5 flex items-center gap-1"
+                  style={{ color: '#3D3D3A' }}
+                >
+                  <Users className="h-3.5 w-3.5 opacity-60" style={{ color: '#D97757' }} />{' '}
+                  {slotsLeft}
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {event.status === 'PUBLISHED' ? (
@@ -213,12 +218,10 @@ export const EventCard: FC<EventCardProps> = ({ event, formattedStartDate }) => 
               borderColor: '#D1CFC5',
               color: '#87867F',
             }}
-            asChild
+            disabled
+            onClick={(e) => e.preventDefault()}
           >
-            <Link href={`/events/${event.slug}`} className="group-hover:gap-2.5 transition-all">
-              {event.status === 'COMPLETED' ? 'Event Selesai' : 'Pendaftaran Ditutup'}{' '}
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
+            {event.status === 'COMPLETED' ? 'Event Selesai' : 'Pendaftaran Ditutup'}{' '}
           </Button>
         )}
       </div>

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { EventType } from '@/generated/prisma/enums';
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Props {
   scrolled: boolean;
@@ -19,24 +20,15 @@ const EVENT_TYPE_LABEL: Record<EventType, string> = {
   [EventType.OFFLINE]: 'Offline',
 };
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState<T>(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
-}
-
 export const EventSearch: React.FC<Props> = ({ scrolled }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useDebounce('', 500);
   const [results, setResults] = useState<EventSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debouncedQuery = useDebounce(query, 300);
 
   const [isMac, setIsMac] = useState(false);
 
@@ -78,19 +70,20 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
     }
   }, [open]);
 
-  const closeSearch = () => {
+  const closeSearch = useCallback(() => {
     setOpen(false);
     setQuery('');
+    setDebouncedQuery('');
     setResults([]);
     setActiveIndex(-1);
-  };
+  }, [setDebouncedQuery]);
 
   const navigateTo = useCallback(
     (slug: string) => {
       router.push(`/events/${slug}`);
       closeSearch();
     },
-    [router]
+    [closeSearch, router]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -154,7 +147,10 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
               ref={inputRef}
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setDebouncedQuery(e.target.value);
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Ketik judul event yang ingin Anda cari..."
               className="flex-1 text-base text-[#141413] placeholder:text-[#87867F] outline-none bg-transparent"
@@ -188,6 +184,7 @@ export const EventSearch: React.FC<Props> = ({ scrolled }) => {
                       type="button"
                       onClick={() => {
                         setQuery(keyword);
+                        setDebouncedQuery(keyword);
                         inputRef.current?.focus();
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D1CFC5] text-xs font-medium text-[#3D3D3A] bg-white hover:border-[#D97757] hover:text-[#D97757] transition-all"

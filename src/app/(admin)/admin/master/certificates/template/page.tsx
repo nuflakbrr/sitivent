@@ -10,10 +10,12 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import Heading from '@/components/Common/Heading';
 import CertificateTemplateForm from './_components/CertificateTemplateForm';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function TemplateConfigPage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useDebounce<string>('', 500);
 
   const { data } = useQuery({
     queryKey: ['events-with-cert-enabled'],
@@ -22,7 +24,7 @@ export default function TemplateConfigPage() {
 
   const events = data?.data ?? [];
   const filteredEvents = events.filter((event: any) =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase())
+    event.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
   const selectedEvent = filteredEvents.find((e: any) => e.id === selectedEventId);
 
@@ -57,7 +59,10 @@ export default function TemplateConfigPage() {
                     type="text"
                     placeholder="Cari event..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setDebouncedSearchTerm(e.target.value);
+                    }}
                     className="pl-8"
                   />
                 </div>

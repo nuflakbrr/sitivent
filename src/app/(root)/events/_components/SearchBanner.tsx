@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const SearchBanner: FC = () => {
   const router = useRouter();
@@ -12,26 +13,33 @@ export const SearchBanner: FC = () => {
 
   const query = searchParams.get('q') || '';
   const [value, setValue] = useState(query);
+  const [debouncedValue, setDebouncedValue] = useDebounce(query, 500);
 
   // Sync search input state if query parameter changes externally
   useEffect(() => {
     setValue(query);
-  }, [query]);
+    setDebouncedValue(query);
+  }, [query, setDebouncedValue]);
 
-  // Debounce query parameter changes to trigger Server Component live update
+  // Sync debounced query parameter changes to URL
   useEffect(() => {
-    const handler = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set('q', value);
-      } else {
-        params.delete('q');
-      }
-      router.replace(`${pathname}?${params.toString()}` as any, { scroll: false });
-    }, 300);
+    const currentQ = searchParams.get('q') || '';
+    if (debouncedValue === currentQ) return;
 
-    return () => clearTimeout(handler);
-  }, [value, pathname, router, searchParams]);
+    const params = new URLSearchParams(searchParams.toString());
+    if (debouncedValue) {
+      params.set('q', debouncedValue);
+    } else {
+      params.delete('q');
+    }
+    router.replace(`${pathname}?${params.toString()}` as any, { scroll: false });
+  }, [debouncedValue, pathname, router, searchParams]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setValue(val);
+    setDebouncedValue(val);
+  };
 
   const triggerSearch = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -76,7 +84,7 @@ export const SearchBanner: FC = () => {
               type="text"
               placeholder="Cari event atau lokasi..."
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={(e) => e.key === 'Enter' && triggerSearch()}
               className="w-full pl-10 h-11 rounded-xl shadow-xs border-none text-white placeholder:text-[#87867F]"
               style={{ background: 'rgba(255,255,255,0.08)' }}

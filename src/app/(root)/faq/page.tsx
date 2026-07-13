@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Search, ChevronDown, HelpCircle, ArrowRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { siteMetadata } from '@/data/siteMetadata';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface FAQItem {
   id: string;
@@ -90,17 +91,18 @@ const FAQ_DATA: FAQItem[] = [
 
 const FAQPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useDebounce('', 500);
   const [selectedCategory, setSelectedCategory] = useState<string>('semua');
 
   const filteredFAQs = useMemo(() => {
     return FAQ_DATA.filter((faq) => {
       const matchesSearch =
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+        faq.question.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        faq.answer.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'semua' || faq.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [debouncedSearchQuery, selectedCategory]);
 
   return (
     <div
@@ -153,7 +155,10 @@ const FAQPage: FC = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setDebouncedSearchQuery(e.target.value);
+                }}
                 placeholder="Cari pertanyaan..."
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-transparent bg-white/10 text-white placeholder-[#87867F] text-sm outline-none transition-all duration-200 focus:bg-white focus:text-[#141413] focus:border-[#D97757]"
               />
