@@ -7,6 +7,7 @@ import Features from './_components/Features';
 import Stats from './_components/Stats';
 import CTABanner from './_components/CTABanner';
 import Steps from './_components/Steps';
+import GalleryBento from './_components/GalleryBento';
 import type { EventCategory } from '@/interfaces/features/event-categories';
 
 export const metadata: Metadata = {
@@ -46,6 +47,7 @@ export default async function HomePage() {
       <CategoryLinks categories={categories as EventCategory[]} />
       <FeaturedEvents events={events as any} />
       <Stats />
+      <GalleryBento />
       <Features />
       <CTABanner />
       {/* <Steps /> */}

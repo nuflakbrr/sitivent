@@ -560,6 +560,68 @@ async function main() {
     }
   }
 
+  // 9. Seed Galleries
+  console.log('  - Seeding galleries...');
+  const galleryItems = [
+    {
+      title: 'Sesi Pembukaan Seminar AI',
+      description: 'Suasana kemeriahan sesi pembukaan Seminar Teknologi & Inovasi 2026.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=60',
+      featured: true,
+      eventId: eventGratis1.id,
+    },
+    {
+      title: 'Workshop Flutter Praktis',
+      description: 'Peserta mencoba membuat aplikasi mobile pertama mereka dengan Flutter.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&auto=format&fit=crop&q=60',
+      featured: true,
+      eventId: eventGratis2.id,
+    },
+    {
+      title: 'Diskusi Panel Start-up',
+      description: 'Diskusi panel interaktif bersama pakar industri mengenai pendanaan startup.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=60',
+      featured: true,
+      eventId: eventGratis1.id,
+    },
+    {
+      title: 'Presentasi Finalis Kompetisi Hackathon',
+      description: 'Finalis mendemonstrasikan prototipe aplikasi IoT mereka di hadapan dewan juri.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=60',
+      featured: false,
+      eventId: eventBerbayar1.id,
+    },
+    {
+      title: 'Antusiasme Audien',
+      description: 'Audien antusias mendengarkan materi dari pembicara global.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=60',
+      featured: true,
+      eventId: eventGratis1.id,
+    },
+    {
+      title: 'Foto Bersama Panitia dan Pembicara',
+      description: 'Sesi dokumentasi foto bersama setelah penutupan event selesai.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&auto=format&fit=crop&q=60',
+      featured: false,
+      eventId: eventGratis1.id,
+    },
+  ];
+
+  for (const item of galleryItems) {
+    const existing = await prisma.gallery.findFirst({
+      where: { imageUrl: item.imageUrl },
+    });
+    if (!existing) {
+      await prisma.gallery.create({ data: item });
+    }
+  }
+
   console.log('✅ Seed completed successfully!');
   console.log('');
   console.log('📋 Akun yang tersedia (semua password: "password"):');

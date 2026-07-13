@@ -385,3 +385,23 @@ export async function publishEvent(id: string): Promise<EventResponse> {
     return { success: false, error: 'Gagal mempublikasikan event.' };
   }
 }
+
+/**
+ * Mengambil seluruh event untuk dropdown pilihan
+ */
+export async function getAllEvents(): Promise<{ id: string; title: string }[]> {
+  try {
+    const list = await prisma.event.findMany({
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        title: true,
+      },
+      orderBy: { title: 'asc' },
+    });
+    return list;
+  } catch (error) {
+    console.error('Get All Events Error:', error);
+    return [];
+  }
+}
