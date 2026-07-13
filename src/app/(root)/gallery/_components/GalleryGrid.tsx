@@ -41,10 +41,13 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
               className="object-cover group-hover:scale-102 transition-transform duration-500 ease-out"
             />
             {/* Hover visual cue */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
               <span
-                className="text-xs font-semibold px-4 py-2 rounded-full border bg-white/90 text-zinc-950 scale-90 group-hover:scale-100 transition-all duration-300"
-                style={{ borderColor: '#D1CFC5' }}
+                className="text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-full border bg-white text-zinc-950 shadow-md transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+                style={{
+                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                  borderColor: '#E3DACC',
+                }}
               >
                 Lihat Detail
               </span>

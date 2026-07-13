@@ -197,15 +197,15 @@ const FeaturedEvents: FC<Props> = ({ events }) => {
 
                   <div className="space-y-1.5 text-xs flex-1" style={{ color: '#87867F' }}>
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 shrink-0" style={{ color: '#D1CFC5' }} />
+                      <Calendar className="w-3.5 h-3.5 shrink-0" style={{ color: '#D97757' }} />
                       {formattedDate}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: '#D1CFC5' }} />
+                      <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: '#D97757' }} />
                       {event.startTime} WIB
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: '#D1CFC5' }} />
+                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: '#D97757' }} />
                       <span className="line-clamp-1">{event.location}</span>
                     </div>
                   </div>
