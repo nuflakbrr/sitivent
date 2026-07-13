@@ -13,27 +13,28 @@ datasource db {
 }
 
 model User {
-  id                 String         @id @default(uuid())
-  email              String         @unique
+  id                 String           @id @default(uuid())
+  email              String           @unique
   name               String?
-  emailVerified      Boolean        @default(false) @map("email_verified")
+  emailVerified      Boolean          @default(false) @map("email_verified")
   image              String?
-  createdAt          DateTime       @default(now()) @map("created_at")
-  updatedAt          DateTime       @updatedAt @map("updated_at")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
   role               String?
-  banned             Boolean?       @default(false)
-  banReason          String?        @map("ban_reason")
-  banExpires         DateTime?      @map("ban_expires")
-  roleId             String?        @map("role_id")
+  banned             Boolean?         @default(false)
+  banReason          String?          @map("ban_reason")
+  banExpires         DateTime?        @map("ban_expires")
+  roleId             String?          @map("role_id")
   sessions           Session[]
   accounts           Account[]
   roles              Role[]
   registrations      Registration[]
   verifiedPayments   Payment[]
   certificates       Certificate[]
-  scannedAttendances Attendance[]   @relation("ScannerToAttendance")
+  scannedAttendances Attendance[]     @relation("ScannerToAttendance")
   auditLogs          AuditLog[]
   supportMessages    SupportMessage[]
+  articles           Article[]
 
   @@map("users")
 }
@@ -365,18 +366,18 @@ model EmailQueue {
 }
 
 model SupportMessage {
-  id          String   @id @default(cuid())
-  email       String
-  phone       String
-  name        String
-  title       String
-  category    String
-  chronology  String   @map("chronology") @db.Text
-  status      String   @default("PENDING") // PENDING, PROCESS, RESOLVED
-  userId      String?  @map("user_id")
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(cuid())
+  email      String
+  phone      String
+  name       String
+  title      String
+  category   String
+  chronology String   @map("chronology") @db.Text
+  status     String   @default("PENDING") // PENDING, PROCESS, RESOLVED
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("support_messages")
 }
@@ -395,3 +396,26 @@ model Gallery {
   @@map("galleries")
 }
 
+model ArticleCategory {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  articles  Article[]
+
+  @@map("article_categories")
+}
+
+model Article {
+  id                String            @id @default(uuid())
+  title             String
+  content           String
+  cover             String?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  createdById       String?           @map("created_by_id")
+  createdBy         User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  articleCategories ArticleCategory[]
+
+  @@map("articles")
+}

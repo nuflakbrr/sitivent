@@ -111,19 +111,19 @@ export const sideLinks: SideLinks = {
     },
     {
       title: 'Publikasi',
-      url: 'publication',
+      url: 'publications',
       hasChildren: true,
       icon: BookOpen,
       items: [
         {
           title: 'Artikel',
-          url: 'publication/articles',
+          url: 'publications/articles',
           icon: BookOpen,
-          permission: 'articles.read',
+          permission: 'article.read',
         },
         {
           title: 'Testimoni',
-          url: 'publication/testimonies',
+          url: 'publications/testimonies',
           icon: MessageCircle,
           permission: 'testimonies.read',
         },

@@ -10,3 +10,5 @@ export const articleSchema = z.object({
     })
   ),
 });
+
+export type ArticleValues = z.infer<typeof articleSchema>;

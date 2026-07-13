@@ -28,10 +28,14 @@ async function main() {
     { name: 'event.categories.delete', description: 'Menghapus event kategori' },
 
     // --- Articles Module ---
-    { name: 'articles.read', description: 'Melihat daftar artikel' },
-    { name: 'articles.create', description: 'Membuat artikel baru' },
-    { name: 'articles.update', description: 'Mengubah data artikel' },
-    { name: 'articles.delete', description: 'Menghapus artikel' },
+    { name: 'article.read', description: 'Melihat daftar artikel' },
+    { name: 'article.create', description: 'Membuat artikel baru' },
+    { name: 'article.update', description: 'Mengubah data artikel' },
+    { name: 'article.delete', description: 'Menghapus artikel' },
+    { name: 'article.category.read', description: 'Melihat daftar kategori artikel' },
+    { name: 'article.category.create', description: 'Membuat kategori artikel baru' },
+    { name: 'article.category.update', description: 'Mengubah data kategori artikel' },
+    { name: 'article.category.delete', description: 'Menghapus kategori artikel' },
 
     // --- Galleries Module ---
     { name: 'galleries.read', description: 'Melihat daftar galeri' },
@@ -620,6 +624,46 @@ async function main() {
     if (!existing) {
       await prisma.gallery.create({ data: item });
     }
+  }
+
+  // 6. Seed Article Categories & Articles
+  console.log('  - Seeding article categories & articles...');
+  let catTips = await prisma.articleCategory.findFirst({
+    where: { name: 'Tips & Trik' },
+  });
+  if (!catTips) {
+    catTips = await prisma.articleCategory.create({
+      data: { name: 'Tips & Trik' },
+    });
+  }
+
+  let catNews = await prisma.articleCategory.findFirst({
+    where: { name: 'Berita & Pengumuman' },
+  });
+  if (!catNews) {
+    catNews = await prisma.articleCategory.create({
+      data: { name: 'Berita & Pengumuman' },
+    });
+  }
+
+  const articleExists = await prisma.article.findFirst({
+    where: { title: 'Tips Menghadiri Seminar Hybrid di SITIVENT' },
+  });
+
+  if (!articleExists && adminId) {
+    await prisma.article.create({
+      data: {
+        title: 'Tips Menghadiri Seminar Hybrid di SITIVENT',
+        content:
+          'Menghadiri seminar secara hybrid memerlukan persiapan baik dari segi teknis koneksi maupun kehadiran offline. Pastikan Anda memeriksa jenis tiket dan QR Code kehadiran Anda sebelum acara dimulai.',
+        cover:
+          'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=60',
+        createdById: adminId,
+        articleCategories: {
+          connect: [{ id: catTips.id }, { id: catNews.id }],
+        },
+      },
+    });
   }
 
   console.log('✅ Seed completed successfully!');

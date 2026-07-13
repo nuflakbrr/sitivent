@@ -33,3 +33,21 @@ export interface ArticlePaginationResponse {
   };
   error?: string;
 }
+
+export interface ArticleCategoryResponse {
+  success: boolean;
+  data?: ArticleCategory;
+  message?: string;
+  error?: string;
+}
+
+export interface ArticleCategoryPaginationResponse {
+  success: boolean;
+  data: ArticleCategory[];
+  meta: {
+    total: number;
+    page: number;
+    lastPage: number;
+  };
+  error?: string;
+}
