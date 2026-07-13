@@ -61,7 +61,7 @@ export const SearchBanner: FC = () => {
           <p
             className="text-xs font-bold uppercase tracking-widest mb-3"
             style={{
-              color: '#788C5D',
+              color: '#D97757',
               fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
             }}
           >
