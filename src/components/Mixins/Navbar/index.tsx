@@ -184,15 +184,15 @@ const Navbar: FC = () => {
                   href={link.path as Route}
                   className={cn(
                     'relative px-3 py-2 text-sm font-medium transition-colors duration-200',
-                    'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-300',
+                    'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-transform after:duration-300 after:origin-center',
                     scrolled
                       ? 'text-[#3D3D3A] hover:text-[#D97757] after:bg-[#D97757]'
                       : 'text-white/80 hover:text-white after:bg-white',
                     isMenuActive(link.path)
                       ? scrolled
-                        ? 'text-[#D97757] after:w-full'
-                        : 'text-white font-semibold after:w-full'
-                      : 'after:w-0'
+                        ? 'text-[#D97757] after:scale-x-100'
+                        : 'text-white font-semibold after:scale-x-100'
+                      : 'after:scale-x-0'
                   )}
                 >
                   {link.title}
