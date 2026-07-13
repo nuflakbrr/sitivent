@@ -36,6 +36,19 @@ const CategoryLinks: FC<CategoryLinksProps> = ({ categories }) => {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category');
 
+  // Dynamic helper to create target href maintaining existing params
+  const createCategoryHref = (categorySlug?: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('page'); // Reset pagination on category change
+    if (categorySlug) {
+      params.set('category', categorySlug);
+    } else {
+      params.delete('category');
+    }
+    const queryString = params.toString();
+    return (queryString ? `/events?${queryString}` : '/events') as Route;
+  };
+
   return (
     <div
       className="sticky z-30"
@@ -50,7 +63,7 @@ const CategoryLinks: FC<CategoryLinksProps> = ({ categories }) => {
         <div className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-hide">
           {/* "Semua" filter button */}
           <Link
-            href="/events"
+            href={createCategoryHref()}
             className={cn(
               'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200'
             )}
@@ -79,7 +92,7 @@ const CategoryLinks: FC<CategoryLinksProps> = ({ categories }) => {
             return (
               <Link
                 key={cat.id}
-                href={`/events?category=${cat.slug}` as Route}
+                href={createCategoryHref(cat.slug)}
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200"
                 style={
                   isActive

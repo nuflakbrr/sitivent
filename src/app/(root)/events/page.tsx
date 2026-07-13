@@ -10,7 +10,7 @@ import SearchBanner from './_components/SearchBanner';
 import EventCard from './_components/EventCard';
 
 type Props = {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; category?: string }>;
 };
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, category } = await searchParams;
 
   // 1. Define DB Filter criteria (Clean query builder)
   const where = {
@@ -28,6 +28,13 @@ export default async function EventsPage({ searchParams }: Props) {
       in: ['PUBLISHED' as const, 'CLOSED' as const, 'COMPLETED' as const],
     },
     deletedAt: null,
+    ...(category
+      ? {
+          category: {
+            slug: category,
+          },
+        }
+      : {}),
     ...(q
       ? {
           OR: [
