@@ -20,6 +20,7 @@ const ScannerClient: FC = () => {
     onSubmitToken,
     handleManualSubmit,
     handleFileChange,
+    handleStartScanning,
   } = useScanner();
 
   useEffect(() => {
@@ -102,6 +103,16 @@ const ScannerClient: FC = () => {
           color: inherit !important;
           margin: 4px 0 !important;
         }
+        #qr-scanner-widget {
+          width: 100% !important;
+          height: 100% !important;
+          border: none !important;
+        }
+        #qr-scanner-widget video {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
       `}</style>
 
       {/* Title block */}
@@ -113,7 +124,7 @@ const ScannerClient: FC = () => {
       </div>
 
       {/* Scanner Viewport */}
-      <div className="relative aspect-square w-full max-w-xs mx-auto rounded-3xl overflow-hidden bg-zinc-950 border-4 border-zinc-800 dark:border-zinc-900 shadow-xl flex flex-col items-center justify-center p-2 group">
+      <div className="relative aspect-square w-full max-w-xs mx-auto rounded-3xl overflow-hidden bg-zinc-950 border-4 border-zinc-800 dark:border-zinc-900 shadow-xl flex flex-col items-center justify-center p-0 group">
         {isScanning ? (
           <div id="qr-scanner-widget" className="w-full h-full bg-zinc-950" />
         ) : (
@@ -128,7 +139,7 @@ const ScannerClient: FC = () => {
 
             {isSecure ? (
               <Button
-                onClick={() => setIsScanning(true)}
+                onClick={handleStartScanning}
                 className="z-20 flex items-center gap-2 text-xs font-semibold px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md"
               >
                 <Camera className="h-4 w-4" /> Aktifkan Kamera

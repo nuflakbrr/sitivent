@@ -116,6 +116,27 @@ export const useScanner = () => {
     }
   };
 
+  const handleStartScanning = () => {
+    if (
+      typeof window !== 'undefined' &&
+      navigator.mediaDevices &&
+      navigator.mediaDevices.getUserMedia
+    ) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          stream.getTracks().forEach((track) => track.stop());
+          setIsScanning(true);
+        })
+        .catch((err) => {
+          console.error('Native camera access error:', err);
+          toast.error('Gagal mengakses kamera. Pastikan izin kamera diberikan di browser.');
+        });
+    } else {
+      toast.error('Browser Anda tidak mendukung akses kamera.');
+    }
+  };
+
   useEffect(() => {
     setIsSecure(window.isSecureContext);
   }, []);
@@ -130,5 +151,6 @@ export const useScanner = () => {
     onSubmitToken,
     handleManualSubmit,
     handleFileChange,
+    handleStartScanning,
   };
 };

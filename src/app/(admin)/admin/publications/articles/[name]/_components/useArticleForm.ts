@@ -8,11 +8,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import type { Article } from '@/interfaces/features/articles';
-import {
-  createArticle,
-  deleteArticleById,
-  updateArticleById,
-} from '@/services/articles';
+import { createArticle, deleteArticleById, updateArticleById } from '@/services/articles';
 import { deleteImage, deleteUploadDir, renameUploadDir, uploadImage } from '@/services/uploads';
 import { articleSchema, type ArticleValues } from '@/schemas/articles';
 import { slugify } from '@/lib/slugify';
