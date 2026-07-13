@@ -29,11 +29,36 @@ export const eventSchema = z.object({
 });
 
 export const refinedEventSchema = eventSchema
-  .refine((data) => data.registrationDeadline <= data.startDate, {
-    message: 'Batas pendaftaran tidak boleh melewati tanggal mulai event.',
-    path: ['registrationDeadline'],
-  })
-  .refine((data) => data.endDate >= data.startDate, {
-    message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
-    path: ['endDate'],
-  });
+  .refine(
+    (data) => {
+      const actualStart = new Date(data.startDate);
+      if (data.startTime) {
+        const [hours, minutes] = data.startTime.split(':').map(Number);
+        actualStart.setHours(hours || 0, minutes || 0, 0, 0);
+      }
+      return data.registrationDeadline <= actualStart;
+    },
+    {
+      message: 'Batas pendaftaran tidak boleh melewati tanggal mulai event.',
+      path: ['registrationDeadline'],
+    }
+  )
+  .refine(
+    (data) => {
+      const actualStart = new Date(data.startDate);
+      if (data.startTime) {
+        const [hours, minutes] = data.startTime.split(':').map(Number);
+        actualStart.setHours(hours || 0, minutes || 0, 0, 0);
+      }
+      const actualEnd = new Date(data.endDate);
+      if (data.endTime) {
+        const [hours, minutes] = data.endTime.split(':').map(Number);
+        actualEnd.setHours(hours || 0, minutes || 0, 0, 0);
+      }
+      return actualEnd >= actualStart;
+    },
+    {
+      message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+      path: ['endDate'],
+    }
+  );

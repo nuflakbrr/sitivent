@@ -110,22 +110,12 @@ const ImageCropperModal: FC<ImageCropperModalProps> = ({
       className="sm:max-w-5xl w-full"
     >
       <div className="mt-2 flex flex-col gap-6 w-full">
-        <div
-          className="relative w-full overflow-hidden rounded-xl bg-[#0a0a0a] border border-white/5 shadow-2xl"
-          style={{
-            // Gunakan rasio aktual gambar jika portrait/kecil, clamp antara 30vh dan 65vh
-            aspectRatio:
-              imageWidth > 0 && imageHeight > 0
-                ? `${imageWidth} / ${imageHeight}`
-                : `${containerAspectRatio}`,
-            minHeight: '200px',
-            maxHeight: '65vh',
-          }}
-        >
+        <div className="relative w-full overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-2xl h-[300px] sm:h-[450px] md:h-[500px] bg-[conic-gradient(#e5e7eb_25%,#ffffff_0_50%,#e5e7eb_0_75%,#ffffff_0)] dark:bg-[conic-gradient(#18181b_25%,#09090b_0_50%,#18181b_0_75%,#09090b_0)] bg-size-[20px_20px]">
           <Cropper
             key={currentAspectRatio || 'free'}
             ref={cropperRef}
             src={imageSrc}
+            imageRestriction={ImageRestriction.fitArea}
             stencilProps={{
               aspectRatio: currentAspectRatio,
               grid: true,
@@ -151,7 +141,7 @@ const ImageCropperModal: FC<ImageCropperModalProps> = ({
               };
             }}
             className="h-full w-full"
-            style={{ maxWidth: '100%', maxHeight: '100%' }}
+            style={{ maxWidth: '100%', maxHeight: '100%', background: 'transparent' }}
           />
         </div>
 

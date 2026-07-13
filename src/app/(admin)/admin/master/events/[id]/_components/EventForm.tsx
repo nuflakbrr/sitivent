@@ -144,6 +144,15 @@ const EventForm: FC<Props> = ({ initialData }) => {
     return d.toISOString().split('T')[0];
   };
 
+  const getTimeString = (date?: Date | null) => {
+    if (!date) return '00:00';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '00:00';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <section className="space-y-6">
       <AlertModal
@@ -534,50 +543,93 @@ const EventForm: FC<Props> = ({ initialData }) => {
                 />
               </div>
 
-              <Controller
-                name="registrationDeadline"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>
-                      Batas Akhir Pendaftaran <span className="text-red-600">*</span>
-                    </FieldLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          disabled={!canEdit}
-                          className={cn(
-                            'w-full justify-between text-left font-normal h-11 px-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-background text-zinc-900 dark:text-zinc-50 hover:bg-muted/50',
-                            !field.value && 'text-muted-foreground'
-                          )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  name="registrationDeadline"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>
+                        Batas Akhir Pendaftaran <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={!canEdit}
+                            className={cn(
+                              'w-full justify-between text-left font-normal h-11 px-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-background text-zinc-900 dark:text-zinc-50 hover:bg-muted/50',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            <span>
+                              {field.value
+                                ? formatLocalTime(field.value)
+                                : 'Pilih Batas Akhir Pendaftaran'}
+                            </span>
+                            <CalendarIcon className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0 bg-background border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-lg"
+                          align="start"
                         >
-                          <span>
-                            {field.value
-                              ? formatLocalTime(field.value)
-                              : 'Pilih Batas Akhir Pendaftaran'}
-                          </span>
-                          <CalendarIcon className="h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="w-auto p-0 bg-background border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-lg"
-                        align="start"
-                      >
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date || undefined)}
-                          disabled={(date) => date < new Date('1900-01-01')}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
+                          <Calendar
+                            mode="single"
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={(date) => {
+                              if (date) {
+                                const newDate = new Date(date);
+                                if (field.value) {
+                                  const current = new Date(field.value);
+                                  newDate.setHours(current.getHours());
+                                  newDate.setMinutes(current.getMinutes());
+                                } else {
+                                  newDate.setHours(0, 0, 0, 0);
+                                }
+                                field.onChange(newDate);
+                              } else {
+                                field.onChange(undefined);
+                              }
+                            }}
+                            disabled={(date) => date < new Date('1900-01-01')}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  name="registrationDeadline"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>
+                        Waktu Batas Akhir <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        type="time"
+                        disabled={!canEdit}
+                        value={getTimeString(field.value)}
+                        onChange={(e) => {
+                          const [hours, minutes] = e.target.value.split(':').map(Number);
+                          const newDate = field.value ? new Date(field.value) : new Date();
+                          newDate.setHours(hours || 0);
+                          newDate.setMinutes(minutes || 0);
+                          newDate.setSeconds(0);
+                          newDate.setMilliseconds(0);
+                          field.onChange(newDate);
+                        }}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </div>
 
               <Controller
                 name="banner"
