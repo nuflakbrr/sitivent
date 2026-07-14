@@ -12,7 +12,6 @@ export const footerLinks = [
       { name: 'Jelajahi Event', href: '/events' },
       { name: 'Galeri', href: '/gallery' },
       { name: 'Tentang Kami', href: '/about' },
-      { name: 'Kontak', href: '/contact' },
     ],
   },
   {

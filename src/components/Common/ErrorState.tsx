@@ -533,7 +533,7 @@ const ErrorState: FC<ErrorStateProps> = ({ code, error }) => {
             <p className="mt-4 text-center text-xs" style={{ color: '#87867F' }}>
               Butuh bantuan?{' '}
               <Link
-                href="/contact"
+                href="/help"
                 className="font-semibold hover:underline"
                 style={{ color: meta.errorColor }}
               >

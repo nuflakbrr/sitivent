@@ -21,6 +21,14 @@ export async function resolveLabel(id: string, parentSegment: string): Promise<s
         return event?.title || null;
       }
 
+      case 'articles': {
+        const article = await prisma.article.findUnique({
+          where: { id },
+          select: { title: true },
+        });
+        return article?.title || null;
+      }
+
       case 'certificates': {
         const cert = await prisma.certificate.findUnique({
           where: { id },

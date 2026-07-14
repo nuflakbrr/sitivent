@@ -654,6 +654,7 @@ async function main() {
     await prisma.article.create({
       data: {
         title: 'Tips Menghadiri Seminar Hybrid di SITIVENT',
+        slug: 'tips-menghadiri-seminar-hybrid-di-sitivent',
         content:
           'Menghadiri seminar secara hybrid memerlukan persiapan baik dari segi teknis koneksi maupun kehadiran offline. Pastikan Anda memeriksa jenis tiket dan QR Code kehadiran Anda sebelum acara dimulai.',
         cover:

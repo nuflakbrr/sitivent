@@ -245,8 +245,8 @@ const FAQPage: FC = () => {
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
-            <Link
-              href="/contact"
+            <a
+              href="/help"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-xs text-white shadow-md transition-all duration-200 active:scale-[0.98] hover:opacity-90"
               style={{
                 background: '#D97757',
@@ -254,7 +254,7 @@ const FAQPage: FC = () => {
             >
               Hubungi Kami
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </a>
             <a
               href={`mailto:${siteMetadata.email}`}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-xs transition-all duration-200 active:scale-[0.98] hover:bg-[#E3DACC]"

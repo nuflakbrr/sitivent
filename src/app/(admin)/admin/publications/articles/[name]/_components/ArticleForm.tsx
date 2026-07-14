@@ -148,6 +148,17 @@ const ArticleForm: FC<Props> = ({ initialData }) => {
                 )}
               />
 
+              <Field>
+                <FieldLabel>Slug Artikel (Auto-generated)</FieldLabel>
+                <Input
+                  value={currentTitle ? slugify(currentTitle) : ''}
+                  readOnly
+                  disabled
+                  className="bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed select-none"
+                  placeholder="slug-artikel-otomatis"
+                />
+              </Field>
+
               <Controller
                 name="content"
                 control={form.control}

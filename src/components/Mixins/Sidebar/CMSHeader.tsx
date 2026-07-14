@@ -34,6 +34,8 @@ const labelMapping: Record<string, string> = {
   roles: 'Jabatan',
   permissions: 'Hak Akses',
   new: 'Tambah',
+  publications: 'Publikasi',
+  articles: 'Artikel',
 };
 
 export function CMSHeader() {
@@ -66,6 +68,7 @@ export function CMSHeader() {
           'users',
           'roles',
           'permissions',
+          'articles',
         ];
         if (prevSegment && resolvableParents.includes(prevSegment)) {
           const label = await resolveLabel(segment, prevSegment);

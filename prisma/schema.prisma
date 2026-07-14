@@ -410,6 +410,7 @@ model ArticleCategory {
 model Article {
   id                String            @id @default(uuid())
   title             String
+  slug              String?           @unique
   content           String
   cover             String?
   createdAt         DateTime          @default(now()) @map("created_at")

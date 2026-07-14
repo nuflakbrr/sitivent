@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 
 import { genPageMetadata } from '@/app/seo';
 
@@ -135,64 +136,66 @@ const PrivacyPolicy: FC = () => {
       </div>
 
       {/* Body */}
-      <div className="max-w-4xl mx-auto px-6 py-14 lg:flex lg:gap-12">
-        {/* Sticky ToC — desktop */}
-        <aside className="hidden lg:block w-56 shrink-0">
-          <div
-            className="sticky top-20 rounded-2xl p-5 space-y-2"
-            style={{ background: '#F0EEE6', border: '1.5px solid #E3DACC' }}
-          >
-            <p
-              className="text-[10px] font-bold uppercase tracking-widest mb-3"
-              style={{
-                color: '#87867F',
-                fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
-              }}
-            >
-              Daftar Isi
-            </p>
+      <div className="container mx-auto px-4 max-w-6xl py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Content */}
+          <article className="lg:col-span-9 bg-white rounded-2xl border border-[#D1CFC5] p-6 md:p-10 shadow-sm space-y-12">
             {sections.map((s) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="block text-xs py-1 px-2 rounded-lg transition-colors hover:bg-[#E3DACC]"
-                style={{ color: '#3D3D3A' }}
-              >
-                {s.title}
-              </a>
+              <section key={s.id} id={s.id} className="scroll-mt-24">
+                <h2 className="font-serif text-2xl font-bold mb-4" style={{ color: '#141413' }}>
+                  {s.title}
+                </h2>
+                <div className="space-y-3">
+                  {s.content.map((para, i) => (
+                    <p key={i} className="text-base leading-relaxed" style={{ color: '#3D3D3A' }}>
+                      {para}
+                    </p>
+                  ))}
+                </div>
+                <div className="mt-8 h-px" style={{ background: '#E3DACC' }} />
+              </section>
             ))}
-          </div>
-        </aside>
 
-        {/* Content */}
-        <article className="flex-1 space-y-12">
-          {sections.map((s) => (
-            <section key={s.id} id={s.id} className="scroll-mt-8">
-              <h2 className="font-serif text-2xl font-bold mb-4" style={{ color: '#141413' }}>
-                {s.title}
-              </h2>
-              <div className="space-y-3">
-                {s.content.map((para, i) => (
-                  <p key={i} className="text-base leading-relaxed" style={{ color: '#3D3D3A' }}>
-                    {para}
-                  </p>
+            {/* Back links */}
+            <div className="flex flex-wrap gap-3 pt-4">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                style={{ color: '#87867F', border: '1.5px solid #E3DACC' }}
+              >
+                ← Kembali ke Beranda
+              </Link>
+            </div>
+          </article>
+
+          {/* Sticky ToC — desktop */}
+          <aside className="lg:col-span-3 lg:sticky lg:top-20 hidden lg:block space-y-6">
+            <div className="bg-white rounded-2xl border border-[#D1CFC5] p-5 shadow-xs">
+              <p
+                className="text-[10px] font-bold uppercase tracking-widest mb-4 border-b border-[#F0EEE6] pb-2"
+                style={{
+                  color: '#87867F',
+                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                }}
+              >
+                Daftar Isi
+              </p>
+              <ul className="space-y-3">
+                {sections.map((s) => (
+                  <li key={s.id}>
+                    <a
+                      href={`#${s.id}`}
+                      className="text-xs text-[#3D3D3A] hover:text-[#D97757] transition-all flex items-center gap-2 group font-semibold"
+                    >
+                      <ChevronRight className="w-3 h-3 text-[#D97757] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {s.title}
+                    </a>
+                  </li>
                 ))}
-              </div>
-              <div className="mt-8 h-px" style={{ background: '#E3DACC' }} />
-            </section>
-          ))}
-
-          {/* Back links */}
-          <div className="flex flex-wrap gap-3 pt-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-              style={{ color: '#87867F', border: '1.5px solid #E3DACC' }}
-            >
-              ← Kembali ke Beranda
-            </Link>
-          </div>
-        </article>
+              </ul>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );

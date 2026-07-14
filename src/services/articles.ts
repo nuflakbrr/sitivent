@@ -14,6 +14,7 @@ import type {
 } from '@/interfaces/features/articles';
 import { articleSchema } from '@/schemas/articles';
 import type { ArticleValues } from '@/schemas/articles';
+import { slugify } from '@/lib/utils';
 
 const BASE_PATH = '/admin/publications/articles';
 
@@ -25,7 +26,7 @@ export async function getArticles(
   limit: number = 10,
   search: string = ''
 ): Promise<ArticlePaginationResponse> {
-  const hasAccess = await verifyPermission('articles.read');
+  const hasAccess = await verifyPermission('article.read');
   if (!hasAccess) {
     return { success: false, data: [], meta: { total: 0, page: 1, lastPage: 0 } };
   }
@@ -64,7 +65,7 @@ export async function getArticles(
  * Mengambil artikel berdasarkan ID
  */
 export async function getArticleById(id: string): Promise<ArticleResponse> {
-  const hasAccess = await verifyPermission('articles.read');
+  const hasAccess = await verifyPermission('article.read');
   if (!hasAccess) return { success: false, error: 'Akses ditolak.' };
 
   const article = await prisma.article.findUnique({
@@ -108,6 +109,7 @@ export async function createArticle(values: ArticleValues): Promise<ArticleRespo
   const article = await prisma.article.create({
     data: {
       title: values.title,
+      slug: slugify(values.title),
       content: values.content,
       cover: values.cover || null,
       createdById: session.user.id,
@@ -151,6 +153,7 @@ export async function updateArticleById(
     where: { id },
     data: {
       title: values.title,
+      slug: slugify(values.title),
       content: values.content,
       cover: values.cover || null,
       articleCategories: {
@@ -282,4 +285,22 @@ export async function deleteCategory(id: string): Promise<ArticleCategoryRespons
   await prisma.articleCategory.delete({ where: { id } });
   revalidatePath(BASE_PATH);
   return { success: true, message: 'Kategori berhasil dihapus.' };
+}
+
+/**
+ * Mengambil artikel untuk halaman publik (tanpa proteksi admin)
+ */
+export async function getPublicArticles(): Promise<Article[]> {
+  try {
+    const articles = await prisma.article.findMany({
+      include: {
+        articleCategories: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return articles as unknown as Article[];
+  } catch (error) {
+    console.error('getPublicArticles error:', error);
+    return [];
+  }
 }
