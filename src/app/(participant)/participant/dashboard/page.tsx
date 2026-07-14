@@ -405,7 +405,7 @@ export default async function ParticipantDashboard() {
               )}
             </div>
 
-            {upcomingEvent && upcomingEvent.qrToken && (
+            {upcomingEvent && upcomingEvent.qrToken && upcomingEvent.eventType !== 'ONLINE' && (
               <div className="px-6 pb-6 pt-0" style={{ borderTop: '1.5px solid #F0EEE6' }}>
                 <div className="pt-4">
                   <ShowQrButton
@@ -479,7 +479,7 @@ export default async function ParticipantDashboard() {
                         <th className="pb-3 pr-4">Event</th>
                         <th className="pb-3 px-4">Tanggal</th>
                         <th className="pb-3 px-4">Status</th>
-                        <th className="pb-3 px-4">Kehadiran</th>
+                        <th className="pb-3 px-4">Link Meeting</th>
                         <th className="pb-3 pl-4 text-right">Sertifikat</th>
                       </tr>
                     </thead>
@@ -537,19 +537,23 @@ export default async function ParticipantDashboard() {
                               </span>
                             </td>
                             <td className="py-4 px-4 whitespace-nowrap">
-                              {item.status === 'CHECKED_IN' ? (
-                                <span
-                                  className="text-xs font-semibold flex items-center gap-1"
-                                  style={{ color: '#788C5D' }}
+                              {item.event.eventType === 'ONLINE' && item.event.meetingLink ? (
+                                <a
+                                  href={item.event.meetingLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200"
+                                  style={{
+                                    color: '#788C5D',
+                                    borderColor: 'rgba(120,140,93,0.3)',
+                                    background: 'rgba(120,140,93,0.06)',
+                                  }}
                                 >
-                                  <CheckCircle2 className="w-3.5 h-3.5" /> Hadir
-                                </span>
+                                  <Video className="w-3.5 h-3.5" /> Gabung
+                                </a>
                               ) : (
-                                <span
-                                  className="text-xs flex items-center gap-1"
-                                  style={{ color: '#87867F' }}
-                                >
-                                  <Clock className="w-3.5 h-3.5" /> Belum Hadir
+                                <span className="text-xs" style={{ color: '#D1CFC5' }}>
+                                  —
                                 </span>
                               )}
                             </td>
@@ -557,7 +561,6 @@ export default async function ParticipantDashboard() {
                               {canDownloadCert ? (
                                 <a
                                   href={item.certificates[0].downloadUrl}
-                                  download
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200"

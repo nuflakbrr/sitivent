@@ -203,6 +203,8 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
             location: true,
             status: true,
             certificateEnabled: true,
+            eventType: true,
+            meetingLink: true,
           },
         },
         attendances: {

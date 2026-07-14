@@ -77,6 +77,8 @@ export interface ParticipantDashboardStats {
       location: string;
       status: string;
       certificateEnabled: boolean;
+      eventType: string;
+      meetingLink: string | null;
     };
     attendances: Array<{
       status: string;
