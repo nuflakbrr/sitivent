@@ -194,6 +194,12 @@ export async function verifyPayment(
 
     // Send emails after successful transaction commits
     if (status === PaymentStatus.PAID) {
+      const isOnline = payment.registration.event.eventType === 'ONLINE';
+      const meetingInfo =
+        isOnline && payment.registration.event.meetingLink
+          ? `<p>Link Meeting (Zoom): <a href="${payment.registration.event.meetingLink}">${payment.registration.event.meetingLink}</a></p>`
+          : '<p>Sampai jumpa di lokasi event!</p>';
+
       const emailBody = `
         <h2>Pembayaran Berhasil Diverifikasi!</h2>
         <p>Halo ${payment.registration.user.name || payment.registration.user.email},</p>
@@ -201,7 +207,7 @@ export async function verifyPayment(
         <p>Nomor Registrasi Anda: <strong>${payment.registration.registrationNumber}</strong></p>
         <p>Tunjukkan QR Code berikut saat check-in:</p>
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrToken}" alt="QR Code" style="display:block;margin:10px 0;" />
-        <p>Sampai jumpa di lokasi event!</p>
+        ${meetingInfo}
       `;
       await queueEmail(
         payment.registration.user.email,

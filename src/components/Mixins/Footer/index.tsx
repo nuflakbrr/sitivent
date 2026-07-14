@@ -160,7 +160,7 @@ const Footer: FC = () => {
           <p>
             ©{' '}
             <span style={{ color: '#D97757', fontFamily: 'ui-monospace, monospace' }}>{year}</span>{' '}
-            INDEVPRO. Seluruh hak cipta dilindungi undang-undang.
+            Naufal Akbar Nugroho. Seluruh hak cipta dilindungi undang-undang.
           </p>
           {/* <div className="flex gap-6">
             <Link

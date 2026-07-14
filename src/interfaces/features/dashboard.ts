@@ -56,6 +56,8 @@ export interface ParticipantDashboardStats {
     startTime: string;
     endTime: string;
     location: string;
+    eventType?: string;
+    meetingLink?: string | null;
     qrToken: string | null;
     status: string;
     registrationNumber?: string;

@@ -12,6 +12,7 @@ export interface Event {
   startTime: string;
   endTime: string;
   location: string;
+  meetingLink?: string | null;
   eventType: EventType;
   registrationDeadline: Date;
   quota: number;

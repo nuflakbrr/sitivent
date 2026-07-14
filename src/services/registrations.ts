@@ -188,12 +188,18 @@ export async function registerToEvent(eventId: string) {
       });
 
       // Send Registration Success Email
+      const isOnline = createdReg.event.eventType === 'ONLINE';
+      const meetingInfo =
+        isOnline && createdReg.event.meetingLink
+          ? `<p>Link Meeting (Zoom): <a href="${createdReg.event.meetingLink}">${createdReg.event.meetingLink}</a></p>`
+          : '<p>Sampai jumpa di lokasi event!</p>';
+
       const emailBody = `
         <h2>Registrasi Berhasil!</h2>
         <p>Halo ${createdReg.user.name || createdReg.user.email},</p>
         <p>Anda telah berhasil terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
         <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
-        <p>Sampai jumpa di lokasi event!</p>
+        ${meetingInfo}
       `;
       await queueEmail(
         createdReg.user.email,

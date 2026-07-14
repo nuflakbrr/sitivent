@@ -10,7 +10,7 @@ import { eventSchema } from '@/schemas/events';
 import type { Event, EventResponse, EventPaginationResponse } from '@/interfaces/features/events';
 import { verifyPermission } from './security';
 import { slugify } from '@/lib/slugify';
-import { EventStatus } from '@/generated/prisma/enums';
+import { EventStatus, EventType } from '@/generated/prisma/enums';
 
 const BASE_PATH = '/admin/master/events';
 
@@ -229,6 +229,7 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
         endTime: data.endTime,
         location: data.location,
         eventType: data.eventType,
+        meetingLink: data.eventType === EventType.ONLINE ? data.meetingLink : null,
         registrationDeadline: data.registrationDeadline,
         quota: data.quota,
         price: data.price,
@@ -322,6 +323,7 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
         endTime: data.endTime,
         location: data.location,
         eventType: data.eventType,
+        meetingLink: data.eventType === EventType.ONLINE ? data.meetingLink : null,
         registrationDeadline: data.registrationDeadline,
         quota: data.quota,
         price: data.price,

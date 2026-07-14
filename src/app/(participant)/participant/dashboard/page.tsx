@@ -1,6 +1,15 @@
 import type { Route } from 'next';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, Award, CheckCircle2, AlertCircle, FileDown } from 'lucide-react';
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Award,
+  CheckCircle2,
+  AlertCircle,
+  FileDown,
+  Video,
+} from 'lucide-react';
 
 import { getParticipantDashboardData } from '@/services/dashboard';
 import { auth } from '@/lib/auth';
@@ -356,6 +365,20 @@ export default async function ParticipantDashboard() {
                         <MapPin className="w-4 h-4 shrink-0" style={{ color: '#D1CFC5' }} />
                         <span className="line-clamp-1">{upcomingEvent.location}</span>
                       </div>
+                      {upcomingEvent.meetingLink && (
+                        <div className="flex items-center gap-2">
+                          <Video className="w-4 h-4 shrink-0" style={{ color: '#788C5D' }} />
+                          <a
+                            href={upcomingEvent.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-primary transition-colors break-all"
+                            style={{ color: '#788C5D', fontWeight: 600 }}
+                          >
+                            Gabung Link Zoom
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

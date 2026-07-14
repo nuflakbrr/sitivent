@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "author": {
-    "name": "Indevpro",
-    "email": "indevappfti@gmail.com"
+    "name": "Naufal Akbar Nugroho",
+    "email": "naufalakbar378@gmail.com"
   },
   "scripts": {
     "dev": "next dev --turbopack",

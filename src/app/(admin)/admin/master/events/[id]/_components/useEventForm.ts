@@ -28,6 +28,7 @@ export const useEventForm = (initialData: Event | null) => {
       startTime: initialData?.startTime || '',
       endTime: initialData?.endTime || '',
       location: initialData?.location || '',
+      meetingLink: initialData?.meetingLink || '',
       eventType: initialData?.eventType || 'OFFLINE',
       registrationDeadline: initialData?.registrationDeadline
         ? new Date(initialData.registrationDeadline)

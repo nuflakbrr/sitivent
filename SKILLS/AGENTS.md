@@ -2,7 +2,7 @@
 
 > Version: 1.0.0
 >
-> Author: INDEVPRO
+> Author: Naufal Akbar Nugroho
 >
 > Project: SITIVENT
 >

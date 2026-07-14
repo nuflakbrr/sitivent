@@ -68,6 +68,7 @@ const EventForm: FC<Props> = ({ initialData }) => {
 
   // Auto generate slug from title when creating
   const eventTitle = form.watch('title');
+  const eventType = form.watch('eventType');
   useEffect(() => {
     if (eventTitle) {
       form.setValue('slug', slugify(eventTitle), { shouldValidate: true });
@@ -341,7 +342,7 @@ const EventForm: FC<Props> = ({ initialData }) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>
-                      Lokasi / Tautan Ruangan <span className="text-red-600">*</span>
+                      Lokasi <span className="text-red-600">*</span>
                     </FieldLabel>
                     <Input
                       {...field}
@@ -352,6 +353,27 @@ const EventForm: FC<Props> = ({ initialData }) => {
                   </Field>
                 )}
               />
+
+              {eventType === EventType.ONLINE && (
+                <Controller
+                  name="meetingLink"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>
+                        Link Zoom / Meeting <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        value={field.value || ''}
+                        placeholder="Masukkan link Zoom (https://zoom.us/j/...)"
+                        disabled={!canEdit}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Controller

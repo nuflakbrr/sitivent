@@ -15,6 +15,7 @@ export const eventSchema = z.object({
   startTime: z.string().min(1, 'Waktu mulai wajib diisi.'),
   endTime: z.string().min(1, 'Waktu selesai wajib diisi.'),
   location: z.string().min(3, 'Lokasi minimal 3 karakter.'),
+  meetingLink: z.string().optional().nullable(),
   eventType: z.nativeEnum(EventType, {
     message: 'Tipe event wajib dipilih.',
   }),
@@ -60,5 +61,34 @@ export const refinedEventSchema = eventSchema
     {
       message: 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
       path: ['endDate'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.eventType === EventType.ONLINE) {
+        return !!data.meetingLink && data.meetingLink.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Link meeting/Zoom wajib diisi jika tipe event online.',
+      path: ['meetingLink'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.eventType === EventType.ONLINE && data.meetingLink) {
+        try {
+          new URL(data.meetingLink);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message: 'Link meeting/Zoom harus berupa URL yang valid.',
+      path: ['meetingLink'],
     }
   );

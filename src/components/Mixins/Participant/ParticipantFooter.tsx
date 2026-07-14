@@ -18,7 +18,7 @@ export const ParticipantFooter: FC = () => {
           Dilindungi.
         </p>
         <p className="text-xs" style={{ color: '#D1CFC5', fontFamily: 'ui-monospace, monospace' }}>
-          by INDEVPRO
+          by Naufal Akbar Nugroho
         </p>
       </div>
     </footer>

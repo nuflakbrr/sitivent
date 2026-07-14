@@ -176,6 +176,7 @@ model Event {
   startTime            String               @map("start_time")
   endTime              String               @map("end_time")
   location             String
+  meetingLink          String?              @map("meeting_link")
   eventType            EventType            @map("event_type")
   registrationDeadline DateTime             @map("registration_deadline")
   quota                Int

@@ -13,9 +13,24 @@ const getTransporter = () => {
     return null;
   }
 
+  /**
+   * Resend
+   */
+  // return nodemailer.createTransport({
+  //   host,
+  //   port,
+  //   secure: port === 465,
+  //   auth: {
+  //     user,
+  //     pass,
+  //   },
+  // });
+
+  /**
+   * Google App Password (2FA needed)
+   */
   return nodemailer.createTransport({
-    host,
-    port,
+    service: 'gmail',
     secure: port === 465,
     auth: {
       user,

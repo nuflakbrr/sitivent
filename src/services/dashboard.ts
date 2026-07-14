@@ -171,6 +171,8 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
           startTime: upcomingReg.event.startTime,
           endTime: upcomingReg.event.endTime,
           location: upcomingReg.event.location,
+          eventType: upcomingReg.event.eventType,
+          meetingLink: upcomingReg.event.meetingLink,
           qrToken: upcomingReg.qrToken,
           status: upcomingReg.status,
           registrationNumber: upcomingReg.registrationNumber,
