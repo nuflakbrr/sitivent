@@ -97,15 +97,37 @@ export default async function EventDetailPage({ params }: Props) {
     .format('DD MMMM YYYY, HH:mm');
 
   return (
-    <article className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pt-28 pb-16">
+    <article className="min-h-screen bg-[#FAF9F5] text-[#141413] font-sans antialiased pt-28 pb-16">
       <div className="container mx-auto px-4 max-w-6xl">
+        {/* Eyebrow Breadcrumb */}
+        <div className="mb-4">
+          <p
+            className="text-[10px] font-bold uppercase tracking-widest font-mono"
+            style={{ color: '#D97757' }}
+          >
+            Jelajahi · Detail Event
+          </p>
+        </div>
+
         {/* Banner Area */}
-        <div className="relative w-full aspect-video md:aspect-3/1 rounded-3xl overflow-hidden border shadow-lg bg-muted mb-8">
+        <div
+          className="relative w-full aspect-video md:aspect-3/1 rounded-3xl overflow-hidden border shadow-xs mb-8"
+          style={{ borderColor: '#D1CFC5' }}
+        >
           {event.banner ? (
             <img src={event.banner} alt={event.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-blue-600 to-indigo-700 text-white p-6">
-              <h1 className="text-3xl md:text-5xl font-extrabold text-center leading-tight max-w-2xl">
+            <div className="w-full h-full flex flex-col items-center justify-center bg-[#141413] text-center p-8">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest font-mono mb-3"
+                style={{ color: '#D97757' }}
+              >
+                SITIVENT · EVENT
+              </span>
+              <h1
+                className="font-serif text-2xl md:text-4xl font-bold leading-tight max-w-2xl"
+                style={{ color: '#FAF9F5' }}
+              >
                 {event.title}
               </h1>
             </div>
@@ -113,36 +135,30 @@ export default async function EventDetailPage({ params }: Props) {
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge
               variant="outline"
-              className={`font-semibold text-xs px-3 py-1 shadow-sm ${
+              className="font-mono text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 shadow-xs border"
+              style={
                 event.eventType === 'ONLINE'
-                  ? 'bg-emerald-500/90 text-white border-emerald-400'
-                  : 'bg-blue-500/90 text-white border-blue-400'
-              }`}
+                  ? {
+                      backgroundColor: 'rgba(120, 140, 93, 0.08)',
+                      borderColor: 'rgba(120, 140, 93, 0.3)',
+                      color: '#788C5D',
+                    }
+                  : {
+                      backgroundColor: 'rgba(217, 119, 87, 0.08)',
+                      borderColor: 'rgba(217, 119, 87, 0.3)',
+                      color: '#D97757',
+                    }
+              }
             >
               {event.eventType === 'ONLINE' ? (
                 <span className="flex items-center gap-1">
-                  <Globe className="h-3.5 w-3.5" /> Online
+                  <Globe className="h-3 w-3" /> Online
                 </span>
               ) : (
                 <span className="flex items-center gap-1">
-                  <Landmark className="h-3.5 w-3.5" /> Offline
+                  <Landmark className="h-3 w-3" /> Offline
                 </span>
               )}
-            </Badge>
-
-            <Badge
-              variant="outline"
-              className={`font-semibold text-xs px-3 py-1 shadow-sm ${
-                event.status === 'PUBLISHED'
-                  ? 'bg-emerald-500/90 text-white border-emerald-400'
-                  : event.status === 'CLOSED'
-                    ? 'bg-rose-500/90 text-white border-rose-400'
-                    : event.status === 'COMPLETED'
-                      ? 'bg-blue-500/90 text-white border-blue-400'
-                      : 'bg-zinc-500/90 text-white border-zinc-400'
-              }`}
-            >
-              {event.status}
             </Badge>
           </div>
         </div>
@@ -150,32 +166,37 @@ export default async function EventDetailPage({ params }: Props) {
         {/* Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Left Column: Title & Description (col-span-2) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             <div className="space-y-4">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-white leading-tight">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-[#141413] leading-tight">
                 {event.title}
               </h1>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground font-medium">
+              <div
+                className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-mono uppercase tracking-wider"
+                style={{ color: '#87867F' }}
+              >
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-primary" /> {formattedStartDate}
+                  <Calendar className="h-4 w-4 shrink-0" style={{ color: '#D97757' }} />{' '}
+                  {formattedStartDate}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-primary" /> {event.startTime} - {event.endTime} WIB
+                  <Clock className="h-4 w-4 shrink-0" style={{ color: '#D97757' }} />{' '}
+                  {event.startTime} - {event.endTime} WIB
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                  <MapPin className="h-4 w-4 shrink-0" style={{ color: '#D97757' }} />
                   <span className="line-clamp-1">{event.location}</span>
                 </span>
               </div>
             </div>
 
-            <Separator />
+            <Separator style={{ backgroundColor: '#E3DACC' }} />
 
             {/* Description HTML content */}
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Detail Event</h2>
+              <h2 className="font-serif text-2xl font-bold text-[#141413]">Detail Event</h2>
               <div
-                className="prose dark:prose-invert max-w-none text-zinc-700 dark:text-zinc-300 leading-relaxed min-h-[150px] focus:outline-none"
+                className="prose max-w-none text-[#3D3D3A] leading-relaxed min-h-[150px] focus:outline-none"
                 dangerouslySetInnerHTML={{ __html: event.description }}
               />
             </div>
@@ -183,56 +204,56 @@ export default async function EventDetailPage({ params }: Props) {
 
           {/* Right Column: Pricing & Registration (col-span-1) */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-28 border-none shadow-md bg-white dark:bg-zinc-900 overflow-hidden">
+            <Card
+              className="sticky top-28 border shadow-xs bg-white overflow-hidden rounded-2xl"
+              style={{ borderColor: '#D1CFC5' }}
+            >
               <CardContent className="p-6 space-y-6">
                 {/* Price block */}
                 <div className="space-y-1">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[#87867F] font-mono uppercase tracking-widest">
                     Biaya Pendaftaran
                   </span>
                   <div className="flex items-baseline gap-1">
                     {isFree ? (
-                      <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                        Gratis
-                      </span>
+                      <span className="text-3xl font-serif font-bold text-[#788C5D]">Gratis</span>
                     ) : (
-                      <span className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+                      <span className="text-3xl font-serif font-bold text-[#141413]">
                         {formatCurrency(event.price)}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <Separator />
+                <Separator style={{ backgroundColor: '#E3DACC' }} />
 
                 {/* Key stats details */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <Users className="h-4 w-4" /> Sisa Kuota
+                  <div className="flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                    <span className="text-[#87867F] flex items-center gap-1.5">
+                      <Users className="h-4 w-4" style={{ color: '#D97757' }} /> Sisa Kuota
                     </span>
-                    <span className="font-bold text-foreground">
+                    <span className="font-bold text-[#141413]">
                       {slotsLeft} / {event.quota} Kursi
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <Clock className="h-4 w-4" /> Batas Pendaftaran
+                  <div className="flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                    <span className="text-[#87867F] flex items-center gap-1.5">
+                      <Clock className="h-4 w-4" style={{ color: '#D97757' }} /> Batas Pendaftaran
                     </span>
-                    <span className="font-bold text-foreground text-right">
-                      {formattedDeadline}
-                    </span>
+                    <span className="font-bold text-[#141413] text-right">{formattedDeadline}</span>
                   </div>
 
                   {event.certificateEnabled && (
-                    <div className="flex items-center justify-between text-sm border-t pt-3">
-                      <span className="text-muted-foreground flex items-center gap-1.5">
-                        <ShieldCheck className="h-4 w-4 text-emerald-500" /> Sertifikat
+                    <div
+                      className="flex items-center justify-between text-xs font-mono uppercase tracking-wider border-t pt-3"
+                      style={{ borderTopColor: '#E3DACC' }}
+                    >
+                      <span className="text-[#87867F] flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4" style={{ color: '#788C5D' }} /> Sertifikat
                       </span>
-                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        Tersedia (e-Certificate)
-                      </span>
+                      <span className="font-bold text-[#788C5D]">Tersedia</span>
                     </div>
                   )}
                 </div>
@@ -242,7 +263,11 @@ export default async function EventDetailPage({ params }: Props) {
                   {event.status !== 'PUBLISHED' ? (
                     <Button
                       disabled
-                      className="w-full py-6 text-base font-semibold flex items-center justify-center gap-2"
+                      className="w-full py-6 text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl"
+                      style={{
+                        backgroundColor: '#87867F',
+                        color: '#FAF9F5',
+                      }}
                     >
                       <BadgeAlert className="h-5 w-5" /> Pendaftaran Ditutup
                     </Button>
@@ -250,6 +275,7 @@ export default async function EventDetailPage({ params }: Props) {
                     <RegisterButton
                       eventId={event.id}
                       isAuthenticated={isAuthenticated}
+                      isEmailVerified={session?.user?.emailVerified ?? false}
                       isRegistered={isRegistered}
                       registrationStatus={registrationStatus}
                       isDeadlinePassed={isDeadlinePassed}

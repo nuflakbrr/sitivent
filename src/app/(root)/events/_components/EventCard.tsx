@@ -94,28 +94,6 @@ export const EventCard: FC<EventCardProps> = ({ event, formattedStartDate }) => 
                 </span>
               )}
             </Badge>
-
-            {event.status !== 'PUBLISHED' && (
-              <Badge
-                variant="outline"
-                className="font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 shadow-xs border rounded-md"
-                style={
-                  event.status === 'COMPLETED'
-                    ? {
-                        background: 'rgba(120,140,93,0.12)',
-                        borderColor: 'rgba(120,140,93,0.3)',
-                        color: '#788C5D',
-                      }
-                    : {
-                        background: 'rgba(217,119,87,0.12)',
-                        borderColor: 'rgba(217,119,87,0.3)',
-                        color: '#D97757',
-                      }
-                }
-              >
-                {event.status === 'COMPLETED' ? 'Selesai' : 'Tutup'}
-              </Badge>
-            )}
           </div>
         </div>
 

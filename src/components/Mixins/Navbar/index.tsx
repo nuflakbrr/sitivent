@@ -155,12 +155,26 @@ const Navbar: FC = () => {
     return pathname !== '/' && path !== '/' && pathname.includes(path);
   };
 
+  const isTransparentNotAllowed = [
+    '/',
+    '/events',
+    '/gallery',
+    '/articles',
+    '/about',
+    '/help',
+    '/faq',
+    '/terms',
+    '/privacy',
+  ];
+
+  const isSolid = scrolled || !isTransparentNotAllowed.includes(pathname);
+
   return (
     <>
       <header
         className={cn(
           'fixed top-0 left-0 w-full z-50 transition-all duration-300',
-          scrolled ? 'bg-[#FFFFFF]/96 backdrop-blur-md border-b border-[#E3DACC]' : 'bg-transparent'
+          isSolid ? 'bg-[#FFFFFF]/96 backdrop-blur-md border-b border-[#E3DACC]' : 'bg-transparent'
         )}
       >
         <div className="container mx-auto px-4 max-w-6xl">
@@ -180,7 +194,7 @@ const Navbar: FC = () => {
               <span
                 className={cn(
                   'font-extrabold text-lg tracking-tight transition-colors duration-300',
-                  scrolled ? 'text-[#141413]' : 'text-white'
+                  isSolid ? 'text-[#141413]' : 'text-white'
                 )}
                 style={{ fontFamily: 'ui-serif, Georgia, serif' }}
               >
@@ -197,11 +211,11 @@ const Navbar: FC = () => {
                   className={cn(
                     'relative px-3 py-2 text-sm font-medium transition-colors duration-200',
                     'after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-transform after:duration-300 after:origin-center',
-                    scrolled
+                    isSolid
                       ? 'text-[#3D3D3A] hover:text-[#D97757] after:bg-[#D97757]'
                       : 'text-white/80 hover:text-white after:bg-white',
                     isMenuActive(link.path)
-                      ? scrolled
+                      ? isSolid
                         ? 'text-[#D97757] after:scale-x-100'
                         : 'text-white font-semibold after:scale-x-100'
                       : 'after:scale-x-0'
@@ -214,16 +228,16 @@ const Navbar: FC = () => {
 
             {/* Desktop right: search + auth */}
             <div className="hidden lg:flex items-center gap-2">
-              <EventSearch scrolled={scrolled} />
+              <EventSearch scrolled={isSolid} />
               {session?.user ? (
-                <NavbarUserDropdown user={session.user} scrolled={scrolled} isAdmin={isAdmin} />
+                <NavbarUserDropdown user={session.user} scrolled={isSolid} isAdmin={isAdmin} />
               ) : (
                 <>
                   <Link
                     href={'/login' as Route}
                     className={cn(
                       'text-sm font-semibold px-4 py-2 rounded-lg transition-colors duration-200',
-                      scrolled
+                      isSolid
                         ? 'text-[#3D3D3A] hover:text-[#D97757]'
                         : 'text-white/80 hover:text-white'
                     )}
@@ -248,7 +262,7 @@ const Navbar: FC = () => {
               aria-label="Toggle navigation"
               className={cn(
                 'lg:hidden p-2 rounded-lg transition-colors',
-                scrolled ? 'text-[#3D3D3A] hover:bg-[#F0EEE6]' : 'text-white hover:bg-white/10'
+                isSolid ? 'text-[#3D3D3A] hover:bg-[#F0EEE6]' : 'text-white hover:bg-white/10'
               )}
             >
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
