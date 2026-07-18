@@ -6,6 +6,52 @@ import { RegistrationStatus, PaymentStatus } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
 import { queueEmail } from './emails';
+import type { RegistrationPaginationResponse } from '@/interfaces/features/registrations';
+
+export async function getParticipantRegistrations() {
+  try {
+    const session = await verifySession();
+    if (!session || !session.user) {
+      return { success: false, data: [] };
+    }
+
+    const data = await prisma.registration.findMany({
+      where: {
+        userId: session.user.id,
+        deletedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            startDate: true,
+            startTime: true,
+            endTime: true,
+            location: true,
+            status: true,
+            certificateEnabled: true,
+            eventType: true,
+            meetingLink: true,
+          },
+        },
+        certificates: {
+          select: {
+            id: true,
+            downloadUrl: true,
+          },
+        },
+      },
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Get Participant Registrations Error:', error);
+    return { success: false, data: [] };
+  }
+}
 
 export async function getRegistrations(
   page: number = 1,
@@ -21,7 +67,7 @@ export async function getRegistrations(
       data: [],
       meta: { total: 0, page: 1, lastPage: 0 },
       error: 'Anda tidak memiliki hak akses untuk melihat data ini.',
-    } as any;
+    } satisfies RegistrationPaginationResponse;
   }
 
   try {
@@ -30,7 +76,7 @@ export async function getRegistrations(
     const where = {
       deletedAt: null,
       ...(eventId ? { eventId } : {}),
-      ...(status ? { status: status as any } : {}),
+      ...(status ? { status: status as RegistrationStatus } : {}),
       ...(search
         ? {
             OR: [

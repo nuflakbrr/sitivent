@@ -6,6 +6,7 @@ import { Printer, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import Loader from '@/components/Common/Loader';
+import type { CertificateTemplate, CertificateSignature } from '@/interfaces/features/certificates';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -13,8 +14,8 @@ type PageProps = {
 
 export default function CertificatePage(props: PageProps) {
   const params = use(props.params);
-  const [cert, setCert] = useState<any>(null);
-  const [template, setTemplate] = useState<any>(null);
+  const [cert, setCert] = useState<Awaited<ReturnType<typeof getCertificateById>>>(null);
+  const [template, setTemplate] = useState<CertificateTemplate | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -250,7 +251,7 @@ export default function CertificatePage(props: PageProps) {
                 )}
 
                 {/* Render each signature */}
-                {signatures.map((sig: any) => (
+                {signatures.map((sig: CertificateSignature) => (
                   <div key={sig.id} className="flex flex-col items-center space-y-1">
                     <div className="h-20 w-36 relative flex items-center justify-center">
                       <img

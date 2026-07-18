@@ -9,6 +9,7 @@ import CTABanner from './_components/CTABanner';
 import Steps from './_components/Steps';
 import GalleryBento from './_components/GalleryBento';
 import type { EventCategory } from '@/interfaces/features/event-categories';
+import type { Event } from '@/interfaces/features/events';
 
 export const metadata: Metadata = {
   title: 'SITIVENT — Platform Manajemen Event & Tiket',
@@ -33,9 +34,12 @@ export default async function HomePage() {
         },
       },
     }),
-    prisma.eventCategory.findMany({
-      orderBy: { name: 'asc' },
-    }),
+    // Explicitly await categories to ensure they're not typed as any
+    prisma.eventCategory
+      .findMany({
+        orderBy: { name: 'asc' },
+      })
+      .then((categories) => categories as EventCategory[]),
   ]);
 
   // Take minimum 3 and maximum 5 for HeroBanner, fallback if fewer
@@ -43,9 +47,9 @@ export default async function HomePage() {
 
   return (
     <div className="w-full">
-      {heroEvents.length >= 3 && <HeroBanner events={heroEvents as any} />}
-      <CategoryLinks categories={categories as EventCategory[]} />
-      <FeaturedEvents events={events as any} />
+      {heroEvents.length >= 3 && <HeroBanner events={heroEvents as Event[]} />}
+      <CategoryLinks categories={categories} />
+      <FeaturedEvents events={events} />
       <Stats />
       <GalleryBento />
       <Features />

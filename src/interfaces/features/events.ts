@@ -1,6 +1,27 @@
 import { EventStatus, EventType } from '@/generated/prisma/enums';
 import type { EventCategory } from './event-categories';
 
+export interface EventSpeaker {
+  id?: string;
+  name: string;
+  title?: string | null;
+  company?: string | null;
+  companyUrl?: string | null;
+  github?: string | null;
+  instagram?: string | null;
+  linkedIn?: string | null;
+  avatar?: string | null;
+  order?: number;
+}
+
+export interface EventBenefit {
+  id?: string;
+  title: string;
+  description?: string | null;
+  icon?: string | null;
+  order?: number;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -23,8 +44,12 @@ export interface Event {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
+  tenantId?: string | null;
+  createdById?: string | null;
   categoryId?: string | null;
   category?: EventCategory | null;
+  speakers?: EventSpeaker[];
+  benefits?: EventBenefit[];
   _count?: {
     registrations: number;
   };
@@ -45,6 +70,7 @@ export interface EventPaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }
 
 export interface EventSearchResult {

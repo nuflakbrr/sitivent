@@ -28,4 +28,5 @@ export interface RolePaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }

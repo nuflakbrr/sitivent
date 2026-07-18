@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { Editor } from '@tiptap/react';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,7 +12,7 @@ export function isValidUrl(url: string) {
   return /^https?:\/\/\S+$/.test(url);
 }
 
-export function duplicateContent(editor: any) {
+export function duplicateContent(editor: Editor) {
   const { state } = editor;
   const { selection } = state;
 

@@ -119,7 +119,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardStats | nul
         certificates,
       },
       popularEvents,
-      recentRegistrations: recentRegistrations as any[],
+      recentRegistrations: recentRegistrations as AdminDashboardStats['recentRegistrations'],
     };
   } catch (error) {
     console.error('Get Admin Dashboard Data Error:', error);
@@ -236,7 +236,7 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
 
     return {
       upcomingEvent,
-      history: history as any[],
+      history: history as ParticipantDashboardStats['history'],
       summary: {
         totalRegistered,
         totalCheckedIn,

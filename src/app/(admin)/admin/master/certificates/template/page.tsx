@@ -11,6 +11,21 @@ import { Input } from '@/components/ui/input';
 import Heading from '@/components/Common/Heading';
 import CertificateTemplateForm from './_components/CertificateTemplateForm';
 import { useDebounce } from '@/hooks/useDebounce';
+import { EventStatus } from '@/generated/prisma/enums';
+
+interface EventWithCertData {
+  id: string;
+  title: string;
+  slug: string;
+  startDate: Date;
+  location: string;
+  status: EventStatus;
+  certificateTemplate?: {
+    id: string;
+    backgroundUrl: string | null;
+    numberTemplate: string;
+  } | null;
+}
 
 export default function TemplateConfigPage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
@@ -22,11 +37,11 @@ export default function TemplateConfigPage() {
     queryFn: () => getEventsWithCertificateEnabled(),
   });
 
-  const events = data?.data ?? [];
-  const filteredEvents = events.filter((event: any) =>
+  const events: EventWithCertData[] = data?.data ?? [];
+  const filteredEvents = events.filter((event: EventWithCertData) =>
     event.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
-  const selectedEvent = filteredEvents.find((e: any) => e.id === selectedEventId);
+  const selectedEvent = filteredEvents.find((e: EventWithCertData) => e.id === selectedEventId);
 
   return (
     <section>
@@ -83,7 +98,7 @@ export default function TemplateConfigPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-foreground/5">
-                  {filteredEvents.map((event: any) => {
+                  {filteredEvents.map((event: EventWithCertData) => {
                     const isSelected = selectedEventId === event.id;
                     const isConfigured = !!event.certificateTemplate;
                     return (

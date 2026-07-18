@@ -38,4 +38,5 @@ export interface RegistrationPaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }

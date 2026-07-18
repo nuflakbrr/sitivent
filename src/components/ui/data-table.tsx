@@ -4,6 +4,8 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
+  type RowSelectionState,
+  type OnChangeFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -11,6 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+
 
 import {
   Table,
@@ -41,7 +44,7 @@ interface DataTableProps<TData, TValue> {
   onSearchChange?: (value: string) => void;
   onBulkDelete?: (rows: TData[]) => void;
   rowSelection?: Record<string, boolean>;
-  onRowSelectionChange?: (selection: any) => void;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   searchValue?: string;
   pageCount?: number;
   placeholderSearch?: string;
@@ -87,17 +90,29 @@ export function DataTable<TData, TValue>({
 
     const lowered = searchValue.toLowerCase();
 
-    return data.filter((item: any) => {
+    return data.filter((item: TData) => {
       if (Array.isArray(searchKey)) {
         return searchKey.some((key) => {
-          const value = key.split(".").reduce((acc, part) => acc?.[part], item);
-          return value?.toString()?.toLowerCase()?.includes(lowered);
+          const value = key.split('.').reduce((acc: unknown, part) => {
+            if (acc && typeof acc === 'object') {
+              return (acc as Record<string, unknown>)[part];
+            }
+            return undefined;
+          }, item as unknown);
+          return typeof value === 'string' || typeof value === 'number'
+            ? value.toString().toLowerCase().includes(lowered)
+            : false;
         });
-      } else if (typeof searchKey === "string") {
-        const value = searchKey
-          .split(".")
-          .reduce((acc, part) => acc?.[part], item);
-        return value?.toString()?.toLowerCase()?.includes(lowered);
+      } else if (typeof searchKey === 'string') {
+        const value = searchKey.split('.').reduce((acc: unknown, part) => {
+          if (acc && typeof acc === 'object') {
+            return (acc as Record<string, unknown>)[part];
+          }
+          return undefined;
+        }, item as unknown);
+        return typeof value === 'string' || typeof value === 'number'
+          ? value.toString().toLowerCase().includes(lowered)
+          : false;
       }
       return true;
     });

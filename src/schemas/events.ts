@@ -1,6 +1,30 @@
 import { z } from 'zod';
 import { EventStatus, EventType } from '@/generated/prisma/enums';
 
+export const speakerSchema = z.object({
+  name: z.string().min(2, 'Nama pemateri minimal 2 karakter.'),
+  title: z.string().optional().nullable(),
+  company: z.string().optional().nullable(),
+  companyUrl: z
+    .string()
+    .url('Website instansi harus valid.')
+    .or(z.literal(''))
+    .optional()
+    .nullable(),
+  github: z.string().url('Link GitHub harus valid.').or(z.literal('')).optional().nullable(),
+  instagram: z.string().url('Link Instagram harus valid.').or(z.literal('')).optional().nullable(),
+  linkedIn: z.string().url('Link LinkedIn harus valid.').or(z.literal('')).optional().nullable(),
+  avatar: z.string().optional().nullable(),
+  order: z.coerce.number().int().min(0).default(0),
+});
+
+export const benefitSchema = z.object({
+  title: z.string().min(2, 'Benefit minimal 2 karakter.'),
+  description: z.string().optional().nullable(),
+  icon: z.string().optional().nullable(),
+  order: z.coerce.number().int().min(0).default(0),
+});
+
 export const eventSchema = z.object({
   title: z.string().min(3, 'Judul minimal 3 karakter.'),
   slug: z.string().min(3, 'Slug minimal 3 karakter.'),
@@ -27,6 +51,10 @@ export const eventSchema = z.object({
   status: z.nativeEnum(EventStatus).default(EventStatus.DRAFT),
   certificateEnabled: z.boolean().default(false),
   categoryId: z.string().optional().nullable(),
+  tenantId: z.string().optional().nullable(),
+  createdById: z.string().optional().nullable(),
+  speakers: z.array(speakerSchema).default([]),
+  benefits: z.array(benefitSchema).default([]),
 });
 
 export const refinedEventSchema = eventSchema

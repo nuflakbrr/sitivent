@@ -18,6 +18,21 @@ import Heading from '@/components/Common/Heading';
 import Columns from './_components/Columns';
 import { useCertificatesList } from './_components/useCertificatesList';
 import AlertModal from '@/components/Common/Modals/AlertModal';
+import type { EventStatus } from '@/generated/prisma/enums';
+
+interface EventWithCertTyped {
+  id: string;
+  title: string;
+  slug: string;
+  startDate: Date;
+  location: string;
+  status: EventStatus;
+  certificateTemplate?: {
+    id: string;
+    backgroundUrl: string | null;
+    numberTemplate: string;
+  } | null;
+}
 
 const CertificatesCMS: FC = () => {
   const { hasPermission } = usePermission();
@@ -102,7 +117,7 @@ const CertificatesCMS: FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Semua Event</SelectItem>
-              {eventsWithCert.map((event: any) => (
+              {eventsWithCert.map((event: EventWithCertTyped) => (
                 <SelectItem key={event.id} value={event.id}>
                   {event.title}
                 </SelectItem>

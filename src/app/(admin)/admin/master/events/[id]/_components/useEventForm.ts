@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 
-import type { Event } from '@/interfaces/features/events';
+import type { Event, EventSpeaker, EventBenefit } from '@/interfaces/features/events';
 import { createEvent, deleteEvent, updateEvent, type EventValues } from '@/services/events';
 import { eventSchema, refinedEventSchema } from '@/schemas/events';
 
@@ -15,6 +15,9 @@ export const useEventForm = (initialData: Event | null) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  const speakers = initialData?.speakers || [];
+  const benefits = initialData?.benefits || [];
 
   const form = useForm<z.infer<typeof eventSchema>>({
     resolver: zodResolver(refinedEventSchema) as Resolver<z.infer<typeof eventSchema>>,
@@ -38,6 +41,10 @@ export const useEventForm = (initialData: Event | null) => {
       status: initialData?.status || 'DRAFT',
       certificateEnabled: initialData?.certificateEnabled || false,
       categoryId: initialData?.categoryId || '',
+      tenantId: initialData?.tenantId || '',
+      createdById: initialData?.createdById || '',
+      speakers: speakers.length > 0 ? speakers : [{ ...defaultSpeaker, order: 0 }],
+      benefits: benefits.length > 0 ? benefits : [{ ...defaultBenefit, order: 0 }],
     },
   });
 
@@ -83,4 +90,23 @@ export const useEventForm = (initialData: Event | null) => {
     submitMutation,
     deleteMutation,
   };
+};
+
+const defaultSpeaker: EventSpeaker = {
+  name: '',
+  title: '',
+  company: '',
+  companyUrl: '',
+  github: '',
+  instagram: '',
+  linkedIn: '',
+  avatar: '',
+  order: 0,
+};
+
+const defaultBenefit: EventBenefit = {
+  title: '',
+  description: '',
+  icon: '',
+  order: 0,
 };

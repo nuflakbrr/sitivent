@@ -88,7 +88,7 @@ export default function CertificatePreview({
 }: Props) {
   const certNumber = renderNumber(numberTemplate || 'CERT/{SLUG}/{REG_NO}', eventTitle);
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('id-ID', {
       day: 'numeric',

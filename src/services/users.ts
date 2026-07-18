@@ -45,7 +45,7 @@ export async function getUsers(
       data: [],
       meta: { total: 0, page: 1, lastPage: 0 },
       error: 'Anda tidak memiliki hak akses untuk melihat data ini.',
-    } as any;
+    } satisfies UserPaginationResponse;
   }
 
   try {

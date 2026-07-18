@@ -1,10 +1,15 @@
+import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 
-export const FacebookIcon: FC = () => {
+type Props = {
+  className?: string;
+};
+
+export const FacebookIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="w-5 h-5"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"
@@ -18,11 +23,11 @@ export const FacebookIcon: FC = () => {
   );
 };
 
-export const InstagramIcon: FC = () => {
+export const InstagramIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="w-5 h-5"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"
@@ -36,11 +41,11 @@ export const InstagramIcon: FC = () => {
   );
 };
 
-export const TwitterIcon: FC = () => {
+export const TwitterIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="w-5 h-5"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"
@@ -54,11 +59,11 @@ export const TwitterIcon: FC = () => {
   );
 };
 
-export const LinkedInIcon: FC = () => {
+export const LinkedInIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="w-5 h-5"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"
@@ -72,11 +77,11 @@ export const LinkedInIcon: FC = () => {
   );
 };
 
-export const GoogleIcon: FC = () => {
+export const GoogleIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="h-5 w-5 shrink-0"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"
@@ -105,11 +110,11 @@ export const GoogleIcon: FC = () => {
   );
 };
 
-export const GitHubIcon: FC = () => {
+export const GitHubIcon: FC<Props> = ({ className }) => {
   return (
     <span>
       <svg
-        className="h-5 w-5 shrink-0"
+        className={cn('shrink-0', className)}
         width={24}
         height={24}
         viewBox="0 0 24 24"

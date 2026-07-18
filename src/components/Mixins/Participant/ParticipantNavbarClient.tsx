@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { LogOut, LayoutDashboard } from 'lucide-react';
+import { LogOut, LayoutDashboard, CreditCard, Award } from 'lucide-react';
 import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -94,6 +94,24 @@ export default function ParticipantNavbarClient({ user }: Props) {
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/participant/payment-history"
+              className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+            >
+              <CreditCard className="h-4 w-4" />
+              Riwayat Pembayaran
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/participant/event-history"
+              className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+            >
+              <Award className="h-4 w-4" />
+              Riwayat Event
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator style={{ background: '#E3DACC' }} />

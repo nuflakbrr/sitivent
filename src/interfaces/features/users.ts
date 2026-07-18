@@ -27,4 +27,5 @@ export interface UserPaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }

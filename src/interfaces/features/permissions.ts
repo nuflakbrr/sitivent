@@ -26,4 +26,5 @@ export interface PermissionPaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }

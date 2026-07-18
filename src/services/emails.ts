@@ -136,14 +136,14 @@ export async function processEmailQueue() {
             status: EmailStatus.SENT,
           },
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`Failed to send email ID ${email.id}:`, err);
         const finalStatus = email.attempts >= 2 ? EmailStatus.FAILED : EmailStatus.PENDING;
         await prisma.emailQueue.update({
           where: { id: email.id },
           data: {
             status: finalStatus,
-            error: err?.message || String(err),
+            error: err instanceof Error ? err.message : String(err),
           },
         });
       }

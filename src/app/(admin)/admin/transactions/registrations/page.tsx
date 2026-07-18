@@ -14,6 +14,11 @@ import {
 import Columns from './_components/Columns';
 import { useRegistrationsList } from './_components/useRegistrationsList';
 
+interface EventFilterOption {
+  id: string;
+  title: string;
+}
+
 const RegistrationsCMS: FC = () => {
   const {
     setPage,
@@ -29,6 +34,8 @@ const RegistrationsCMS: FC = () => {
     setStatusFilter,
     events,
   } = useRegistrationsList();
+
+  const EventFilterOptions: EventFilterOption[] = events || [];
 
   return (
     <section>
@@ -58,7 +65,7 @@ const RegistrationsCMS: FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Semua Event</SelectItem>
-                {events.map((event: any) => (
+                {EventFilterOptions.map((event) => (
                   <SelectItem key={event.id} value={event.id}>
                     {event.title}
                   </SelectItem>

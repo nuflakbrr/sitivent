@@ -14,6 +14,13 @@ import {
   Globe,
   Landmark,
   BadgeAlert,
+  Sparkles,
+  User,
+  Briefcase,
+  AtSign,
+  Code2,
+  Link2,
+  ExternalLink,
 } from 'lucide-react';
 
 import { formatCurrency } from '@/lib/formatCurrency';
@@ -21,9 +28,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import type { EventBenefit, EventSpeaker } from '@/interfaces/features/events';
 import { getEventRegistrationStatus } from '@/services/registrations';
 import RegisterButton from './_components/RegisterButton';
 import type { Metadata } from 'next';
+import { GitHubIcon, InstagramIcon, LinkedInIcon } from '@/components/Common/CustomIcons';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -59,6 +68,18 @@ export default async function EventDetailPage({ params }: Props) {
           status: {
             not: 'CANCELLED',
           },
+        },
+      },
+      speakers: {
+        orderBy: { order: 'asc' },
+      },
+      benefits: {
+        orderBy: { order: 'asc' },
+      },
+      createdBy: {
+        select: {
+          name: true,
+          image: true,
         },
       },
     },
@@ -164,7 +185,7 @@ export default async function EventDetailPage({ params }: Props) {
         </div>
 
         {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Title & Description (col-span-2) */}
           <div className="lg:col-span-2 space-y-8">
             <div className="space-y-4">
@@ -200,12 +221,47 @@ export default async function EventDetailPage({ params }: Props) {
                 dangerouslySetInnerHTML={{ __html: event.description }}
               />
             </div>
+
+            {/* Benefits Section */}
+            {event.benefits.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="font-serif text-2xl font-bold text-[#141413]">Benefit Event</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {event.benefits.map((benefit, idx) => (
+                    <div
+                      key={benefit.id || idx}
+                      className="flex items-start gap-3 p-4 rounded-xl border bg-white"
+                      style={{ borderColor: '#E3DACC' }}
+                    >
+                      <div
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                        style={{ backgroundColor: 'rgba(217, 119, 87, 0.1)', color: '#D97757' }}
+                      >
+                        {benefit.icon ? (
+                          <span className="text-base">{benefit.icon}</span>
+                        ) : (
+                          <Sparkles className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-semibold text-sm text-[#141413]">{benefit.title}</p>
+                        {benefit.description && (
+                          <p className="text-xs text-[#87867F] leading-relaxed">
+                            {benefit.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Pricing & Registration (col-span-1) */}
-          <div className="lg:col-span-1">
+          <div className="sticky top-20 self-start lg:col-span-1 space-y-4">
             <Card
-              className="sticky top-28 border shadow-xs bg-white overflow-hidden rounded-2xl"
+              className="py-0 border shadow-xs bg-white overflow-hidden rounded-2xl"
               style={{ borderColor: '#D1CFC5' }}
             >
               <CardContent className="p-6 space-y-6">
@@ -244,18 +300,6 @@ export default async function EventDetailPage({ params }: Props) {
                     </span>
                     <span className="font-bold text-[#141413] text-right">{formattedDeadline}</span>
                   </div>
-
-                  {event.certificateEnabled && (
-                    <div
-                      className="flex items-center justify-between text-xs font-mono uppercase tracking-wider border-t pt-3"
-                      style={{ borderTopColor: '#E3DACC' }}
-                    >
-                      <span className="text-[#87867F] flex items-center gap-1.5">
-                        <ShieldCheck className="h-4 w-4" style={{ color: '#788C5D' }} /> Sertifikat
-                      </span>
-                      <span className="font-bold text-[#788C5D]">Tersedia</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Register Action Button */}
@@ -287,6 +331,131 @@ export default async function EventDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Creator Card */}
+            {event.createdBy && (
+              <Card
+                className="py-0 border shadow-xs bg-white overflow-hidden rounded-2xl"
+                style={{ borderColor: '#D1CFC5' }}
+              >
+                <CardContent className="p-6 space-y-3">
+                  <span className="text-[10px] font-bold text-[#87867F] font-mono uppercase tracking-widest">
+                    Diselenggarakan Oleh
+                  </span>
+                  <div className="flex mt-2 items-center gap-3">
+                    {event.createdBy.image ? (
+                      <img
+                        src={event.createdBy.image}
+                        alt={event.createdBy.name || 'Penyelenggara'}
+                        className="h-11 w-11 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="h-11 w-11 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: 'rgba(217, 119, 87, 0.1)', color: '#D97757' }}
+                      >
+                        <User className="h-5 w-5" />
+                      </div>
+                    )}
+                    <p className="font-semibold text-sm text-[#141413]">
+                      {event.createdBy.name || 'SITIVENT'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Speakers Card */}
+            {event.speakers.length > 0 && (
+              <Card
+                className="py-0 border shadow-xs bg-white overflow-hidden rounded-2xl"
+                style={{ borderColor: '#D1CFC5' }}
+              >
+                <CardContent className="p-6 space-y-4">
+                  <span className="text-[10px] font-bold text-[#87867F] font-mono uppercase tracking-widest">
+                    Pemateri
+                  </span>
+                  <div className="space-y-4 mt-2">
+                    {event.speakers.map((speaker, idx) => (
+                      <div key={speaker.id || idx} className="flex gap-3">
+                        {speaker.avatar ? (
+                          <img
+                            src={speaker.avatar}
+                            alt={speaker.name}
+                            className="h-12 w-12 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className="h-12 w-12 rounded-full flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: 'rgba(120, 140, 93, 0.1)', color: '#788C5D' }}
+                          >
+                            <User className="h-5 w-5" />
+                          </div>
+                        )}
+                        <div className="space-y-1 min-w-0">
+                          <p className="font-semibold text-sm text-[#141413]">{speaker.name}</p>
+                          {speaker.title && (
+                            <p className="text-xs text-[#87867F] flex items-center gap-1">
+                              <Briefcase className="h-3 w-3" /> {speaker.title}
+                            </p>
+                          )}
+                          {speaker.company && (
+                            <div className="flex items-center gap-1">
+                              <Landmark className="h-3 w-3" />{' '}
+                              {speaker.companyUrl ? (
+                                <a
+                                  href={speaker.companyUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#87867F] hover:text-[#D97757] hover:underline flex items-center gap-0.5 text-[11px]"
+                                >
+                                  {speaker.company}
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              ) : (
+                                <p className="text-xs ">{speaker.company}</p>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {speaker.github && (
+                              <a
+                                href={speaker.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#141413] hover:underline flex items-center gap-0.5 text-[11px]"
+                              >
+                                <GitHubIcon className="w-3 h-3" /> GitHub
+                              </a>
+                            )}
+                            {speaker.instagram && (
+                              <a
+                                href={speaker.instagram}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#D97757] hover:underline flex items-center gap-0.5 text-[11px]"
+                              >
+                                <InstagramIcon className="h-3 w-3" /> Instagram
+                              </a>
+                            )}
+                            {speaker.linkedIn && (
+                              <a
+                                href={speaker.linkedIn}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#1D4ED8] hover:underline flex items-center gap-0.5 text-[11px]"
+                              >
+                                <LinkedInIcon className="h-3 w-3" /> LinkedIn
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

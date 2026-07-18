@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScanner } from './useScanner';
+import type { Html5Qrcode } from 'html5-qrcode';
 
 const ScannerClient: FC = () => {
   const {
@@ -26,32 +27,34 @@ const ScannerClient: FC = () => {
   useEffect(() => {
     if (!isScanning) return;
 
-    let html5QrCode: any;
+    let html5QrCode: Html5Qrcode | undefined;
 
     import('html5-qrcode')
       .then(({ Html5Qrcode }) => {
         html5QrCode = new Html5Qrcode('qr-scanner-widget');
 
-        html5QrCode
-          .start(
-            { facingMode: 'environment' },
-            {
-              fps: 10,
-              qrbox: { width: 220, height: 220 },
-            },
-            (decodedText: string) => {
-              onSubmitToken(decodedText);
+        if (html5QrCode) {
+          html5QrCode
+            .start(
+              { facingMode: 'environment' },
+              {
+                fps: 10,
+                qrbox: { width: 220, height: 220 },
+              },
+              (decodedText: string) => {
+                onSubmitToken(decodedText);
+                setIsScanning(false);
+              },
+              (_error: unknown) => {
+                // parsing failures
+              }
+            )
+            .catch((err: unknown) => {
+              console.error('Html5Qrcode start error:', err);
+              toast.error('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
               setIsScanning(false);
-            },
-            (error: any) => {
-              // parsing failures
-            }
-          )
-          .catch((err: any) => {
-            console.error('Html5Qrcode start error:', err);
-            toast.error('Gagal mengakses kamera. Pastikan izin kamera diberikan.');
-            setIsScanning(false);
-          });
+            });
+        }
       })
       .catch((err) => {
         console.error('Html5Qrcode load error:', err);
@@ -62,7 +65,7 @@ const ScannerClient: FC = () => {
     return () => {
       if (html5QrCode) {
         if (html5QrCode.isScanning) {
-          html5QrCode.stop().catch((err: any) => console.error('Failed to stop scanner', err));
+          html5QrCode.stop().catch((err: unknown) => console.error('Failed to stop scanner', err));
         }
       }
     };

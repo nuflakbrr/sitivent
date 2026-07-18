@@ -37,15 +37,6 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
               SITIVENT
             </span>
           </Link>
-
-          <nav className="hidden md:flex items-center gap-1">
-            <Link
-              href="/participant/dashboard"
-              className="relative px-3 py-2 text-sm font-medium transition-colors duration-200 text-[#3D3D3A] hover:text-[#D97757]"
-            >
-              Dashboard
-            </Link>
-          </nav>
         </div>
 
         {/* Right: user dropdown */}

@@ -7,12 +7,21 @@ import {
   Landmark,
   Image as ImageIcon,
   ArrowLeft,
+  Plus,
+  X,
+  User,
+  Briefcase,
+  Link2,
+  AtSign,
+  Code2,
+  Award,
+  Sparkles,
 } from 'lucide-react';
-import { Controller } from 'react-hook-form';
+import { Controller, useFieldArray } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
-import type { Event } from '@/interfaces/features/events';
+import type { Event, EventSpeaker, EventBenefit } from '@/interfaces/features/events';
 import { usePermission } from '@/providers/PermissionProvider';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -44,6 +53,25 @@ import { getAllEventCategories } from '@/services/event-categories';
 
 type Props = {
   initialData: Event | null;
+};
+
+const defaultSpeaker: EventSpeaker = {
+  name: '',
+  title: '',
+  company: '',
+  companyUrl: '',
+  github: '',
+  instagram: '',
+  linkedIn: '',
+  avatar: '',
+  order: 0,
+};
+
+const defaultBenefit: EventBenefit = {
+  title: '',
+  description: '',
+  icon: '',
+  order: 0,
 };
 
 const EventForm: FC<Props> = ({ initialData }) => {
@@ -153,6 +181,10 @@ const EventForm: FC<Props> = ({ initialData }) => {
     const minutes = String(d.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
   };
+
+  // Field arrays untuk speakers dan benefits
+  const speakersArray = useFieldArray({ control: form.control, name: 'speakers' });
+  const benefitsArray = useFieldArray({ control: form.control, name: 'benefits' });
 
   return (
     <section className="space-y-6">
@@ -702,6 +734,289 @@ const EventForm: FC<Props> = ({ initialData }) => {
               </Field>
             )}
           />
+        </div>
+
+        {/* Section: Pemateri (Speakers) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Heading
+              title="Pemateri / Narasumber"
+              description="Daftar pemateri yang mengisi event ini."
+            />
+            {canEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  speakersArray.append({ ...defaultSpeaker, order: speakersArray.fields.length })
+                }
+                disabled={!canEdit}
+              >
+                <Plus className="h-4 w-4" /> Tambah Pemateri
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {speakersArray.fields.map((fieldItem, index) => (
+              <div
+                key={fieldItem.id}
+                className="border rounded-xl p-4 space-y-3 relative bg-muted/30"
+              >
+                {canEdit && speakersArray.fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => speakersArray.remove(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Controller
+                    name={`speakers.${index}.name`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <User className="h-3 w-3 inline" /> Nama Pemateri{' '}
+                          <span className="text-red-600">*</span>
+                        </FieldLabel>
+                        <Input {...field} placeholder="Nama lengkap" disabled={!canEdit} />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.title`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Briefcase className="h-3 w-3 inline" /> Jabatan
+                          <span className="text-red-600">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="Mis. Senior Engineer"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.company`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          Instansi / Perusahaan
+                          <span className="text-red-600">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="Nama instansi"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.companyUrl`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Link2 className="h-3 w-3 inline" /> Website Instansi
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="https://instansi.com"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.github`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Code2 className="h-3 w-3 inline" /> GitHub
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="https://github.com/user"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.instagram`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <AtSign className="h-3 w-3 inline" /> Instagram
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="https://instagram.com/user"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.linkedIn`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Link2 className="h-3 w-3 inline" /> LinkedIn
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="https://linkedin.com/in/user"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`speakers.${index}.avatar`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>URL Foto Profil</FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="https://..."
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section: Benefit */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Heading title="Benefit Event" description="Keuntungan yang didapat peserta." />
+            {canEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  benefitsArray.append({ ...defaultBenefit, order: benefitsArray.fields.length })
+                }
+                disabled={!canEdit}
+              >
+                <Plus className="h-4 w-4" /> Tambah Benefit
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {benefitsArray.fields.map((fieldItem, index) => (
+              <div
+                key={fieldItem.id}
+                className="border rounded-xl p-4 space-y-3 relative bg-muted/30"
+              >
+                {canEdit && benefitsArray.fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => benefitsArray.remove(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Controller
+                    name={`benefits.${index}.title`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Award className="h-3 w-3 inline" /> Judul Benefit{' '}
+                          <span className="text-red-600">*</span>
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          placeholder="Mis. Sertifikat, Makan Siang"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`benefits.${index}.icon`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>
+                          <Sparkles className="h-3 w-3 inline" /> Icon (opsional)
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="Nama ikon / emoji"
+                          disabled={!canEdit}
+                        />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                      </Field>
+                    )}
+                  />
+                  <div className="md:col-span-2">
+                    <Controller
+                      name={`benefits.${index}.description`}
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel>Deskripsi Benefit</FieldLabel>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="Penjelasan singkat"
+                            disabled={!canEdit}
+                          />
+                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 mt-6">

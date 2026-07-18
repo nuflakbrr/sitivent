@@ -7,6 +7,41 @@ import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
 import { queueEmail } from './emails';
 import { uploadImage } from './uploads';
+import type { PaymentPaginationResponse } from '@/interfaces/features/payments';
+
+export async function getParticipantPayments() {
+  try {
+    const session = await verifySession();
+    if (!session || !session.user) {
+      return { success: false, data: [] };
+    }
+
+    const data = await prisma.payment.findMany({
+      where: {
+        registration: { userId: session.user.id },
+        deletedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        registration: {
+          select: {
+            id: true,
+            registrationNumber: true,
+            status: true,
+            event: {
+              select: { id: true, title: true, slug: true },
+            },
+          },
+        },
+      },
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Get Participant Payments Error:', error);
+    return { success: false, data: [] };
+  }
+}
 
 export async function getPayments(page: number = 1, limit: number = 10, search: string = '') {
   const hasAccess = await verifyPermission('payments.verify');
@@ -16,7 +51,7 @@ export async function getPayments(page: number = 1, limit: number = 10, search: 
       data: [],
       meta: { total: 0, page: 1, lastPage: 0 },
       error: 'Anda tidak memiliki hak akses untuk melihat data ini.',
-    } as any;
+    } satisfies PaymentPaginationResponse;
   }
 
   try {

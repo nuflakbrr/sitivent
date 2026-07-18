@@ -1,5 +1,5 @@
 'use client';
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 import { AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -32,7 +32,7 @@ const STATUS_CONFIG = {
   },
 } as const;
 
-const StatusCell = ({ row }: { row: any }) => {
+const StatusCell = ({ row }: { row: Row<SupportMessage> }) => {
   const queryClient = useQueryClient();
   const data = row.original;
 

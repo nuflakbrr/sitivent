@@ -5,6 +5,7 @@ import { verifyPermission } from './security';
 import { EventStatus, RegistrationStatus, CertNumberMode } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
+import { Prisma } from '@/generated/prisma/client';
 import type {
   CertificateTemplateAppearance,
   CertificateTemplateHeader,
@@ -56,7 +57,7 @@ export async function getCertificates(
 
     const skip = (page - 1) * limit;
 
-    const whereClause: any = {
+    const whereClause: Prisma.CertificateWhereInput = {
       event: {
         certificateEnabled: true,
         deletedAt: null,
@@ -211,7 +212,11 @@ export async function generateCertificatesForEvent(eventId: string) {
     let updatedCount = 0;
 
     // Helper function to resolve number templates
-    const resolveNumber = (pattern: string, reg: any, seqIdx: number) => {
+    const resolveNumber = (
+      pattern: string,
+      reg: { id: string; registrationNumber: string },
+      seqIdx: number
+    ) => {
       const now = new Date();
       const year = now.getFullYear().toString();
       const month = (now.getMonth() + 1).toString().padStart(2, '0');

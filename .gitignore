@@ -72,3 +72,5 @@ bun.lock
 /public/uploads/*
 
 /nginx
+
+/html-effectiveness

@@ -31,7 +31,7 @@ interface EventCardProps {
     location: string;
     price: number;
     quota: number;
-    registrations: any[];
+    registrations: { id: string }[];
   };
   formattedStartDate: string;
 }

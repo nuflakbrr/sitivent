@@ -47,4 +47,5 @@ export interface PaymentPaginationResponse {
     page: number;
     lastPage: number;
   };
+  error?: string;
 }

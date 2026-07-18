@@ -7,7 +7,14 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { eventSchema } from '@/schemas/events';
-import type { Event, EventResponse, EventPaginationResponse } from '@/interfaces/features/events';
+import type {
+  Event,
+  EventSpeaker,
+  EventBenefit,
+  EventResponse,
+  EventPaginationResponse,
+} from '@/interfaces/features/events';
+
 import { verifyPermission } from './security';
 import { slugify } from '@/lib/slugify';
 import { EventStatus, EventType } from '@/generated/prisma/enums';
@@ -50,12 +57,13 @@ async function isSuperAdmin(): Promise<boolean> {
 }
 
 /**
- * Mengambil data events dengan pagination dan pencarian
+ * Mengambil data events dengan pagination dan pencarian, opsional filter tenant
  */
 export async function getEvents(
   page: number = 1,
   limit: number = 10,
-  search: string = ''
+  search: string = '',
+  tenantId?: string | null
 ): Promise<EventPaginationResponse> {
   const hasAccess = await verifyPermission('events.read');
   if (!hasAccess) {
@@ -64,13 +72,14 @@ export async function getEvents(
       data: [],
       meta: { total: 0, page: 1, lastPage: 0 },
       error: 'Anda tidak memiliki hak akses untuk melihat data ini.',
-    } as any;
+    } satisfies EventPaginationResponse;
   }
 
   try {
     const skip = (page - 1) * limit;
 
     const where = {
+      ...(tenantId ? { tenantId } : {}),
       deletedAt: null,
       ...(search
         ? {
@@ -89,6 +98,8 @@ export async function getEvents(
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
+          speakers: true,
+          benefits: true,
           _count: {
             select: { registrations: true },
           },
@@ -117,18 +128,23 @@ export async function getEvents(
 }
 
 /**
- * Mengambil data event berdasarkan ID
+ * Mengambil data event berdasarkan ID (opsional filter tenant)
  */
-export async function getEventById(id: string): Promise<EventResponse> {
+export async function getEventById(id: string, tenantId?: string | null): Promise<EventResponse> {
   const hasAccess = await verifyPermission('events.read');
   if (!hasAccess) {
     return { success: false, error: 'Anda tidak memiliki hak akses.' };
   }
 
   try {
+    const where: any = { id, deletedAt: null };
+    if (tenantId) where.tenantId = tenantId;
+
     const event = await prisma.event.findFirst({
-      where: { id, deletedAt: null },
+      where,
       include: {
+        speakers: true,
+        benefits: true,
         _count: {
           select: { registrations: true },
         },
@@ -191,7 +207,7 @@ async function sendEventNewsletter(event: Event) {
 }
 
 /**
- * Membuat Event baru
+ * Membuat Event baru dengan speakers & benefits
  */
 export async function createEvent(values: EventValues): Promise<EventResponse> {
   const hasAccess = await verifyPermission('events.create');
@@ -205,6 +221,11 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
   }
 
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    const userId = session?.user?.id;
+
     const data = validatedFields.data;
     const finalSlug = slugify(data.slug || data.title);
 
@@ -237,11 +258,48 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
         certificateEnabled: data.certificateEnabled,
         publishedAt: data.status === EventStatus.PUBLISHED ? new Date() : null,
         categoryId: data.categoryId,
+        tenantId: data.tenantId,
+        createdById: userId,
+        speakers:
+          data.speakers && data.speakers.length > 0
+            ? {
+                createMany: {
+                  data: data.speakers.map((s: EventSpeaker, idx: number) => ({
+                    name: s.name,
+                    title: s.title,
+                    company: s.company,
+                    companyUrl: s.companyUrl,
+                    github: s.github,
+                    instagram: s.instagram,
+                    linkedIn: s.linkedIn,
+                    avatar: s.avatar,
+                    order: s.order ?? idx,
+                  })),
+                },
+              }
+            : undefined,
+        benefits:
+          data.benefits && data.benefits.length > 0
+            ? {
+                createMany: {
+                  data: data.benefits.map((b: EventBenefit, idx: number) => ({
+                    title: b.title,
+                    description: b.description,
+                    icon: b.icon,
+                    order: b.order ?? idx,
+                  })),
+                },
+              }
+            : undefined,
+      },
+      include: {
+        speakers: true,
+        benefits: true,
       },
     });
 
     if (event.status === EventStatus.PUBLISHED) {
-      void sendEventNewsletter(event);
+      void sendEventNewsletter(event as unknown as Event);
     }
 
     revalidatePath(BASE_PATH);
@@ -258,7 +316,7 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
 }
 
 /**
- * Memperbarui Event
+ * Memperbarui Event dengan speakers & benefits
  */
 export async function updateEvent(id: string, values: EventValues): Promise<EventResponse> {
   const hasAccess = await verifyPermission('events.update');
@@ -310,6 +368,12 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
     const isPublishing =
       data.status === EventStatus.PUBLISHED && existing.status !== EventStatus.PUBLISHED;
 
+    // Hapus speakers & benefits lama
+    await prisma.$transaction([
+      prisma.eventSpeaker.deleteMany({ where: { eventId: id } }),
+      prisma.eventBenefit.deleteMany({ where: { eventId: id } }),
+    ]);
+
     const event = await prisma.event.update({
       where: { id },
       data: {
@@ -331,11 +395,47 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
         certificateEnabled: data.certificateEnabled,
         publishedAt: isPublishing ? new Date() : existing.publishedAt,
         categoryId: data.categoryId,
+        tenantId: data.tenantId,
+        speakers:
+          data.speakers && data.speakers.length > 0
+            ? {
+                createMany: {
+                  data: data.speakers.map((s: EventSpeaker, idx: number) => ({
+                    name: s.name,
+                    title: s.title,
+                    company: s.company,
+                    companyUrl: s.companyUrl,
+                    github: s.github,
+                    instagram: s.instagram,
+                    linkedIn: s.linkedIn,
+                    avatar: s.avatar,
+                    order: s.order ?? idx,
+                  })),
+                },
+              }
+            : undefined,
+        benefits:
+          data.benefits && data.benefits.length > 0
+            ? {
+                createMany: {
+                  data: data.benefits.map((b: EventBenefit, idx: number) => ({
+                    title: b.title,
+                    description: b.description,
+                    icon: b.icon,
+                    order: b.order ?? idx,
+                  })),
+                },
+              }
+            : undefined,
+      },
+      include: {
+        speakers: true,
+        benefits: true,
       },
     });
 
     if (isPublishing) {
-      void sendEventNewsletter(event);
+      void sendEventNewsletter(event as unknown as Event);
     }
 
     revalidatePath(BASE_PATH);

@@ -1,7 +1,8 @@
 import { type Editor as CoreEditor, Extension, type Range } from '@tiptap/core';
 import type { Node as PMNode } from '@tiptap/pm/model';
-import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Plugin, PluginKey, type EditorState, type Transaction } from '@tiptap/pm/state';
 import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
+
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -104,7 +105,7 @@ function processSearches(
   };
 }
 
-const replace = (replaceTerm: string, results: Range[], { state, dispatch }: any) => {
+const replace = (replaceTerm: string, results: Range[], { state, dispatch }: { state: EditorState; dispatch: ((tr: Transaction) => void) | undefined }) => {
   const firstResult = results[0];
 
   if (!firstResult) {
@@ -147,7 +148,7 @@ const rebaseNextResult = (
 const replaceAll = (
   replaceTerm: string,
   results: Range[],
-  { tr, dispatch }: { tr: any; dispatch: any }
+  { tr, dispatch }: { tr: Transaction; dispatch: ((tr: Transaction) => void) | undefined }
 ) => {
   if (!results.length) {
     return;
@@ -165,7 +166,7 @@ const replaceAll = (
     }
   }
 
-  dispatch(tr);
+  dispatch?.(tr);
 };
 
 const selectNext = (editor: CoreEditor) => {

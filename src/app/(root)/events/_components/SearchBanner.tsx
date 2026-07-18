@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks/useDebounce';
+import type { Route } from 'next';
 
 export const SearchBanner: FC = () => {
   const router = useRouter();
@@ -32,7 +33,7 @@ export const SearchBanner: FC = () => {
     } else {
       params.delete('q');
     }
-    router.replace(`${pathname}?${params.toString()}` as any, { scroll: false });
+    router.replace(`${pathname}?${params.toString()}` as Route, { scroll: false });
   }, [debouncedValue, pathname, router, searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +49,7 @@ export const SearchBanner: FC = () => {
     } else {
       params.delete('q');
     }
-    router.replace(`${pathname}?${params.toString()}` as any, { scroll: false });
+    router.replace(`${pathname}?${params.toString()}` as Route, { scroll: false });
   };
 
   return (

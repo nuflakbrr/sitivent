@@ -37,7 +37,8 @@ export async function GET(request: Request) {
     }));
 
     return NextResponse.json({ success: true, data: mapped });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

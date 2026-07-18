@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import type { AuthResponse, User } from '@/interfaces/features/auth';
 import { prisma } from '@/lib/prisma';
 import { loginSchema, registerSchema } from '@/schemas/auth';
+import type { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
@@ -64,7 +65,7 @@ export async function loginAction(values: LoginValues): Promise<AuthResponse> {
         const name = nameValue.substring(0, firstEq);
         const value = nameValue.substring(firstEq + 1);
 
-        const cookieOptions: any = {
+        const cookieOptions: Partial<ResponseCookie> = {
           path: '/',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
@@ -78,7 +79,8 @@ export async function loginAction(values: LoginValues): Promise<AuthResponse> {
           if (lowerKey === 'max-age') cookieOptions.maxAge = parseInt(val);
           if (lowerKey === 'expires') cookieOptions.expires = new Date(val);
           if (lowerKey === 'domain') cookieOptions.domain = val;
-          if (lowerKey === 'samesite') cookieOptions.sameSite = val.toLowerCase() as any;
+          if (lowerKey === 'samesite')
+            cookieOptions.sameSite = val.toLowerCase() as 'strict' | 'lax' | 'none';
         });
 
         // Paksa pengaturan cookie ke store Next.js
@@ -118,7 +120,7 @@ export async function logoutAction(): Promise<AuthResponse> {
         const firstEq = parts.indexOf('=');
         if (firstEq !== -1) {
           const name = parts.substring(0, firstEq).trim();
-          cookieStore.delete(name as any);
+          cookieStore.delete(name);
         }
       }
     }
