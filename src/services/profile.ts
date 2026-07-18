@@ -4,6 +4,28 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
+export async function updateUserName(name: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return { success: false, error: 'Sesi tidak valid.' };
+    }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { name: name.trim() },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Update User Name Error:', error);
+    return { success: false, error: 'Gagal memperbarui nama karena kesalahan server.' };
+  }
+}
+
 export async function updateUserEmail(
   newEmail: string
 ): Promise<{ success: boolean; error?: string }> {
