@@ -36,6 +36,10 @@ const labelMapping: Record<string, string> = {
   new: 'Tambah',
   publications: 'Publikasi',
   articles: 'Artikel',
+  tenants: 'Organisasi',
+  tenant: 'Organisasi',
+  members: 'Anggota',
+  settings: 'Pengaturan',
 };
 
 export function CMSHeader() {
@@ -69,6 +73,10 @@ export function CMSHeader() {
           'roles',
           'permissions',
           'articles',
+          'tenants',
+          'tenant',
+          'members',
+          'settings',
         ];
         if (prevSegment && resolvableParents.includes(prevSegment)) {
           const label = await resolveLabel(segment, prevSegment);
@@ -124,6 +132,10 @@ export function CMSHeader() {
                 'payments',
                 'attendance',
                 'scan',
+                'tenants',
+                'tenant',
+                'members',
+                'settings',
               ];
               const isNonClickable = staticSegments.includes(segment);
 

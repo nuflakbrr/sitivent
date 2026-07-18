@@ -4,6 +4,18 @@ import { auth } from '../src/lib/auth';
 async function main() {
   console.log('🚀 Start seeding...');
 
+  // 0. Seed Default Tenant
+  console.log('  - Seeding default tenant...');
+  const defaultTenant = await prisma.tenant.upsert({
+    where: { slug: 'universitas-merdeka-malang' },
+    update: { name: 'Universitas Merdeka Malang' },
+    create: {
+      name: 'Universitas Merdeka Malang',
+      slug: 'universitas-merdeka-malang',
+      description: 'Tenant default SITIVENT untuk event dan manajemen peserta.',
+    },
+  });
+
   // 1. Seed Permissions
   const permissions = [
     // --- Core / Administration Module ---
@@ -26,6 +38,18 @@ async function main() {
     { name: 'event.categories.create', description: 'Membuat event kategori baru' },
     { name: 'event.categories.update', description: 'Mengubah data event kategori' },
     { name: 'event.categories.delete', description: 'Menghapus event kategori' },
+
+    // --- Tenant Management Module ---
+    { name: 'tenants.read', description: 'Melihat daftar tenant' },
+    { name: 'tenants.create', description: 'Membuat tenant baru' },
+    { name: 'tenants.update', description: 'Mengubah data tenant' },
+    { name: 'tenants.delete', description: 'Menghapus tenant' },
+
+    // --- Tenant Member Management Module ---
+    { name: 'tenant.members.read', description: 'Melihat daftar anggota tenant' },
+    { name: 'tenant.members.invite', description: 'Mengundang anggota tenant baru' },
+    { name: 'tenant.members.update', description: 'Mengubah data anggota tenant' },
+    { name: 'tenant.members.delete', description: 'Menghapus anggota tenant' },
 
     // --- Articles Module ---
     { name: 'article.read', description: 'Melihat daftar artikel' },
@@ -125,22 +149,6 @@ async function main() {
   });
 
   await prisma.role.upsert({
-    where: { name: 'scanner' },
-    update: { description: 'Petugas pemindaian kehadiran peserta' },
-    create: {
-      name: 'scanner',
-      description: 'Petugas pemindaian kehadiran peserta',
-      permissions: {
-        connect: [
-          { name: 'admin.access' },
-          { name: 'attendance.scan' },
-          { name: 'registrations.read' },
-        ],
-      },
-    },
-  });
-
-  await prisma.role.upsert({
     where: { name: 'peserta' },
     update: { description: 'Peserta dengan akses pendaftaran dan sertifikat' },
     create: {
@@ -206,7 +214,6 @@ async function main() {
   console.log('  - Seeding users...');
   const adminId = await seedUser('super.admin@gmail.com', 'Super Admin', 'password', 'superadmin');
   const panitiaId = await seedUser('panitia@gmail.com', 'Panitia Event', 'password', 'panitia');
-  const scannerId = await seedUser('scanner@gmail.com', 'Petugas Scanner', 'password', 'scanner');
   const pesertaId = await seedUser('peserta@gmail.com', 'Peserta Mandiri', 'password', 'peserta');
   const pesertaBerbayarId = await seedUser(
     'peserta-berbayar@gmail.com',
@@ -227,6 +234,14 @@ async function main() {
     'peserta'
   );
 
+  if (adminId) {
+    await prisma.userTenant.upsert({
+      where: { userId_tenantId: { userId: adminId, tenantId: defaultTenant.id } },
+      update: { role: 'superadmin' },
+      create: { userId: adminId, tenantId: defaultTenant.id, role: 'superadmin' },
+    });
+  }
+
   // 4. Seed Event Categories
   console.log('  - Seeding event categories...');
   const categoryDefs = [
@@ -242,7 +257,7 @@ async function main() {
     const record = await prisma.eventCategory.upsert({
       where: { slug: cat.slug },
       update: { description: cat.description },
-      create: cat,
+      create: { ...cat, tenantId: defaultTenant.id },
     });
     categoryMap[cat.slug] = record.id;
   }
@@ -271,6 +286,8 @@ async function main() {
       certificateEnabled: true,
       publishedAt: new Date(),
       categoryId: categoryMap['seminar'],
+      tenantId: defaultTenant.id,
+      createdById: adminId ?? null,
     },
   });
 
@@ -295,6 +312,8 @@ async function main() {
       certificateEnabled: true,
       publishedAt: new Date(),
       categoryId: categoryMap['webinar'],
+      tenantId: defaultTenant.id,
+      createdById: adminId ?? null,
     },
   });
 
@@ -319,6 +338,8 @@ async function main() {
       certificateEnabled: true,
       publishedAt: new Date(),
       categoryId: categoryMap['workshop'],
+      tenantId: defaultTenant.id,
+      createdById: adminId ?? null,
     },
   });
 
@@ -343,6 +364,8 @@ async function main() {
       certificateEnabled: true,
       publishedAt: new Date(),
       categoryId: categoryMap['konferensi'],
+      tenantId: defaultTenant.id,
+      createdById: adminId ?? null,
     },
   });
 
@@ -366,6 +389,8 @@ async function main() {
       status: 'DRAFT',
       certificateEnabled: false,
       categoryId: categoryMap['kompetisi'],
+      tenantId: defaultTenant.id,
+      createdById: adminId ?? null,
     },
   });
 
@@ -670,9 +695,8 @@ async function main() {
   console.log('✅ Seed completed successfully!');
   console.log('');
   console.log('📋 Akun yang tersedia (semua password: "password"):');
-  console.log('   super.admin@gmail.com        → superadmin');
+  console.log('   super.admin@gmail.com     → superadmin');
   console.log('   panitia@gmail.com            → panitia');
-  console.log('   scanner@gmail.com            → scanner');
   console.log('   peserta@gmail.com            → peserta');
   console.log('   peserta-berbayar@gmail.com   → peserta');
   console.log('   peserta-scan-1@gmail.com     → peserta');

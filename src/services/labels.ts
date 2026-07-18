@@ -77,6 +77,14 @@ export async function resolveLabel(id: string, parentSegment: string): Promise<s
         return perm?.name || null;
       }
 
+      case 'tenants': {
+        const tenant = await prisma.tenant.findUnique({
+          where: { id },
+          select: { name: true },
+        });
+        return tenant?.name || null;
+      }
+
       default:
         return null;
     }

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { loginSchema } from '@/schemas/auth';
 import type { LoginValues } from '@/services/auth';
 import { signIn } from '@/lib/authClient';
+import { getUserDefaultTenantSlug } from '@/services/user-tenants';
 import type { Route } from 'next';
 
 const LoginForm: FC = () => {
@@ -31,6 +32,8 @@ const LoginForm: FC = () => {
         callbackURL: '/admin/dashboard',
       });
 
+      const tenantSlug = data?.user?.id ? await getUserDefaultTenantSlug(data.user.id) : null;
+
       if (error) {
         let message = 'Terjadi kesalahan saat login.';
         if (error.status === 401 || error.code === 'INVALID_EMAIL_OR_PASSWORD') {
@@ -41,11 +44,15 @@ const LoginForm: FC = () => {
         throw new Error(message);
       }
 
-      return data;
+      return { data, tenantSlug };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.success('Login berhasil! Selamat datang kembali.');
-      router.push('/admin/dashboard');
+      if (result?.tenantSlug) {
+        router.push(`/admin/${result.tenantSlug}/dashboard` as Route);
+      } else {
+        router.push('/admin/dashboard' as Route);
+      }
       router.refresh();
     },
     onError: (error: Error) => {

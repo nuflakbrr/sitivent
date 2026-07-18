@@ -76,6 +76,18 @@ export async function proxy(request: NextRequest) {
 
     const hasAdminAccess = permissionsSet.has('admin.access');
 
+    const tenant = isAuthenticated
+      ? await prisma.userTenant.findFirst({
+          where: { userId: session.user.id },
+          include: { tenant: true },
+          orderBy: { tenant: { createdAt: 'asc' } },
+        })
+      : null;
+
+    const defaultAdminDashboard = tenant?.tenant?.slug
+      ? `/admin/${tenant.tenant.slug}/dashboard`
+      : '/admin/dashboard';
+
     // Blocker 2: Jika akses /admin tapi tidak punya akses admin -> Tendang ke /participant/dashboard
     if (isAdminPath && isAuthenticated && !hasAdminAccess) {
       return NextResponse.redirect(new URL('/participant/dashboard', request.url));
@@ -84,7 +96,7 @@ export async function proxy(request: NextRequest) {
     // Blocker 3: Jika akses /login tapi SUDAH login -> Tendang ke dashboard yang sesuai
     if ((isAuthPath || isRegisterPath) && isAuthenticated) {
       if (hasAdminAccess) {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+        return NextResponse.redirect(new URL(defaultAdminDashboard, request.url));
       } else {
         return NextResponse.redirect(new URL('/participant/dashboard', request.url));
       }

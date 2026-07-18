@@ -25,7 +25,7 @@ const CMSLayout: FC<Props> = async ({ children }) => {
     return redirect('/login');
   }
 
-  // 2. Ambil permissions di server
+  // 2. Ambil user + permissions di server
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
@@ -59,11 +59,33 @@ const CMSLayout: FC<Props> = async ({ children }) => {
 
   const permissions = Array.from(permissionsSet);
 
+  // Dapatkan semua tenant yang bisa diakses user (superadmin dapat semua)
+  const userTenants = await prisma.userTenant.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    include: {
+      tenant: true,
+    },
+  });
+
+  const tenants = userTenants
+    .map((ut) => ut.tenant)
+    .filter((t): t is NonNullable<typeof t> => t !== null);
+
+  // Default ke tenant pertama (superadmin bisa lihat semua)
+  const currentTenant = tenants[0] || null;
+
   return (
     <TooltipProvider>
       <SidebarProvider>
         <PermissionProvider initialPermissions={permissions} initialRoles={roles}>
-          <AppSidebar session={session} permissions={permissions} />
+          <AppSidebar
+            session={session}
+            permissions={permissions}
+            tenant={currentTenant}
+            tenants={tenants}
+          />
           <SidebarInset>
             <CMSHeader />
             <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>

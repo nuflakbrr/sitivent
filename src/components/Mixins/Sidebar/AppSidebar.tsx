@@ -24,16 +24,48 @@ import { sideLinks } from './constant/sideLinks';
 import { UserSetting } from './UserSetting';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
+import { TenantSwitcher } from './TenantSwitcher';
+
+interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface AppSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string;
+    image?: string | null;
+  };
+}
 
 const BASE_ADMIN_PATH = '/admin';
+const buildTenantHref = (tenant?: string, path = '') =>
+  tenant
+    ? `/admin/${tenant}/${path}`.replace(/\/+$/, '')
+    : `${BASE_ADMIN_PATH}/${path}`.replace(/\/+$/, '');
+
+interface AppSidebarProps {
+  session: { user?: { name?: string | null; email?: string; image?: string | null } };
+  permissions: string[];
+  tenant?: { id: string; name: string; slug: string } | null;
+  tenants?: { id: string; name: string; slug: string }[];
+  basePath?: string;
+}
 
 export function AppSidebar({
   session,
   permissions,
+  tenant,
+  tenants,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { session: any; permissions: string[] }) {
+}: React.ComponentProps<typeof Sidebar> & AppSidebarProps) {
   const isMounted = useMounted();
   const { resolvedTheme } = useTheme();
+
+  const tenantSlug = tenant?.slug;
 
   const [logoSrc, setLogoSrc] = React.useState('/assets/img/ttn-logo.jpg');
 
@@ -82,10 +114,8 @@ export function AppSidebar({
 
   const filteredNavMain = sideLinks.navMain
     .map((item) => {
-      // Filter children first
       const visibleItems = item.items?.filter((subItem) => hasPermission(subItem.permission));
 
-      // If item has children, show if at least one child is visible
       if (item.hasChildren) {
         if (visibleItems && visibleItems.length > 0) {
           return { ...item, items: visibleItems };
@@ -93,20 +123,24 @@ export function AppSidebar({
         return null;
       }
 
-      // If item has no children, check its own permission
       if (hasPermission(item.permission)) {
         return item;
       }
 
       return null;
     })
-    .filter(Boolean) as typeof sideLinks.navMain;
+    .filter((item): item is (typeof sideLinks.navMain)[number] => item !== null);
 
   return (
     <Sidebar {...props}>
       <SidebarHeader className="flex items-center justify-center p-4">
         {/* Menggunakan img standar sementara untuk memastikan path benar-benar bisa diakses */}
         <img src={logoSrc} alt="Logo" className="w-auto h-20 object-contain" loading="lazy" />
+        {tenants && tenants.length > 0 && (
+          <div className="w-full py-2 border-b">
+            <TenantSwitcher currentTenant={tenant || tenants[0]} tenants={tenants} />
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent className="gap-0">
         {/* We create a collapsible SidebarGroup for each parent. */}
@@ -126,7 +160,7 @@ export function AppSidebar({
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <Link href={`${BASE_ADMIN_PATH}/${subItem.url}` as Route}>
+                          <Link href={buildTenantHref(tenantSlug, subItem.url) as Route}>
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>
@@ -139,7 +173,7 @@ export function AppSidebar({
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link href={`${BASE_ADMIN_PATH}/${item.url}` as Route}>
+                    <Link href={buildTenantHref(tenantSlug, item.url) as Route}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                     </Link>

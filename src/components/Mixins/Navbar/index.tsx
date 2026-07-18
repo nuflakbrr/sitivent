@@ -26,12 +26,14 @@ import AlertModal from '@/components/Common/Modals/AlertModal';
 
 interface MeResponse {
   isAdmin: boolean;
+  tenantSlug?: string | null;
 }
 
 interface NavbarUserDropdownProps {
   user: { name: string; email: string; image?: string | null };
   scrolled: boolean;
   isAdmin: boolean;
+  tenantSlug?: string | null;
 }
 
 const getInitials = (name: string): string =>
@@ -44,9 +46,18 @@ const getInitials = (name: string): string =>
         .toUpperCase()
     : 'U';
 
-const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({ user, scrolled, isAdmin }) => {
+const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({
+  user,
+  scrolled,
+  isAdmin,
+  tenantSlug,
+}) => {
   const router = useRouter();
-  const dashboardHref = isAdmin ? '/admin/dashboard' : '/participant/dashboard';
+  const dashboardHref = isAdmin
+    ? tenantSlug
+      ? `/admin/${tenantSlug}/dashboard`
+      : '/admin/dashboard'
+    : '/participant/dashboard';
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const { mutate: handleLogout, isPending } = useMutation({
@@ -230,7 +241,12 @@ const Navbar: FC = () => {
             <div className="hidden lg:flex items-center gap-2">
               <EventSearch scrolled={isSolid} />
               {session?.user ? (
-                <NavbarUserDropdown user={session.user} scrolled={isSolid} isAdmin={isAdmin} />
+                <NavbarUserDropdown
+                  user={session.user}
+                  scrolled={isSolid}
+                  isAdmin={isAdmin}
+                  tenantSlug={meData?.tenantSlug ?? null}
+                />
               ) : (
                 <>
                   <Link

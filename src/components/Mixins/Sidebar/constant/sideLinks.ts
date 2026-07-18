@@ -13,10 +13,10 @@ import {
   Image,
   BookOpen,
   MessageCircle,
+  Building2,
 } from 'lucide-react';
 
 type SideLinks = {
-  versions: string[];
   navMain: {
     title: string;
     url: string;
@@ -34,7 +34,6 @@ type SideLinks = {
 };
 
 export const sideLinks: SideLinks = {
-  versions: ['1.0.1', '1.1.0-alpha', '2.0.0-beta1'],
   navMain: [
     {
       title: 'Dashboard',
@@ -160,6 +159,12 @@ export const sideLinks: SideLinks = {
           url: 'managements/roles',
           icon: UserCog,
           permission: 'role.read',
+        },
+        {
+          title: 'Organisasi',
+          url: 'managements/tenants',
+          icon: Building2,
+          permission: 'tenants.read',
         },
         {
           title: 'Pengguna',
