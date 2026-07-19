@@ -1,17 +1,11 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { ChevronsUpDown, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Route } from 'next';
+import { MemberCellAction } from './MemberCellAction';
 
 export type TenantMemberRow = {
   userId: string;
@@ -53,25 +47,14 @@ const Columns: ColumnDef<TenantMemberRow>[] = [
   {
     id: 'action',
     header: 'Aksi',
-    cell: ({ row }) => <MemberCellAction row={row.original} />,
+    cell: ({ row }) => (
+      <MemberCellAction
+        tenantId={row.original.tenantId}
+        userId={row.original.userId}
+        userName={row.original.user.name}
+      />
+    ),
   },
 ];
-
-function MemberCellAction({ row }: { row: TenantMemberRow }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem className="text-destructive">
-          <Trash2 className="mr-2 h-4 w-4" /> Hapus dari Tenant
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
 
 export default Columns;

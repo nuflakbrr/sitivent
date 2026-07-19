@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,13 +23,12 @@ import {
 } from '@/components/ui/select';
 import { addTenantMember, searchAvailableUsers } from '@/services/tenant-members';
 
-export function AddMemberDialog({
-  tenantId,
-  onSuccess,
-}: {
+interface AddMemberDialogProps {
   tenantId: string;
   onSuccess: () => void;
-}) {
+}
+
+export function AddMemberDialog({ tenantId, onSuccess }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [userId, setUserId] = useState('');
@@ -60,15 +59,16 @@ export function AddMemberDialog({
           <Plus className="mr-2 h-4 w-4" /> Tambah Member
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Tambah User ke Tenant</DialogTitle>
+          <DialogTitle>Tambah Member ke Tenant</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
             placeholder="Cari user..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="mb-4"
           />
           <Select value={userId} onValueChange={setUserId}>
             <SelectTrigger>
