@@ -8,6 +8,7 @@ import { CheckCircle2, AlertCircle, CreditCard } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { registerToEvent } from '@/services/registrations';
+import { usePermission } from '@/providers/PermissionProvider';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ type Props = {
   isQuotaFull: boolean;
   price: number;
   slug: string;
+  userRole?: string | null;
 };
 
 const RegisterButton: FC<Props> = ({
@@ -39,9 +41,13 @@ const RegisterButton: FC<Props> = ({
   isQuotaFull,
   price,
   slug,
+  userRole,
 }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+
+  const { hasRole } = usePermission();
+  const isAdminUser = hasRole('superadmin') || hasRole('panitia');
 
   const { mutate: onRegister, isPending } = useMutation({
     mutationFn: () => registerToEvent(eventId),
@@ -153,6 +159,21 @@ const RegisterButton: FC<Props> = ({
         }}
       >
         <AlertCircle className="h-4 w-4" /> Kuota Penuh
+      </Button>
+    );
+  }
+
+  if (isAdminUser) {
+    return (
+      <Button
+        disabled
+        className="w-full py-6 text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl"
+        style={{
+          backgroundColor: '#87867F',
+          color: '#FAF9F5',
+        }}
+      >
+        <AlertCircle className="h-4 w-4" /> Admin Tidak Dapat Mendaftar Event
       </Button>
     );
   }

@@ -158,6 +158,12 @@ export async function registerToEvent(eventId: string) {
     }
 
     const userId = session.user.id;
+    const user = session.user;
+
+    // Cegah superadmin/panitia mendaftar event
+    if (user.role === 'superadmin' || user.role === 'panitia') {
+      return { success: false, error: 'Akun admin/panitia tidak dapat mendaftar event.' };
+    }
 
     // 1. Ambil data event
     const event = await prisma.event.findUnique({
