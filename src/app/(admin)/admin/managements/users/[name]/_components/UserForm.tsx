@@ -6,7 +6,8 @@ import Link from 'next/link';
 
 import type { User } from '@/interfaces/features/users';
 import { usePermission } from '@/providers/PermissionProvider';
-import { useSession } from '@/lib/authClient';
+import { useQuery } from '@tanstack/react-query';
+import { getMeAction } from '@/services/auth';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,11 @@ interface ExtendedUser {
 
 const UserForm: FC<Props> = ({ initialData }) => {
   const { hasPermission, hasRole } = usePermission();
-  const { data: session } = useSession();
+  const { data: meData } = useQuery({
+    queryKey: ['auth-me-server-action'],
+    queryFn: () => getMeAction(),
+  });
+  const session = meData?.session;
   const {
     form,
     roles,

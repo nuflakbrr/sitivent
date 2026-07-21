@@ -51,7 +51,6 @@ export const eventSchema = z.object({
   status: z.nativeEnum(EventStatus).default(EventStatus.DRAFT),
   certificateEnabled: z.boolean().default(false),
   categoryId: z.string().optional().nullable(),
-  tenantId: z.string().optional().nullable(),
   createdById: z.string().optional().nullable(),
   speakers: z.array(speakerSchema).default([]),
   benefits: z.array(benefitSchema).default([]),

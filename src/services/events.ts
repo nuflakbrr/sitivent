@@ -62,8 +62,7 @@ async function isSuperAdmin(): Promise<boolean> {
 export async function getEvents(
   page: number = 1,
   limit: number = 10,
-  search: string = '',
-  tenantId?: string | null
+  search: string = ''
 ): Promise<EventPaginationResponse> {
   const hasAccess = await verifyPermission('events.read');
   if (!hasAccess) {
@@ -79,7 +78,6 @@ export async function getEvents(
     const skip = (page - 1) * limit;
 
     const where = {
-      ...(tenantId ? { tenantId } : {}),
       deletedAt: null,
       ...(search
         ? {
@@ -130,7 +128,7 @@ export async function getEvents(
 /**
  * Mengambil data event berdasarkan ID (opsional filter tenant)
  */
-export async function getEventById(id: string, tenantId?: string | null): Promise<EventResponse> {
+export async function getEventById(id: string): Promise<EventResponse> {
   const hasAccess = await verifyPermission('events.read');
   if (!hasAccess) {
     return { success: false, error: 'Anda tidak memiliki hak akses.' };
@@ -138,7 +136,6 @@ export async function getEventById(id: string, tenantId?: string | null): Promis
 
   try {
     const where: any = { id, deletedAt: null };
-    if (tenantId) where.tenantId = tenantId;
 
     const event = await prisma.event.findFirst({
       where,
@@ -257,8 +254,7 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
         status: data.status,
         certificateEnabled: data.certificateEnabled,
         publishedAt: data.status === EventStatus.PUBLISHED ? new Date() : null,
-        categoryId: data.categoryId,
-        tenantId: data.tenantId,
+        categoryId: data.categoryId || null,
         createdById: userId,
         speakers:
           data.speakers && data.speakers.length > 0
@@ -394,8 +390,7 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
         status: data.status,
         certificateEnabled: data.certificateEnabled,
         publishedAt: isPublishing ? new Date() : existing.publishedAt,
-        categoryId: data.categoryId,
-        tenantId: data.tenantId,
+        categoryId: data.categoryId || null,
         speakers:
           data.speakers && data.speakers.length > 0
             ? {

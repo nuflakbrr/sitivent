@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { siteMetadata } from '@/data/siteMetadata';
 import QueryProvider from '@/providers/QueryProvider';
 import { Toaster } from '@/components/ui/sonner';
+import { ImageKitProvider } from '@imagekit/next';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -68,7 +69,9 @@ export default function RootLayout({
       className={cn('font-sans', inter.variable)}
     >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+        <ImageKitProvider urlEndpoint={process.env.IMAGEKIT_URL}>
+          <QueryProvider>{children}</QueryProvider>
+        </ImageKitProvider>
         <Toaster richColors position="top-center" />
       </body>
     </html>

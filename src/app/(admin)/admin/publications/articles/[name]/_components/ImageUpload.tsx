@@ -2,13 +2,13 @@
 import { useState, type FC, useRef, type ChangeEvent, useEffect } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import Image from 'next/image';
+import { Image } from '@imagekit/next';
 
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-// import MediaPickerModal from '@/components/Common/MediaPicker/MediaPicker';
 import ImageCropperModal from '@/components/Common/Modals/ImageCropperModal';
 import { slugify } from '@/lib/slugify';
+import { deleteImage } from '@/services/uploads';
 
 type ImageUploadProps = {
   value: string;
@@ -35,8 +35,11 @@ const ImageUpload: FC<ImageUploadProps> = ({
   disabledMessage,
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Simulated progress state
+  const [progress, setProgress] = useState(0);
+  const prevUploading = useRef(isUploading);
 
   // Cropper state
   const [isCropperOpen, setIsCropperOpen] = useState(false);
@@ -47,6 +50,41 @@ const ImageUpload: FC<ImageUploadProps> = ({
   useEffect(() => {
     setPreviewUrl(value || null);
   }, [value]);
+
+  // Simulated progress hook
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isUploading) {
+      setProgress(0);
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev < 70) {
+            return prev + Math.floor(Math.random() * 8) + 3;
+          } else if (prev < 90) {
+            return prev + Math.floor(Math.random() * 4) + 1;
+          } else if (prev < 95) {
+            return prev + 1;
+          }
+          return prev;
+        });
+      }, 150);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isUploading]);
+
+  // Completion progress hook
+  useEffect(() => {
+    if (prevUploading.current && !isUploading) {
+      setProgress(100);
+      const timer = setTimeout(() => {
+        setProgress(0);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    prevUploading.current = isUploading;
+  }, [isUploading]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,18 +136,21 @@ const ImageUpload: FC<ImageUploadProps> = ({
   };
 
   const handleCroppedImage = (croppedFile: File) => {
+    setIsCropperOpen(false);
     onUpload(croppedFile);
   };
 
-  const handleMediaSelect = async (url: string) => {
-    onSelect(url);
-    setPreviewUrl(url);
-    toast.success('Gambar dipilih dari pustaka.');
-  };
-
   const removeImage = async () => {
-    if (previewUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrl);
+    if (previewUrl) {
+      if (previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      } else {
+        try {
+          await deleteImage(previewUrl);
+        } catch (err) {
+          console.error('Gagal menghapus gambar dari ImageKit:', err);
+        }
+      }
     }
     setPreviewUrl(null);
     onRemove();
@@ -154,15 +195,6 @@ const ImageUpload: FC<ImageUploadProps> = ({
               >
                 Ganti
               </Button>
-              {/* <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsPickerOpen(true)}
-                disabled={isUploading}
-              >
-                Pustaka
-              </Button> */}
               <Button
                 type="button"
                 size="sm"
@@ -176,13 +208,18 @@ const ImageUpload: FC<ImageUploadProps> = ({
             {isUploading && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center flex-col gap-2 text-white">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="text-xs">Mengompres...</span>
+                <span className="text-xs">
+                  {progress > 0 && progress < 100
+                    ? `Mengunggah... ${Math.round(progress)}%`
+                    : progress >= 100
+                      ? 'Selesai...'
+                      : 'Memproses...'}
+                </span>
               </div>
             )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {/* INFO: change to md:grid-cols-2 if you want to add button library */}
             <button
               type="button"
               onClick={() => {
@@ -201,27 +238,17 @@ const ImageUpload: FC<ImageUploadProps> = ({
                 <Upload className="h-6 w-6 text-muted-foreground" />
               )}
               <span className="text-sm text-muted-foreground">
-                {isUploading ? 'Memproses...' : 'Upload Gambar Baru'}
+                {isUploading
+                  ? progress > 0 && progress < 100
+                    ? `Mengunggah... ${Math.round(progress)}%`
+                    : 'Memproses...'
+                  : 'Upload Gambar Baru'}
               </span>
             </button>
-            {/* <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
-              disabled={isUploading}
-              className="w-full aspect-video flex flex-col items-center justify-center gap-2 border-2 border-dashed border-muted-foreground/25 rounded-xl hover:bg-muted/50 hover:border-primary/50 transition-all"
-            >
-              <ImageIcon className="h-6 w-6 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground font-bold">COVER</span>
-            </button> */}
           </div>
         )}
       </div>
 
-      {/* <MediaPickerModal
-        isOpen={isPickerOpen}
-        onClose={() => setIsPickerOpen(false)}
-        onSelect={handleMediaSelect}
-      /> */}
       <ImageCropperModal
         isOpen={isCropperOpen}
         onClose={() => setIsCropperOpen(false)}

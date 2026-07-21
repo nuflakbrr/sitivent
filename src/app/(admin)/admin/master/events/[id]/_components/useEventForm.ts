@@ -41,7 +41,6 @@ export const useEventForm = (initialData: Event | null) => {
       status: initialData?.status || 'DRAFT',
       certificateEnabled: initialData?.certificateEnabled || false,
       categoryId: initialData?.categoryId || '',
-      tenantId: initialData?.tenantId || '',
       createdById: initialData?.createdById || '',
       speakers: speakers.length > 0 ? speakers : [{ ...defaultSpeaker, order: 0 }],
       benefits: benefits.length > 0 ? benefits : [{ ...defaultBenefit, order: 0 }],

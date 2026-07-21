@@ -1,7 +1,7 @@
 'use client';
 import { useState, type FC } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -9,7 +9,7 @@ import type { User } from '@/interfaces/features/users';
 import { deleteUser } from '@/services/users';
 import { usePermission } from '@/providers/PermissionProvider';
 import { copyToClipboard } from '@/lib/clipboard';
-import { useSession } from '@/lib/authClient';
+import { getMeAction } from '@/services/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +36,11 @@ const CellAction: FC<CellActionProps> = ({ data }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { hasPermission, hasRole } = usePermission();
-  const { data: session } = useSession();
+  const { data: meData } = useQuery({
+    queryKey: ['auth-me-server-action'],
+    queryFn: () => getMeAction(),
+  });
+  const session = meData?.session;
   const [open, setOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 

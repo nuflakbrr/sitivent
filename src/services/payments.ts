@@ -235,14 +235,24 @@ export async function verifyPayment(
           ? `<p>Link Meeting (Zoom): <a href="${payment.registration.event.meetingLink}">${payment.registration.event.meetingLink}</a></p>`
           : '<p>Sampai jumpa di lokasi event!</p>';
 
+      const qrCodeSection = isOnline
+        ? ''
+        : `
+          <p>Tunjukkan QR Code berikut saat check-in:</p>
+          <div style="text-align: center; margin: 24px 0;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrToken}" alt="QR Code" style="display: inline-block; border: 2px solid #E3DACC; border-radius: 8px; padding: 10px; background-color: white;" />
+          </div>
+        `;
+
       const emailBody = `
-        <h2>Pembayaran Berhasil Diverifikasi!</h2>
-        <p>Halo ${payment.registration.user.name || payment.registration.user.email},</p>
-        <p>Pembayaran Anda untuk event <strong>${payment.registration.event.title}</strong> sebesar <strong>Rp ${payment.amount.toLocaleString('id-ID')}</strong> telah berhasil diverifikasi.</p>
-        <p>Nomor Registrasi Anda: <strong>${payment.registration.registrationNumber}</strong></p>
-        <p>Tunjukkan QR Code berikut saat check-in:</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrToken}" alt="QR Code" style="display:block;margin:10px 0;" />
-        ${meetingInfo}
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif; margin-top: 0;">Pembayaran Berhasil Diverifikasi!</h2>
+          <p>Halo <strong>${payment.registration.user.name || payment.registration.user.email}</strong>,</p>
+          <p>Pembayaran Anda untuk event <strong>${payment.registration.event.title}</strong> sebesar <strong>Rp ${payment.amount.toLocaleString('id-ID')}</strong> telah berhasil diverifikasi.</p>
+          <p>Nomor Registrasi Anda: <strong>${payment.registration.registrationNumber}</strong></p>
+          ${qrCodeSection}
+          ${meetingInfo}
+        </div>
       `;
       await queueEmail(
         payment.registration.user.email,
@@ -251,11 +261,13 @@ export async function verifyPayment(
       );
     } else if (status === PaymentStatus.FAILED) {
       const emailBody = `
-        <h2>Pembayaran Gagal Diverifikasi</h2>
-        <p>Halo ${payment.registration.user.name || payment.registration.user.email},</p>
-        <p>Mohon maaf, bukti pembayaran Anda untuk event <strong>${payment.registration.event.title}</strong> ditolak.</p>
-        <p>Alasan: <strong>${rejectReason || 'Bukti transfer tidak valid atau tidak sesuai.'}</strong></p>
-        <p>Silakan unggah kembali bukti pembayaran yang valid melalui dashboard peserta.</p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif; margin-top: 0;">Pembayaran Gagal Diverifikasi</h2>
+          <p>Halo <strong>${payment.registration.user.name || payment.registration.user.email}</strong>,</p>
+          <p>Mohon maaf, bukti pembayaran Anda untuk event <strong>${payment.registration.event.title}</strong> ditolak.</p>
+          <p>Alasan: <strong style="color: #EF4444;">${rejectReason || 'Bukti transfer tidak valid atau tidak sesuai.'}</strong></p>
+          <p>Silakan unggah kembali bukti pembayaran yang valid melalui dashboard peserta.</p>
+        </div>
       `;
       await queueEmail(
         payment.registration.user.email,

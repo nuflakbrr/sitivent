@@ -9,7 +9,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
-import { useSession, signOut } from '@/lib/authClient';
+import { signOut } from '@/lib/authClient';
+import { getMeAction } from '@/services/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -132,14 +133,12 @@ const Navbar: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { data: session } = useSession();
-
-  const { data: meData } = useQuery<MeResponse>({
-    queryKey: ['auth-me'],
-    queryFn: () => fetch('/api/auth/me').then((r) => r.json() as Promise<MeResponse>),
-    enabled: !!session?.user,
+  const { data: meData } = useQuery({
+    queryKey: ['auth-me-server-action'],
+    queryFn: () => getMeAction(),
     staleTime: 5 * 60 * 1000,
   });
+  const session = meData?.session;
   const isAdmin = meData?.isAdmin ?? false;
 
   useEffect(() => {

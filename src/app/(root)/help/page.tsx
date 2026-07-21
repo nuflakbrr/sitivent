@@ -4,12 +4,12 @@ import type { FC } from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Loader2, Mail, Phone, Clock, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
-import { useSession } from '@/lib/authClient';
+import { getMeAction } from '@/services/auth';
 import { supportMessageSchema } from '@/schemas/support';
 import type { CreateSupportMessageInput } from '@/interfaces/features/support';
 import { createSupportMessageAction } from '@/services/support';
@@ -23,7 +23,11 @@ const HELP_CATEGORIES = [
 ];
 
 const HelpPage: FC = () => {
-  const { data: session } = useSession();
+  const { data: meData } = useQuery({
+    queryKey: ['auth-me-server-action'],
+    queryFn: () => getMeAction(),
+  });
+  const session = meData?.session;
   const isAuthenticated = !!session?.user;
 
   const form = useForm<CreateSupportMessageInput>({

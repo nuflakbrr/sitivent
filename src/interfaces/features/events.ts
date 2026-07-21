@@ -44,7 +44,6 @@ export interface Event {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
-  tenantId?: string | null;
   createdById?: string | null;
   categoryId?: string | null;
   category?: EventCategory | null;

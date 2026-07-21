@@ -230,3 +230,50 @@ export async function sendPasswordChangeNotificationEmail(
     return { success: false };
   }
 }
+
+export async function getMeAction(): Promise<{ isAdmin: boolean; session: any }> {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+
+    if (!session?.user) {
+      return { isAdmin: false, session: null };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        role: true,
+        roleId: true,
+        roles: { select: { name: true } },
+      },
+    });
+
+    if (!user) return { isAdmin: false, session };
+
+    const ADMIN_ROLES = ['admin', 'superadmin'];
+
+    // Check many-to-many roles
+    const hasAdminRole = user.roles.some((r) => ADMIN_ROLES.includes(r.name.toLowerCase()));
+    if (hasAdminRole) return { isAdmin: true, session };
+
+    // Check single roleId
+    if (user.roleId) {
+      const role = await prisma.role.findUnique({
+        where: { id: user.roleId },
+        select: { name: true },
+      });
+      if (role && ADMIN_ROLES.includes(role.name.toLowerCase())) {
+        return { isAdmin: true, session };
+      }
+    }
+
+    // Check role string field
+    if (user.role && ADMIN_ROLES.includes(user.role.toLowerCase())) {
+      return { isAdmin: true, session };
+    }
+
+    return { isAdmin: false, session };
+  } catch {
+    return { isAdmin: false, session: null };
+  }
+}

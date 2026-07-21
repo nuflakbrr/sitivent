@@ -240,12 +240,24 @@ export async function registerToEvent(eventId: string) {
           ? `<p>Link Meeting (Zoom): <a href="${createdReg.event.meetingLink}">${createdReg.event.meetingLink}</a></p>`
           : '<p>Sampai jumpa di lokasi event!</p>';
 
+      const qrCodeSection = isOnline
+        ? ''
+        : `
+          <p>Tunjukkan QR Code berikut saat check-in:</p>
+          <div style="text-align: center; margin: 24px 0;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrToken}" alt="QR Code" style="display: inline-block; border: 2px solid #E3DACC; border-radius: 8px; padding: 10px; background-color: white;" />
+          </div>
+        `;
+
       const emailBody = `
-        <h2>Registrasi Berhasil!</h2>
-        <p>Halo ${createdReg.user.name || createdReg.user.email},</p>
-        <p>Anda telah berhasil terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
-        <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
-        ${meetingInfo}
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif; margin-top: 0;">Registrasi Berhasil!</h2>
+          <p>Halo <strong>${createdReg.user.name || createdReg.user.email}</strong>,</p>
+          <p>Anda telah berhasil terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
+          <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
+          ${qrCodeSection}
+          ${meetingInfo}
+        </div>
       `;
       await queueEmail(
         createdReg.user.email,
@@ -274,12 +286,15 @@ export async function registerToEvent(eventId: string) {
 
       // Send Waiting Payment Email
       const emailBody = `
-        <h2>Registrasi Berhasil - Menunggu Pembayaran</h2>
-        <p>Halo ${createdReg.user.name || createdReg.user.email},</p>
-        <p>Anda telah terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
-        <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
-        <p>Silakan lakukan pembayaran sebesar <strong>Rp ${createdReg.event.price.toLocaleString('id-ID')}</strong>.</p>
-        <p>Terima kasih!</p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif; margin-top: 0;">Registrasi Berhasil - Menunggu Pembayaran</h2>
+          <p>Halo <strong>${createdReg.user.name || createdReg.user.email}</strong>,</p>
+          <p>Anda telah terdaftar pada event <strong>${createdReg.event.title}</strong>.</p>
+          <p>Nomor Registrasi Anda: <strong>${createdReg.registrationNumber}</strong></p>
+          <p>Silakan lakukan pembayaran sebesar <strong>Rp ${createdReg.event.price.toLocaleString('id-ID')}</strong>.</p>
+          <p>Setelah melakukan transfer, silakan unggah bukti pembayaran di dashboard peserta untuk verifikasi.</p>
+          <p>Terima kasih!</p>
+        </div>
       `;
       await queueEmail(
         createdReg.user.email,

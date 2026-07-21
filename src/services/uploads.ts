@@ -24,8 +24,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label = 'Operasi'): Pro
 }
 
 /**
- * Upload dan Kompres Gambar
- * Menyimpan ke /public/uploads
+ * Upload dan Kompres Gambar ke ImageKit
  */
 export async function uploadImage(
   file: File,
@@ -33,86 +32,122 @@ export async function uploadImage(
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   const startTime = Date.now();
   console.log(
-    `[uploadImage] ▶ Mulai upload: "${file.name}" (${(file.size / 1024).toFixed(1)} KB) → subDir: "${subDir || '(root)'}"`
+    `[uploadImage] ▶ Mulai upload ke ImageKit: "${file.name}" (${(file.size / 1024).toFixed(1)} KB) → subDir: "${subDir || '(root)'}"`
   );
 
   try {
-    console.log(`[uploadImage] 📦 Membaca buffer dari file...`);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    console.log(`[uploadImage] ✅ Buffer siap: ${buffer.length} bytes`);
-
-    const uploadDir = join(process.cwd(), 'public', 'uploads', subDir);
-
-    // Pastikan direktori ada
-    if (!existsSync(uploadDir)) {
-      console.log(`[uploadImage] 📁 Direktori tidak ditemukan, membuat: ${uploadDir}`);
-      await mkdir(uploadDir, { recursive: true });
-      console.log(`[uploadImage] ✅ Direktori berhasil dibuat`);
-    } else {
-      console.log(`[uploadImage] 📁 Direktori sudah ada: ${uploadDir}`);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileName', file.name);
+    if (subDir) {
+      formData.append('folder', subDir);
     }
 
-    // Buat nama file unik
-    const safeName = slugify(file.name.replace(/\.[^/.]+$/, '')); // strip extension lalu slugify
-    const filename = `${Date.now()}-${safeName || 'file'}`;
-    const filePath = join(uploadDir, filename);
+    const privateKey = process.env.IMAGEKIT_PRIVATE_KEY || '';
+    const authHeader = 'Basic ' + Buffer.from(privateKey + ':').toString('base64');
 
-    // Proses kompresi menggunakan sharp
-    // we use .webp for better compression without losing quality
-    const compressedFilename = filename.split('.')[0] + '.webp';
-    const compressedFilePath = join(uploadDir, compressedFilename);
+    const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+      method: 'POST',
+      headers: {
+        Authorization: authHeader,
+      },
+      body: formData,
+    });
 
-    console.log(`[uploadImage] 🔧 Memulai kompresi sharp → output: ${compressedFilename}`);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`ImageKit upload failed with status ${res.status}: ${errorText}`);
+    }
 
-    // Kompresi dengan timeout 30 detik — mencegah hang jika sharp macet
-    await withTimeout(
-      sharp(buffer)
-        .rotate() // Auto-correct EXIF orientation before stripping metadata
-        .webp({
-          quality: 85,
-          effort: 4,
-          smartSubsample: true,
-        })
-        .toFile(compressedFilePath),
-      UPLOAD_TIMEOUT_MS,
-      'Kompresi gambar'
-    );
-
+    const data = await res.json();
     const elapsed = Date.now() - startTime;
-    const url = join('/uploads', subDir, compressedFilename).replace(/\\/g, '/');
-
-    console.log(`[uploadImage] ✅ Upload selesai dalam ${elapsed}ms → URL: ${url}`);
+    console.log(`[uploadImage] ✅ Upload ImageKit selesai dalam ${elapsed}ms → URL: ${data.url}`);
 
     return {
       success: true,
-      url,
+      url: data.url,
     };
   } catch (error) {
     const elapsed = Date.now() - startTime;
     console.error(`[uploadImage] ❌ ERROR setelah ${elapsed}ms untuk file "${file.name}":`, error);
-    console.error(`[uploadImage] ❌ Error detail:`, {
-      name: error instanceof Error ? error.name : typeof error,
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    return { success: false, error: 'Gagal mengunggah dan mengompres gambar.' };
+    return { success: false, error: 'Gagal mengunggah gambar ke ImageKit.' };
   }
 }
 
 /**
- * Hapus Gambar dari Filesystem
+ * Hapus Gambar dari Filesystem atau ImageKit
  */
 export async function deleteImage(url: string): Promise<{ success: boolean; error?: string }> {
   try {
-    if (!url || !url.startsWith('/uploads/')) {
-      return { success: true }; // Abaikan jika bukan file lokal atau url kosong
+    if (!url) return { success: true };
+
+    // Hapus file lokal lama jika ada
+    if (url.startsWith('/uploads/')) {
+      const filename = url.replace('/uploads/', '');
+      const filePath = join(process.cwd(), 'public', 'uploads', filename);
+      if (existsSync(filePath)) {
+        await unlink(filePath);
+      }
+      return { success: true };
     }
 
-    const filename = url.replace('/uploads/', '');
-    const filePath = join(process.cwd(), 'public', 'uploads', filename);
+    // Hapus dari ImageKit jika berupa ImageKit URL
+    if (url.includes('ik.imagekit.io')) {
+      const parsedUrl = new URL(url);
+      const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
 
-    if (existsSync(filePath)) {
-      await unlink(filePath);
+      if (pathParts.length > 1) {
+        // Abaikan ID imagekit (part pertama) dan filter out transform (tr:)
+        const relativeParts = pathParts.slice(1).filter((part) => !part.startsWith('tr:'));
+        const imageKitPath = '/' + relativeParts.join('/');
+        const privateKey = process.env.IMAGEKIT_PRIVATE_KEY || '';
+        const authHeader = 'Basic ' + Buffer.from(privateKey + ':').toString('base64');
+
+        // Cari fileId berdasarkan path
+        const query = `path="${imageKitPath}"`;
+        console.log(`[deleteImage] Mencari file dengan query: ${query}`);
+        const searchRes = await fetch(
+          `https://api.imagekit.io/v1/files?searchQuery=${encodeURIComponent(query)}`,
+          {
+            headers: {
+              Authorization: authHeader,
+            },
+          }
+        );
+
+        if (searchRes.ok) {
+          const files = await searchRes.json();
+          console.log(`[deleteImage] Hasil pencarian files:`, JSON.stringify(files));
+          if (Array.isArray(files) && files.length > 0) {
+            const fileId = files[0].fileId;
+            console.log(`[deleteImage] Menghapus fileId: ${fileId}`);
+            const deleteRes = await fetch(`https://api.imagekit.io/v1/files/${fileId}`, {
+              method: 'DELETE',
+              headers: {
+                Authorization: authHeader,
+              },
+            });
+
+            if (deleteRes.ok) {
+              console.log(`[deleteImage] Berhasil menghapus file dari ImageKit: ${fileId}`);
+            } else {
+              const errText = await deleteRes.text();
+              console.error(
+                `[deleteImage] Gagal menghapus file dari ImageKit: ${fileId}. Response: ${errText}`
+              );
+            }
+          } else {
+            console.warn(
+              `[deleteImage] File tidak ditemukan di ImageKit dengan path: ${imageKitPath}`
+            );
+          }
+        } else {
+          const errText = await searchRes.text();
+          console.error(
+            `[deleteImage] Gagal mencari file. Status: ${searchRes.status}, Response: ${errText}`
+          );
+        }
+      }
     }
 
     return { success: true };
