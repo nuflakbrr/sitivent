@@ -30,6 +30,17 @@ const ScannerClient: FC = () => {
   // html5-qrcode tidak akan bisa jalan di iOS/Android webview / browser modern jika izin getUserMedia belum di-prompt oleh action user.
   // Karena itu, isScanning diset true HANYA JIKA getUserMedia berhasil.
 
+  // Eruda mobile console debugger
+  useEffect(() => {
+    const init = async () => {
+      const eruda = (await import('eruda')).default;
+      if (!document.getElementById('eruda-container')) {
+        eruda.init();
+      }
+    };
+    init();
+  }, []);
+
   useEffect(() => {
     if (!isScanning) return;
 
