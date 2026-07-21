@@ -141,12 +141,20 @@ const ScannerClient: FC = () => {
             <QrCode className="h-16 w-16 text-zinc-800 dark:text-zinc-900 animate-pulse mb-4" />
 
             {isSecure ? (
-              <Button
-                onClick={handleStartScanning}
-                className="z-20 flex items-center gap-2 text-xs font-semibold px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md"
-              >
-                <Camera className="h-4 w-4" /> Aktifkan Kamera
-              </Button>
+              <div className="text-center px-4 z-20 space-y-3">
+                <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">
+                  Kamera Dinonaktifkan
+                </Badge>
+                <p className="text-[10px] text-zinc-400 max-w-[200px] leading-normal mx-auto">
+                  Aktifkan scanner dengan tombol di bawah.
+                </p>
+                <Button
+                  onClick={handleStartScanning}
+                  className="z-20 inline-flex items-center gap-2 text-xs font-semibold px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md cursor-pointer transition-colors"
+                >
+                  <Camera className="h-4 w-4" /> Aktifkan Kamera
+                </Button>
+              </div>
             ) : (
               <div className="text-center px-4 z-20 space-y-3">
                 <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">

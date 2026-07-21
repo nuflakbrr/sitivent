@@ -117,23 +117,19 @@ export const useScanner = () => {
   };
 
   const handleStartScanning = () => {
-    if (
-      typeof window !== 'undefined' &&
-      navigator.mediaDevices &&
-      navigator.mediaDevices.getUserMedia
-    ) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({ video: { facingMode: 'environment' } })
         .then((stream) => {
           stream.getTracks().forEach((track) => track.stop());
           setIsScanning(true);
         })
         .catch((err) => {
-          console.error('Native camera access error:', err);
-          toast.error('Gagal mengakses kamera. Pastikan izin kamera diberikan di browser.');
+          console.error('Camera permission denied:', err);
+          toast.error('Izin kamera ditolak atau kamera tidak ditemukan.');
         });
     } else {
-      toast.error('Browser Anda tidak mendukung akses kamera.');
+      toast.error('Browser tidak mendukung akses kamera.');
     }
   };
 
