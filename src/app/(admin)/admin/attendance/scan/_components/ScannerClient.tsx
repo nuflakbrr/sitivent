@@ -149,15 +149,21 @@ const ScannerClient: FC = () => {
           <div id="qr-scanner-widget" className="w-full h-full bg-zinc-950" />
         ) : (
           <>
-            <div className="absolute left-4 right-4 h-0.5 bg-red-500/50 shadow-[0_0_8px_#ef4444] animate-laser z-10" />
-            <div className="absolute top-4 left-4 w-6 h-6 border-t-4 border-l-4 border-blue-500 rounded-tl-md" />
-            <div className="absolute top-4 right-4 w-6 h-6 border-t-4 border-r-4 border-blue-500 rounded-tr-md" />
-            <div className="absolute bottom-4 left-4 w-6 h-6 border-b-4 border-l-4 border-blue-500 rounded-bl-md" />
-            <div className="absolute bottom-4 right-4 w-6 h-6 border-b-4 border-r-4 border-blue-500 rounded-br-md" />
-
-            <QrCode className="h-16 w-16 text-zinc-800 dark:text-zinc-900 animate-pulse mb-4" />
-
-            {isSecure ? (
+            {isPending ? (
+              // Show loading state when API call is pending (during verification)
+              <div className="text-center px-4 z-20 space-y-3">
+                <Badge variant="secondary" className="text-[10px] uppercase font-bold py-0.5">
+                  Memproses QR Code...
+                </Badge>
+                <div className="flex justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+                <p className="text-[10px] text-zinc-400 max-w-50 leading-normal mx-auto">
+                  Memverifikasi dan memproses presensi peserta...
+                </p>
+              </div>
+            ) : isSecure ? (
+              // Original "Camera Disabled" state when not scanning
               <div className="text-center px-4 z-20 space-y-3">
                 <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">
                   Kamera Dinonaktifkan
@@ -173,6 +179,7 @@ const ScannerClient: FC = () => {
                 </Button>
               </div>
             ) : (
+              // "Connection Not Secure" state
               <div className="text-center px-4 z-20 space-y-3">
                 <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">
                   Koneksi Tidak Aman
