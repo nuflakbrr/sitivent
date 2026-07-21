@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, type FC } from 'react';
 import { toast } from 'sonner';
-import { QrCode, Smartphone, Camera, CameraOff } from 'lucide-react';
+import { QrCode, Smartphone, Camera, CameraOff, Flashlight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,10 +18,12 @@ const ScannerClient: FC = () => {
     setIsScanning,
     isSecure,
     isPending,
+    isFlashOn,
     onSubmitToken,
     handleManualSubmit,
     handleFileChange,
     handleStartScanning,
+    toggleTorch,
   } = useScanner();
 
   // Meminta izin kamera secara reaktif saat button Aktifkan Kamera ditekan.
@@ -73,7 +75,7 @@ const ScannerClient: FC = () => {
         }
       }
     };
-  }, [isScanning, onSubmitToken, setIsScanning]);
+  }, [isScanning, onSubmitToken, setIsScanning, isFlashOn]);
 
   return (
     <div className="max-w-md mx-auto space-y-6 px-1">
@@ -149,7 +151,7 @@ const ScannerClient: FC = () => {
                 <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">
                   Kamera Dinonaktifkan
                 </Badge>
-                <p className="text-[10px] text-zinc-400 max-w-[200px] leading-normal mx-auto">
+                <p className="text-[10px] text-zinc-400 max-w-50 leading-normal mx-auto">
                   Aktifkan scanner dengan tombol di bawah.
                 </p>
                 <Button
@@ -164,7 +166,7 @@ const ScannerClient: FC = () => {
                 <Badge variant="destructive" className="text-[10px] uppercase font-bold py-0.5">
                   Koneksi Tidak Aman
                 </Badge>
-                <p className="text-[10px] text-zinc-400 max-w-[200px] leading-normal mx-auto">
+                <p className="text-[10px] text-zinc-400 max-w-50 leading-normal mx-auto">
                   Akses video stream diblokir browser. Ambil foto QR Code menggunakan kamera HP
                   Anda.
                 </p>
@@ -186,13 +188,24 @@ const ScannerClient: FC = () => {
 
       {/* Camera Stop button when scanning */}
       {isScanning && (
-        <div className="text-center">
+        <div className="text-center flex items-center justify-center gap-2">
           <Button
             variant="outline"
             onClick={() => setIsScanning(false)}
             className="text-xs font-semibold px-4 py-2 border-zinc-300 dark:border-zinc-800 hover:bg-muted/50 rounded-xl"
           >
             <CameraOff className="h-4 w-4 mr-2" /> Matikan Kamera
+          </Button>
+          <Button
+            variant="outline"
+            onClick={toggleTorch}
+            className={`text-xs font-semibold px-4 py-2 rounded-xl transition-colors ${
+              isFlashOn
+                ? 'bg-amber-500/20 text-amber-600 border-amber-300 dark:border-amber-500/30'
+                : 'border-zinc-300 dark:border-zinc-800 hover:bg-muted/50'
+            }`}
+          >
+            <Flashlight className="h-4 w-4 mr-2" /> Flash: {isFlashOn ? 'On' : 'Off'}
           </Button>
         </div>
       )}

@@ -9,6 +9,7 @@ export const useScanner = () => {
   const [token, setToken] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [isSecure, setIsSecure] = useState(true);
+  const [isFlashOn, setIsFlashOn] = useState(false);
 
   const { mutate: onSubmitToken, isPending } = useMutation({
     mutationFn: (qrToken: string) => scanQrCode(qrToken),
@@ -129,9 +130,33 @@ export const useScanner = () => {
     }
   };
 
+  const toggleTorch = async () => {
+    try {
+      const videoEl = document.querySelector('#qr-scanner-widget video') as HTMLVideoElement | null;
+      const track =
+        videoEl?.srcObject instanceof MediaStream ? videoEl.srcObject.getVideoTracks()[0] : null;
+      if (!track) {
+        toast.error('Kamera belum aktif.');
+        return;
+      }
+      const newTorch = !isFlashOn;
+      await track.applyConstraints({
+        advanced: [{ torch: newTorch } as MediaTrackConstraintSet],
+      });
+      setIsFlashOn(newTorch);
+    } catch {
+      toast.error('Flash tidak didukung di perangkat ini.');
+    }
+  };
+
   useEffect(() => {
     setIsSecure(window.isSecureContext);
   }, []);
+
+  // Reset flash state when scanning stops
+  useEffect(() => {
+    if (!isScanning) setIsFlashOn(false);
+  }, [isScanning]);
 
   return {
     token,
@@ -139,10 +164,12 @@ export const useScanner = () => {
     isScanning,
     setIsScanning,
     isSecure,
+    isFlashOn,
     isPending,
     onSubmitToken,
     handleManualSubmit,
     handleFileChange,
     handleStartScanning,
+    toggleTorch,
   };
 };
