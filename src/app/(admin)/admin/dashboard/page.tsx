@@ -66,6 +66,8 @@ const getPaymentStatusLabel = (status: string) => {
   }
 };
 
+export const dynamic = 'force-dynamic';
+
 const DashboardCMS = async () => {
   const data = await getAdminDashboardData();
 

@@ -116,20 +116,16 @@ export const useScanner = () => {
     }
   };
 
-  const handleStartScanning = () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: 'environment' } })
-        .then((stream) => {
-          stream.getTracks().forEach((track) => track.stop());
-          setIsScanning(true);
-        })
-        .catch((err) => {
-          console.error('Camera permission denied:', err);
-          toast.error('Izin kamera ditolak atau kamera tidak ditemukan.');
-        });
-    } else {
-      toast.error('Browser tidak mendukung akses kamera.');
+  const handleStartScanning = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+      stream.getTracks().forEach((track) => track.stop());
+      setIsScanning(true);
+    } catch (err) {
+      console.error('Camera permission denied:', err);
+      toast.error('Izin kamera ditolak atau kamera tidak ditemukan.');
     }
   };
 

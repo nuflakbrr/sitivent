@@ -24,6 +24,10 @@ const ScannerClient: FC = () => {
     handleStartScanning,
   } = useScanner();
 
+  // Meminta izin kamera secara reaktif saat button Aktifkan Kamera ditekan.
+  // html5-qrcode tidak akan bisa jalan di iOS/Android webview / browser modern jika izin getUserMedia belum di-prompt oleh action user.
+  // Karena itu, isScanning diset true HANYA JIKA getUserMedia berhasil.
+
   useEffect(() => {
     if (!isScanning) return;
 

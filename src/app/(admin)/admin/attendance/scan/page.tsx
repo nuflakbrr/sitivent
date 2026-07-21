@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Pindai QR Code peserta untuk mencatat kehadiran secara cepat.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ScanPage() {
   const hasScanPermission = await verifyPermission('attendance.scan');
   if (!hasScanPermission) {
