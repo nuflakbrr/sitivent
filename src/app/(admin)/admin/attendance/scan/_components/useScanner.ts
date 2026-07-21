@@ -41,11 +41,17 @@ export const useScanner = () => {
     },
   });
 
+  const handleToggleFlash = () => {
+    if (isScanning && !isPending) {
+      setIsFlashOn((prev) => !prev);
+    }
+  };
+
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!token.trim()) return;
     // Only submit if scanner is not actively scanning to avoid conflicts
-    if (!isScanning) {
+    if (!isScanning && !isPending) {
       onSubmitToken(token.trim());
     }
   };
