@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { verifyPermission, verifySession } from './security';
 import { AttendanceStatus, RegistrationStatus } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
+import moment from 'moment';
+import 'moment-timezone';
+import 'moment/locale/id';
 
 export async function scanQrCode(qrToken: string) {
   try {
@@ -97,7 +100,7 @@ export async function scanQrCode(qrToken: string) {
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
           <h2 style="color: #D97757; font-family: serif;">Kehadiran Event Terverifikasi</h2>
           <p>Halo ${registration.user.name || registration.user.email},</p>
-          <p>Kehadiran Anda pada event <strong>${event.title}</strong> (${event.eventType}) telah berhasil diverifikasi pada pukul <strong>${new Date().toLocaleTimeString('id-ID')}</strong>.</p>
+          <p>Kehadiran Anda pada event <strong>${event.title}</strong> (${event.eventType}) telah berhasil diverifikasi pada pukul <strong>${moment(new Date()).clone().locale('id').tz('Asia/Jakarta').format('DD MMM YYYY, HH:mm:ss') + ' WIB'}</strong>.</p>
           <p>Terima kasih atas partisipasi Anda!</p>
         </div>
       `;

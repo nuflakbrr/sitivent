@@ -1,6 +1,8 @@
 import { type FC } from 'react';
+import moment from 'moment';
+import 'moment-timezone';
+import 'moment/locale/id';
 import { User, Calendar, Clock, QrCode } from 'lucide-react';
-import { formatTime } from '@/lib/formatTime';
 
 type Props = {
   name?: string;
@@ -54,7 +56,15 @@ export const SuccessResultCard: FC<Props> = ({ name, email, number, event, time 
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
             Waktu Kehadiran
           </p>
-          <p className="font-semibold text-zinc-900 dark:text-white mt-0.5">{formatTime(time)}</p>
+          <p className="font-semibold text-zinc-900 dark:text-white mt-0.5">
+            {time
+              ? moment(time)
+                  .clone()
+                  .locale('id')
+                  .tz('Asia/Jakarta')
+                  .format('DD MMM YYYY, HH:mm:ss') + ' WIB'
+              : '-'}
+          </p>
         </div>
       </div>
     </div>
