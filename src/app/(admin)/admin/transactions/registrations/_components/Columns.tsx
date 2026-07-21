@@ -2,6 +2,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { ChevronsUpDown } from 'lucide-react';
 import moment from 'moment';
+import 'moment-timezone';
 import 'moment/locale/id';
 
 import type { Registration } from '@/interfaces/features/registrations';
@@ -96,7 +97,9 @@ const Columns: ColumnDef<Registration>[] = [
     header: 'Tanggal Daftar',
     cell: ({ row }) => {
       const formattedDate = moment(row.original.createdAt)
+        .clone()
         .locale('id')
+        .tz('Asia/Jakarta')
         .format('DD MMM YYYY, HH:mm');
       return <span className="text-sm">{formattedDate}</span>;
     },

@@ -3,10 +3,20 @@ export const formatTime = (timeStr?: string | Date): string => {
   try {
     const date = new Date(timeStr);
     if (isNaN(date.getTime())) return '';
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds} WIB`;
+    // Use Asia/Jakarta timezone for consistency with moment tables
+    const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Jakarta',
+      hour12: false,
+    };
+    const formatter = new Intl.DateTimeFormat('id-ID', options);
+    const parts = formatter.formatToParts(date);
+    const hour = parts.find((p) => p.type === 'hour')?.value;
+    const minute = parts.find((p) => p.type === 'minute')?.value;
+    const second = parts.find((p) => p.type === 'second')?.value;
+    return `${hour}:${minute}:${second} WIB`;
   } catch {
     return '';
   }
