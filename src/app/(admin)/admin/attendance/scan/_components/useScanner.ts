@@ -44,7 +44,10 @@ export const useScanner = () => {
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!token.trim()) return;
-    onSubmitToken(token.trim());
+    // Only submit if scanner is not actively scanning to avoid conflicts
+    if (!isScanning) {
+      onSubmitToken(token.trim());
+    }
   };
 
   const preprocessImage = (imgFile: File): Promise<File> => {
@@ -123,7 +126,10 @@ export const useScanner = () => {
         video: { facingMode: 'environment' },
       });
       stream.getTracks().forEach((track) => track.stop());
-      setIsScanning(true);
+      // Only start scanning if not already pending an API call
+      if (!isPending) {
+        setIsScanning(true);
+      }
     } catch (err) {
       console.error('Camera permission denied:', err);
       toast.error('Izin kamera ditolak atau kamera tidak ditemukan.');
