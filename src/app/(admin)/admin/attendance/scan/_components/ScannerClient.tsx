@@ -75,7 +75,7 @@ const ScannerClient: FC = () => {
         }
       }
     };
-  }, [isScanning, onSubmitToken, setIsScanning, isFlashOn]);
+  }, [isScanning, onSubmitToken, setIsScanning]);
 
   return (
     <div className="max-w-md mx-auto space-y-6 px-1">
