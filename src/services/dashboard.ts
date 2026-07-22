@@ -228,11 +228,20 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
     });
 
     // Summary stats for participant
-    const [totalRegistered, totalCheckedIn, totalPendingPayment] = await Promise.all([
-      prisma.registration.count({ where: { userId } }),
-      prisma.registration.count({ where: { userId, status: 'CHECKED_IN' } }),
-      prisma.registration.count({ where: { userId, status: 'WAITING_PAYMENT' } }),
-    ]);
+    const [totalRegistered, totalCheckedIn, totalPendingPayment, pendingTestimonials] =
+      await Promise.all([
+        prisma.registration.count({ where: { userId } }),
+        prisma.registration.count({ where: { userId, status: 'CHECKED_IN' } }),
+        prisma.registration.count({ where: { userId, status: 'WAITING_PAYMENT' } }),
+        prisma.registration.count({
+          where: {
+            userId,
+            status: 'CHECKED_IN',
+            event: { status: 'COMPLETED' },
+            testimonial: null,
+          },
+        }),
+      ]);
 
     return {
       upcomingEvent,
@@ -241,6 +250,7 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
         totalRegistered,
         totalCheckedIn,
         totalPendingPayment,
+        pendingTestimonials,
       },
     };
   } catch (error) {
