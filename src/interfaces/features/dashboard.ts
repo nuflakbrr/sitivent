@@ -92,5 +92,6 @@ export interface ParticipantDashboardStats {
     totalRegistered: number;
     totalCheckedIn: number;
     totalPendingPayment: number;
+    pendingTestimonials: number;
   };
 }

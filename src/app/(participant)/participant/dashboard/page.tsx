@@ -5,6 +5,7 @@ import { getParticipantDashboardData } from '@/services/dashboard';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import DashboardHeader from './_components/DashboardHeader';
+import TestimonialNoticeBanner from './_components/TestimonialNoticeBanner';
 import SummaryCards from './_components/SummaryCards';
 import UpcomingEventCard from './_components/UpcomingEventCard';
 import EventHistoryTable from './_components/EventHistoryTable';
@@ -33,6 +34,8 @@ export default async function ParticipantDashboard() {
   return (
     <div className="space-y-8 pb-10">
       <DashboardHeader userName={session.user.name} emailVerified={session.user.emailVerified} />
+
+      <TestimonialNoticeBanner count={summary.pendingTestimonials} />
 
       <SummaryCards summary={summary} />
 
