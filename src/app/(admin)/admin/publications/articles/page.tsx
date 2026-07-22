@@ -70,7 +70,7 @@ const ArticlesCMS: FC = () => {
 
       <CategoryModal isOpen={isCategoryModalOpen} onClose={() => setIsCategoryModalOpen(false)} />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading
           title={`Artikel (${meta.total})`}
           description="Kelola publikasi artikel dan kategori artikel."

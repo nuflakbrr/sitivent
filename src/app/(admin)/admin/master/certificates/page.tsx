@@ -70,7 +70,7 @@ const CertificatesCMS: FC = () => {
             : 'Apakah Anda yakin ingin menyinkronkan sertifikat untuk SEMUA event? Proses ini akan memproses semua data event yang aktif.'
         }
       />
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 md:mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading
           title={`Manajemen Sertifikat (${meta.total})`}
           description="Pantau dan kelola sertifikat elektronik untuk peserta event."
