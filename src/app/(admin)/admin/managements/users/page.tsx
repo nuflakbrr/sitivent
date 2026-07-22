@@ -30,10 +30,10 @@ const UsersCMS = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-3 md:mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading title={`Pengguna (${meta.total})`} description="Daftar pengguna yang terdaftar." />
         {hasPermission('user.create') && (
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/admin/managements/users/new">
               <Plus /> Tambah Pengguna
             </Link>

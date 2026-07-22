@@ -33,10 +33,10 @@ const RolesCMS: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-3 md:mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading title={`Jabatan (${meta.total})`} description="Daftar jabatan yang tersedia." />
         {hasPermission('role.create') && (
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/admin/managements/roles/new">
               <Plus /> Tambah Jabatan
             </Link>
