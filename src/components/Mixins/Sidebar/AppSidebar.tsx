@@ -37,6 +37,21 @@ export function AppSidebar({
 
   const [logoSrc, setLogoSrc] = React.useState('/assets/img/ttn-logo.jpg');
 
+  // Auto-close sidebar on mobile when link is clicked
+  React.useEffect(() => {
+    const handleCloseSidebar = () => {
+      if (window.innerWidth < 768) {
+        const sidebarTrigger = document.querySelector('[data-sidebar] button[aria-label="Toggle Sidebar"]') as HTMLButtonElement;
+        if (sidebarTrigger) {
+          sidebarTrigger.click();
+        }
+      }
+    };
+
+    document.addEventListener('close-sidebar', handleCloseSidebar);
+    return () => document.removeEventListener('close-sidebar', handleCloseSidebar);
+  }, []);
+
   React.useEffect(() => {
     if (isMounted) {
       const newSrc =
@@ -80,6 +95,14 @@ export function AppSidebar({
     return userPermissions.includes(permission);
   };
 
+  // Close sidebar on mobile when link is clicked
+  const closeSidebarOnMobile = () => {
+    if (window.innerWidth < 768) {
+      const event = new Event('close-sidebar');
+      document.dispatchEvent(event);
+    }
+  };
+
   const filteredNavMain = sideLinks.navMain
     .map((item) => {
       // Filter children first
@@ -115,7 +138,7 @@ export function AppSidebar({
             {item.hasChildren ? (
               <Collapsible defaultOpen className="group/collapsible">
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton className="font-medium text-sidebar-foreground hover:bg-sidebar-accent">
+                  <SidebarMenuButton className="font-medium text-sidebar-foreground hover:bg-sidebar-accent" onClick={closeSidebarOnMobile}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -126,7 +149,7 @@ export function AppSidebar({
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <Link href={`${BASE_ADMIN_PATH}/${subItem.url}` as Route}>
+                          <Link href={`${BASE_ADMIN_PATH}/${subItem.url}` as Route} onClick={closeSidebarOnMobile}>
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>

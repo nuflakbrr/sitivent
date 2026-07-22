@@ -31,15 +31,15 @@ const ScannerClient: FC = () => {
   // Karena itu, isScanning diset true HANYA JIKA getUserMedia berhasil.
 
   // Eruda mobile console debugger
-  useEffect(() => {
-    const init = async () => {
-      const eruda = (await import('eruda')).default;
-      if (!document.getElementById('eruda-container')) {
-        eruda.init();
-      }
-    };
-    init();
-  }, []);
+  // useEffect(() => {
+  //   const init = async () => {
+  //     const eruda = (await import('eruda')).default;
+  //     if (!document.getElementById('eruda-container')) {
+  //       eruda.init();
+  //     }
+  //   };
+  //   init();
+  // }, []);
 
   useEffect(() => {
     if (!isScanning) return;
@@ -144,7 +144,7 @@ const ScannerClient: FC = () => {
       </div>
 
       {/* Scanner Viewport */}
-      <div className="relative aspect-square w-full max-w-xs mx-auto rounded-3xl overflow-hidden bg-zinc-950 border-4 border-zinc-800 dark:border-zinc-900 shadow-xl flex flex-col items-center justify-center p-0 group">
+      <div className="relative aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto rounded-3xl overflow-hidden bg-zinc-950 border-4 border-zinc-800 dark:border-zinc-900 shadow-xl flex flex-col items-center justify-center p-0 group">
         {isScanning ? (
           <div id="qr-scanner-widget" className="w-full h-full bg-zinc-950" />
         ) : (
@@ -229,7 +229,7 @@ const ScannerClient: FC = () => {
       )}
 
       {/* Manual Input Form */}
-      <Card className="border-none shadow-md bg-white dark:bg-zinc-900 rounded-2xl">
+      <Card className="border-none shadow-md bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-xs sm:max-w-md mx-auto">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Smartphone className="h-4 w-4 text-primary" /> Input Token Manual

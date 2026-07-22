@@ -165,9 +165,9 @@ const DashboardCMS = async () => {
       </div>
 
       {/* 3. Main Split Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Side: Recent Registrations (col-span-2) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           <Card className="shadow-md border-none ring-0">
             <CardHeader className="flex flex-row items-center justify-between border-b border-foreground/5 pb-4">
               <div className="space-y-1">
@@ -200,7 +200,7 @@ const DashboardCMS = async () => {
                         </p>
                         <p className="text-xs text-muted-foreground truncate">{reg.user.email}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium truncate max-w-[120px]">
                             {reg.event.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
@@ -238,7 +238,7 @@ const DashboardCMS = async () => {
         </div>
 
         {/* Right Side: Popular Events & System Shortcuts */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Popular Events */}
           <Card className="shadow-md border-none ring-0">
             <CardHeader className="border-b border-foreground/5 pb-4">
@@ -260,7 +260,7 @@ const DashboardCMS = async () => {
                     return (
                       <div key={event.id} className="space-y-1.5">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-medium text-foreground truncate max-w-[180px]">
+                          <span className="font-medium text-foreground truncate max-w-[140px]">
                             {event.title}
                           </span>
                           <span className="text-muted-foreground font-semibold">

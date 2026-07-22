@@ -30,7 +30,7 @@ const SupportMessagesPage: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
         <Heading
           title={`Inbox Pengaduan (${meta.total})`}
           description="Kelola aduan bantuan pelanggan dan hubungi langsung via WhatsApp."

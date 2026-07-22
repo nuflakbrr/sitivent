@@ -20,7 +20,7 @@ const EventCategoryFormPage: FC<PageProps> = (props) => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
         <Heading
           title={isNew ? 'Tambah Kategori' : 'Ubah Kategori'}
           description={

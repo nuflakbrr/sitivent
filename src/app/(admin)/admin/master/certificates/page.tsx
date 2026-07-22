@@ -70,12 +70,12 @@ const CertificatesCMS: FC = () => {
             : 'Apakah Anda yakin ingin menyinkronkan sertifikat untuk SEMUA event? Proses ini akan memproses semua data event yang aktif.'
         }
       />
-      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 md:mb-4">
         <Heading
           title={`Manajemen Sertifikat (${meta.total})`}
           description="Pantau dan kelola sertifikat elektronik untuk peserta event."
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
           {hasPermission('certificates.create') && (
             <Button
               onClick={() => setIsConfirmOpen(true)}
@@ -112,7 +112,7 @@ const CertificatesCMS: FC = () => {
             value={eventId || ''}
             onValueChange={(value) => handleEventChange(value || undefined)}
           >
-            <SelectTrigger className="w-50">
+            <SelectTrigger className="w-full sm:w-50">
               <SelectValue placeholder="Semua Event" />
             </SelectTrigger>
             <SelectContent>

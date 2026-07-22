@@ -58,7 +58,7 @@ export default function TemplateConfigPage() {
       </div>
       <Separator />
       <div className="flex flex-col lg:flex-row gap-4 items-start mt-4">
-        <div className="w-full lg:w-72 shrink-0">
+        <div className="w-full lg:w-64 shrink-0">
           <Card className="shadow-md border-none ring-0">
             <CardHeader className="pb-3 border-b border-foreground/5 px-4 pt-4">
               <CardTitle className="text-sm font-bold">Pilih Event</CardTitle>
@@ -97,7 +97,7 @@ export default function TemplateConfigPage() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-foreground/5">
+                <div className="divide-y divide-foreground/5 max-h-[calc(100vh-300px)] overflow-y-auto">
                   {filteredEvents.map((event: EventWithCertData) => {
                     const isSelected = selectedEventId === event.id;
                     const isConfigured = !!event.certificateTemplate;
@@ -153,7 +153,7 @@ export default function TemplateConfigPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               {selectedEventId && selectedEvent ? (
                 <CertificateTemplateForm
                   eventId={selectedEventId}

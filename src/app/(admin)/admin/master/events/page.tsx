@@ -18,7 +18,7 @@ const EventsCMS: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
         <Heading
           title={`Manajemen Event (${meta.total})`}
           description="Kelola daftar seminar, workshop, webinar, dan event lainnya."

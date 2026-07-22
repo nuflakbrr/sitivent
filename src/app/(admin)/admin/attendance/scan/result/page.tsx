@@ -31,8 +31,8 @@ export default async function ScanResultPage({ searchParams }: Props) {
   const isSuccess = params.status === 'success';
 
   return (
-    <main className="min-h-[85vh] flex items-center justify-center">
-      <div className="w-full max-w-md space-y-6">
+    <main className="min-h-[85vh] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6">
         {/* Status Card */}
         <Card
           className={`border-none overflow-hidden rounded-3xl ${

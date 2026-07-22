@@ -19,7 +19,7 @@ const EventCategoriesCMS: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
         <Heading
           title={`Kategori Event (${meta.total})`}
           description="Kelola kategori untuk mengelompokkan event berdasarkan jenisnya."
