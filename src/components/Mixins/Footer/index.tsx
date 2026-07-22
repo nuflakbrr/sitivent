@@ -1,12 +1,41 @@
 'use client';
-import type { FC } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import type { Route } from 'next';
 import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { footerLinks, socials } from './constant/footerLinks';
+import { subscribeNewsletter } from '@/app/actions/newsletter';
 
 const Footer: FC = () => {
   const year = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      toast.error('Silakan masukkan alamat email yang valid.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await subscribeNewsletter(email);
+      if (res.success) {
+        toast.success(res.message);
+        setEmail('');
+      } else {
+        toast.error(res.message || 'Gagal mendaftar newsletter.');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Terjadi kesalahan saat mendaftar newsletter.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <footer className="w-full border-t" style={{ background: '#141413', borderColor: '#1F1F1D' }}>
@@ -26,17 +55,17 @@ const Footer: FC = () => {
                 S
               </span>
               <span
-                className="font-extrabold text-lg tracking-tight"
+                className="text-xl font-extrabold tracking-tight"
                 style={{ fontFamily: 'ui-serif, Georgia, serif', color: '#FAF9F5' }}
               >
                 SITIVENT
               </span>
             </Link>
-            <p className="text-sm leading-relaxed max-w-sm" style={{ color: '#87867F' }}>
-              Platform manajemen event dan tiket digital untuk seminar, workshop, webinar, dan
-              bootcamp teknologi di Indonesia.
+            <p className="text-sm max-w-sm leading-relaxed" style={{ color: '#87867F' }}>
+              Platform manajemen event & penjualan tiket digital terdepan di Indonesia. Temukan,
+              daftar, dan kelola event favorit Anda dengan mudah.
             </p>
-            <div className="flex gap-3 pt-1">
+            <div className="flex items-center gap-3">
               {socials.map((social) => (
                 <a
                   key={social.name}
@@ -44,19 +73,13 @@ const Footer: FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.name}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 border"
-                  style={{
-                    background: '#1F1F1D',
-                    color: '#87867F',
-                    borderColor: '#2A2A28',
-                  }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#87867F] border border-[#2A2A28] hover:text-[#FAF9F5] hover:border-[#D97757] transition-all"
+                  style={{ background: '#1C1C1A' }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = '#D97757';
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#FAF9F5';
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = '#D97757';
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = '#1F1F1D';
                     (e.currentTarget as HTMLAnchorElement).style.color = '#87867F';
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = '#2A2A28';
                   }}
@@ -84,11 +107,15 @@ const Footer: FC = () => {
                   Daftarkan email untuk mendapat notifikasi event baru dan promo eksklusif.
                 </p>
               </div>
-              <form className="flex flex-col sm:flex-row gap-2.5">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="nama@email.com"
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm transition-colors outline-none"
+                  required
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm transition-colors outline-none disabled:opacity-60"
                   style={{
                     background: '#141413',
                     border: '1.5px solid #2A2A28',
@@ -103,7 +130,8 @@ const Footer: FC = () => {
                 />
                 <button
                   type="submit"
-                  className="px-5 py-2.5 font-bold rounded-xl text-sm shrink-0 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 font-bold rounded-xl text-sm shrink-0 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                   style={{ background: '#D97757', color: '#FFFFFF' }}
                   onMouseEnter={(e) =>
                     ((e.currentTarget as HTMLButtonElement).style.background = '#C4684A')
@@ -112,7 +140,13 @@ const Footer: FC = () => {
                     ((e.currentTarget as HTMLButtonElement).style.background = '#D97757')
                   }
                 >
-                  Langganan
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Memproses...
+                    </>
+                  ) : (
+                    'Langganan'
+                  )}
                 </button>
               </form>
             </div>
