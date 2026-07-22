@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl || 'http://localhost:3000'),
   title: {
     default: siteMetadata.title,
-    template: `%s | ${siteMetadata.title}`,
+    template: `%s`,
   },
   description: siteMetadata.description,
   openGraph: {
