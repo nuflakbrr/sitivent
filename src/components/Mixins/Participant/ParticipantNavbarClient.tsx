@@ -87,7 +87,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
             <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
-          <DropdownMenuItem asChild>
+          {/* <DropdownMenuItem asChild>
             <Link
               href="/participant/dashboard"
               className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
@@ -113,7 +113,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
               <Award className="h-4 w-4" />
               Riwayat Event
             </Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem asChild>
             <Link
               href="/participant/profile"
@@ -123,7 +123,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
               Profil Saya
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
+          {/* <DropdownMenuSeparator style={{ background: '#E3DACC' }} /> */}
           <DropdownMenuItem asChild>
             <Link
               href="/"

@@ -37,10 +37,34 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
               SITIVENT
             </span>
           </Link>
+
+          <nav className="hidden md:flex items-center gap-1 ml-2">
+            <Link
+              href="/participant/dashboard"
+              data-tour="step-dashboard"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/participant/event-history"
+              data-tour="step-history"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
+            >
+              Riwayat Event
+            </Link>
+            <Link
+              href="/participant/payment-history"
+              data-tour="step-payments"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
+            >
+              Riwayat Pembayaran
+            </Link>
+          </nav>
         </div>
 
         {/* Right: user dropdown */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-tour="step-profile">
           <ParticipantNavbarClient user={user} />
         </div>
       </div>
