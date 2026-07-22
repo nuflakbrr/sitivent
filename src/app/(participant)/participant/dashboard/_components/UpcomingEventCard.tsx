@@ -159,6 +159,7 @@ export default function UpcomingEventCard({ upcomingEvent }: UpcomingEventCardPr
                 qrToken={upcomingEvent.qrToken}
                 eventTitle={upcomingEvent.title}
                 registrationNumber={upcomingEvent.registrationNumber}
+                disabled={upcomingEvent.status === 'CHECKED_IN'}
               />
             </div>
           </div>

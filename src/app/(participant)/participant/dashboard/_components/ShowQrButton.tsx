@@ -1,6 +1,7 @@
 'use client';
+
 import { useState, type FC } from 'react';
-import { QrCode, Smartphone } from 'lucide-react';
+import { QrCode, CheckCircle2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,9 +16,10 @@ type Props = {
   qrToken: string;
   eventTitle: string;
   registrationNumber?: string;
+  disabled?: boolean;
 };
 
-const ShowQrButton: FC<Props> = ({ qrToken, eventTitle, registrationNumber }) => {
+const ShowQrButton: FC<Props> = ({ qrToken, eventTitle, registrationNumber, disabled = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -25,9 +27,18 @@ const ShowQrButton: FC<Props> = ({ qrToken, eventTitle, registrationNumber }) =>
       <DialogTrigger asChild>
         <Button
           id="btn-show-qr"
-          className="w-full flex items-center justify-center gap-2 py-5 font-semibold text-sm shadow-md"
+          disabled={disabled}
+          className="w-full flex items-center justify-center gap-2 py-5 font-semibold text-sm shadow-md disabled:opacity-75 disabled:cursor-not-allowed"
         >
-          <QrCode className="h-5 w-5" /> Tampilkan QR Code Presensi
+          {disabled ? (
+            <>
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" /> Presensi Selesai (Sudah Hadir)
+            </>
+          ) : (
+            <>
+              <QrCode className="h-5 w-5" /> Tampilkan QR Code Presensi
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xs sm:max-w-sm rounded-2xl p-6 text-center">
@@ -54,7 +65,7 @@ const ShowQrButton: FC<Props> = ({ qrToken, eventTitle, registrationNumber }) =>
                 No: {registrationNumber}
               </p>
             )}
-            <p className="text-[10px] text-muted-foreground font-mono break-all max-w-[200px]">
+            <p className="text-[10px] text-muted-foreground font-mono break-all max-w-50">
               Token: {qrToken}
             </p>
           </div>
