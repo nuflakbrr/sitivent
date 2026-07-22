@@ -107,7 +107,7 @@ export function CMSHeader() {
           <BreadcrumbList>
             {pathSegments.length > 0 && (
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/admin/dashboard">TTN CMS</BreadcrumbLink>
+                <BreadcrumbLink href="/admin/dashboard">SITIVENT</BreadcrumbLink>
               </BreadcrumbItem>
             )}
 

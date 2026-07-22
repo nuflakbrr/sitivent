@@ -43,6 +43,13 @@ export async function getParticipantRegistrations() {
             downloadUrl: true,
           },
         },
+        testimonial: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+          },
+        },
       },
     });
 

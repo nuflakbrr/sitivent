@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import type { EventBenefit, EventSpeaker } from '@/interfaces/features/events';
 import { getEventRegistrationStatus } from '@/services/registrations';
 import RegisterButton from './_components/RegisterButton';
+import EventTestimonials from './_components/EventTestimonials';
 import type { Metadata } from 'next';
 import { GitHubIcon, InstagramIcon, LinkedInIcon } from '@/components/Common/CustomIcons';
 
@@ -217,7 +218,7 @@ export default async function EventDetailPage({ params }: Props) {
             <div className="space-y-4">
               <h2 className="font-serif text-2xl font-bold text-[#141413]">Detail Event</h2>
               <div
-                className="prose max-w-none text-[#3D3D3A] leading-relaxed min-h-[150px] focus:outline-none"
+                className="prose max-w-none text-[#3D3D3A] leading-relaxed min-h-37.5 focus:outline-none"
                 dangerouslySetInnerHTML={{ __html: event.description }}
               />
             </div>
@@ -256,6 +257,11 @@ export default async function EventDetailPage({ params }: Props) {
                 </div>
               </div>
             )}
+
+            <Separator style={{ backgroundColor: '#E3DACC' }} />
+
+            {/* Testimonials Section */}
+            <EventTestimonials eventId={event.id} />
           </div>
 
           {/* Right Column: Pricing & Registration (col-span-1) */}

@@ -39,18 +39,20 @@ const LandingPageLayout = async ({ children }: Props) => {
   });
 
   // 2. Ambil permissions di server
-  const user = await prisma.user.findUnique({
-    where: { id: session?.user?.id },
-    include: {
-      roles: {
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
         include: {
-          permissions: {
-            select: { name: true },
+          roles: {
+            include: {
+              permissions: {
+                select: { name: true },
+              },
+            },
           },
         },
-      },
-    },
-  });
+      })
+    : null;
 
   const permissionsSet = new Set<string>();
   const roles: string[] = user?.roles.map((r) => r.name) || [];

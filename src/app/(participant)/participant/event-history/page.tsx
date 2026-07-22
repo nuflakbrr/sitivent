@@ -1,8 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Award, ChevronsUpDown, FileDown, Video } from 'lucide-react';
+import {
+  Award,
+  ChevronsUpDown,
+  FileDown,
+  Video,
+  Star,
+  MessageSquarePlus,
+  Edit3,
+} from 'lucide-react';
 import moment from 'moment';
 import 'moment/locale/id';
 
@@ -20,7 +29,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getParticipantRegistrations } from '@/services/registrations';
-import type { Registration } from '@/interfaces/features/registrations';
+import TestimonialModal from './_components/TestimonialModal';
 
 interface RegistrationWithParticipant {
   id: string;
@@ -41,9 +50,16 @@ interface RegistrationWithParticipant {
     meetingLink: string | null;
   };
   certificates: Array<{ id: string; downloadUrl: string }>;
+  testimonial?: {
+    id: string;
+    rating: number;
+    comment: string;
+  } | null;
 }
 
-const columns: ColumnDef<RegistrationWithParticipant>[] = [
+const getColumns = (
+  onOpenTestimonial: (registration: RegistrationWithParticipant) => void
+): ColumnDef<RegistrationWithParticipant>[] => [
   {
     accessorKey: 'registrationNumber',
     header: ({ column }) => (
@@ -61,7 +77,7 @@ const columns: ColumnDef<RegistrationWithParticipant>[] = [
       const event = row.original.event;
       return (
         <div className="flex flex-col">
-          <span className="text-sm">{event.title}</span>
+          <span className="text-sm font-medium">{event.title}</span>
           <span className="text-xs text-muted-foreground">{event.location}</span>
         </div>
       );
@@ -138,21 +154,60 @@ const columns: ColumnDef<RegistrationWithParticipant>[] = [
       );
     },
   },
+  {
+    accessorKey: 'testimonial',
+    header: 'Testimoni',
+    cell: ({ row }) => {
+      const isEligible =
+        row.original.status === 'CHECKED_IN' && row.original.event.status === 'COMPLETED';
+
+      if (!isEligible) {
+        return <span className="text-xs text-muted-foreground">—</span>;
+      }
+
+      const existing = row.original.testimonial;
+
+      return existing ? (
+        <Button
+          variant="outline"
+          size="xs"
+          className="gap-1 border-amber-200 bg-amber-50/50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-400"
+          onClick={() => onOpenTestimonial(row.original)}
+        >
+          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+          <span>{existing.rating}/5</span>
+          <Edit3 className="h-3 w-3 ml-0.5 opacity-60" />
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          size="xs"
+          className="gap-1 text-xs"
+          onClick={() => onOpenTestimonial(row.original)}
+        >
+          <MessageSquarePlus className="h-3.5 w-3.5 text-amber-500" />
+          Beri Ulasan
+        </Button>
+      );
+    },
+  },
 ];
 
 export default function EventHistoryPage() {
+  const [selectedReg, setSelectedReg] = useState<RegistrationWithParticipant | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ['participant-registrations'],
     queryFn: getParticipantRegistrations,
   });
 
-  const registrations = data?.data || [];
+  const registrations = (data?.data as RegistrationWithParticipant[]) || [];
 
   return (
     <section className="space-y-4">
       <Heading
         title={`Riwayat Event (${registrations.length})`}
-        description="Lihat seluruh event yang pernah Anda daftarkan."
+        description="Lihat seluruh event yang pernah Anda daftarkan dan berikan testimoni event yang telah selesai."
       />
       <Separator />
       {registrations.length === 0 && !isLoading ? (
@@ -170,11 +225,21 @@ export default function EventHistoryPage() {
       ) : (
         <DataTable
           searchKey="registrationNumber"
-          columns={columns}
-          data={registrations as RegistrationWithParticipant[]}
+          columns={getColumns(setSelectedReg)}
+          data={registrations}
           isFetching={isLoading}
           pageCount={1}
           placeholderSearch="Cari no. registrasi atau event..."
+        />
+      )}
+
+      {selectedReg && (
+        <TestimonialModal
+          isOpen={Boolean(selectedReg)}
+          onClose={() => setSelectedReg(null)}
+          registrationId={selectedReg.id}
+          eventTitle={selectedReg.event.title}
+          existingTestimonial={selectedReg.testimonial}
         />
       )}
     </section>

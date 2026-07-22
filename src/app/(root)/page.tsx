@@ -1,15 +1,18 @@
+import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
 import type { Metadata } from 'next';
 import HeroBanner from './_components/HeroBanner';
 import CategoryLinks from './_components/CategoryLinks';
 import FeaturedEvents from './_components/FeaturedEvents';
 import Features from './_components/Features';
+import TestimonialsCarousel from './_components/TestimonialsCarousel';
 import Stats from './_components/Stats';
 import CTABanner from './_components/CTABanner';
 import Steps from './_components/Steps';
 import GalleryBento from './_components/GalleryBento';
 import type { EventCategory } from '@/interfaces/features/event-categories';
 import type { Event } from '@/interfaces/features/events';
+import { getFeaturedTestimonials } from '@/services/testimonials';
 
 export const metadata: Metadata = {
   title: 'SITIVENT — Platform Manajemen Event & Tiket',
@@ -18,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [events, categories] = await Promise.all([
+  const [events, categories, testimonials] = await Promise.all([
     prisma.event.findMany({
       where: {
         status: 'PUBLISHED',
@@ -40,6 +43,7 @@ export default async function HomePage() {
         orderBy: { name: 'asc' },
       })
       .then((categories) => categories as EventCategory[]),
+    getFeaturedTestimonials(10),
   ]);
 
   // Take minimum 3 and maximum 5 for HeroBanner, fallback if fewer
@@ -48,11 +52,14 @@ export default async function HomePage() {
   return (
     <div className="w-full">
       {heroEvents.length >= 3 && <HeroBanner events={heroEvents as Event[]} />}
-      <CategoryLinks categories={categories} />
+      <Suspense fallback={<div className="h-14 border-b bg-white" />}>
+        <CategoryLinks categories={categories} />
+      </Suspense>
       <FeaturedEvents events={events} />
       <Stats />
       <GalleryBento />
       <Features />
+      <TestimonialsCarousel testimonials={testimonials} />
       <CTABanner />
       {/* <Steps /> */}
     </div>
