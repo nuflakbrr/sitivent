@@ -52,46 +52,58 @@ const Columns: ColumnDef<Registration>[] = [
       );
     },
   },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const status = row.original.status;
-      const getStatusClass = (val: typeof status) => {
-        switch (val) {
-          case RegistrationStatus.WAITING_PAYMENT:
-            return 'bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-500/30';
-          case RegistrationStatus.REGISTERED:
-            return 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/30';
-          case RegistrationStatus.CANCELLED:
-            return 'bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/30';
-          case RegistrationStatus.CHECKED_IN:
-            return 'bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/30';
-          default:
-            return '';
-        }
-      };
-      const getStatusLabel = (val: typeof status) => {
-        switch (val) {
-          case RegistrationStatus.WAITING_PAYMENT:
-            return 'Menunggu Pembayaran';
-          case RegistrationStatus.REGISTERED:
-            return 'Terdaftar';
-          case RegistrationStatus.CANCELLED:
-            return 'Dibatalkan';
-          case RegistrationStatus.CHECKED_IN:
-            return 'Hadir';
-          default:
-            return val;
-        }
-      };
-      return (
-        <Badge variant="outline" className={`font-semibold px-2 py-0.5 ${getStatusClass(status)}`}>
-          {getStatusLabel(status)}
-        </Badge>
-      );
-    },
-  },
+   {
+     accessorKey: 'status',
+     header: 'Status',
+     cell: ({ row }) => {
+       const status = row.original.status;
+       const getStatusClass = (val: typeof status) => {
+         switch (val) {
+           case RegistrationStatus.WAITING_PAYMENT:
+             return 'bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-500/30';
+           case RegistrationStatus.REGISTERED:
+             return 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/30';
+           case RegistrationStatus.CANCELLED:
+             return 'bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/30';
+           case RegistrationStatus.CHECKED_IN:
+             return 'bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/30';
+           default:
+             return '';
+         }
+       };
+       const getStatusLabel = (val: typeof status) => {
+         switch (val) {
+           case RegistrationStatus.WAITING_PAYMENT:
+             return 'Menunggu Pembayaran';
+           case RegistrationStatus.REGISTERED:
+             return 'Terdaftar';
+           case RegistrationStatus.CANCELLED:
+             return 'Dibatalkan';
+           case RegistrationStatus.CHECKED_IN:
+             return 'Hadir';
+           default:
+             return val;
+         }
+       };
+       return (
+         <Badge variant="outline" className={`font-semibold px-1.5 py-0.5 text-xs sm:text-sm ${getStatusClass(status)}`}>
+           {getStatusLabel(status)}
+         </Badge>
+       );
+     },
+   },
+   {
+     accessorKey: 'createdAt',
+     header: 'Tanggal',
+     cell: ({ row }) => {
+       const formattedDate = moment(row.original.createdAt)
+         .clone()
+         .locale('id')
+         .tz('Asia/Jakarta')
+         .format('DD MMM, HH:mm');
+       return <span className="text-xs sm:text-sm">{formattedDate}</span>;
+     },
+   },
   {
     accessorKey: 'createdAt',
     header: 'Tanggal Daftar',

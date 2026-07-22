@@ -366,11 +366,11 @@ const ErrorState: FC<ErrorStateProps> = ({ code, error }) => {
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div
-          className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full"
+          className="absolute -top-32 -left-32 w-120 h-120 rounded-full"
           style={{ background: `radial-gradient(circle, ${meta.glowStart}, transparent 70%)` }}
         />
         <div
-          className="absolute -bottom-32 -right-32 w-[380px] h-[380px] rounded-full"
+          className="absolute -bottom-32 -right-32 w-95 h-95 rounded-full"
           style={{ background: `radial-gradient(circle, ${meta.glowEnd}, transparent 70%)` }}
         />
       </div>

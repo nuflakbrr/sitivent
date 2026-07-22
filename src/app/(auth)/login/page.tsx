@@ -33,11 +33,11 @@ const Login: FC = () => {
       >
         {/* Decorative blobs */}
         <div
-          className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full opacity-[0.07]"
+          className="absolute -top-32 -left-32 w-120 h-120 rounded-full opacity-[0.07]"
           style={{ background: 'radial-gradient(circle, #D97757, transparent 70%)' }}
         />
         <div
-          className="absolute bottom-0 right-0 w-[360px] h-[360px] rounded-full opacity-[0.06]"
+          className="absolute bottom-0 right-0 w-90 h-90 rounded-full opacity-[0.06]"
           style={{ background: 'radial-gradient(circle, #788C5D, transparent 70%)' }}
         />
 

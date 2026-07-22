@@ -82,7 +82,7 @@ const PhotoCell = ({ row }: { row: { original: Gallery } }) => {
         aspectRatio="video"
       />
       <div
-        className="relative h-10 w-16 min-w-[64px] rounded-md overflow-hidden border bg-muted flex items-center justify-center cursor-zoom-in hover:ring-2 hover:ring-primary/20 transition-all group"
+        className="relative h-10 w-16 min-w-16 rounded-md overflow-hidden border bg-muted flex items-center justify-center cursor-zoom-in hover:ring-2 hover:ring-primary/20 transition-all group"
         onClick={() => gallery.imageUrl && setIsPreviewOpen(true)}
       >
         <Image

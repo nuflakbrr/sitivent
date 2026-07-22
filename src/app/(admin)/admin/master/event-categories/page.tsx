@@ -25,7 +25,7 @@ const EventCategoriesCMS: FC = () => {
           description="Kelola kategori untuk mengelompokkan event berdasarkan jenisnya."
         />
         {hasPermission('event.categories.create') && (
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href={'/admin/master/event-categories/new' as Route}>
               <Plus className="h-4 w-4 mr-2" /> Tambah Kategori
             </Link>

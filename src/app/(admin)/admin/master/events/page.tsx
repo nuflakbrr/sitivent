@@ -24,7 +24,7 @@ const EventsCMS: FC = () => {
           description="Kelola daftar seminar, workshop, webinar, dan event lainnya."
         />
         {hasPermission('events.create') && (
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/admin/master/events/new">
               <Plus className="h-4 w-4 mr-2" /> Tambah Event
             </Link>

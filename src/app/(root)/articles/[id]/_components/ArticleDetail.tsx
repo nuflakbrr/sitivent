@@ -512,7 +512,7 @@ export const ArticleDetailClient: FC<ArticleDetailClientProps> = ({ initialArtic
                       Alur Proses Interaktif
                     </h3>
                     <div className="bg-[#FAF9F5] border border-[#D1CFC5] rounded-xl p-4 overflow-x-auto">
-                      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 min-w-[500px]">
+                      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 min-w-125">
                         {currentArticle.flowchart.map((step, idx) => (
                           <div
                             key={idx}
@@ -607,7 +607,7 @@ export const ArticleDetailClient: FC<ArticleDetailClientProps> = ({ initialArtic
                       </div>
 
                       {/* Preformatted Code */}
-                      <pre className="p-4 overflow-x-auto text-[11px] md:text-xs font-mono leading-relaxed max-h-[300px]">
+                      <pre className="p-4 overflow-x-auto text-[11px] md:text-xs font-mono leading-relaxed max-h-75">
                         <code>{currentArticle.tabs[activeTabIdx]?.code}</code>
                       </pre>
                     </div>

@@ -19,14 +19,14 @@ const GalleriesCMS: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-3 md:mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading
           title={`Galeri Foto (${meta.total})`}
           description="Kelola dokumentasi foto event untuk dipublikasikan pada website."
         />
         {hasPermission('galleries.create') && (
-          <Button asChild>
-            <Link href={'/admin/master/galleries/new' as Route} className="w-full sm:w-auto">
+          <Button asChild className="w-full sm:w-auto">
+            <Link href={'/admin/master/galleries/new' as Route}>
               <Plus className="h-4 w-4 mr-2" /> Tambah Foto
             </Link>
           </Button>

@@ -214,7 +214,7 @@ const ArticleForm: FC<Props> = ({ initialData }) => {
           <Button
             disabled={submitMutation.isPending || isUploading || !form.formState.isValid}
             type="submit"
-            className="px-8 min-w-[120px]"
+            className="px-8 min-w-30"
           >
             {submitMutation.isPending ? (
               <>

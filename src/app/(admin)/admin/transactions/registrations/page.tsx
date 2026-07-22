@@ -39,7 +39,7 @@ const RegistrationsCMS: FC = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 md:mb-4">
         <Heading
           title={`Pendaftaran Event (${meta.total})`}
           description="Lihat dan kelola daftar riwayat pendaftaran event seluruh peserta."
@@ -58,9 +58,9 @@ const RegistrationsCMS: FC = () => {
         searchValue={search}
         placeholderSearch="Cari no. registrasi, event, atau peserta..."
         customFilters={
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Select value={eventId || ''} onValueChange={(value) => setEventId(value || undefined)}>
-              <SelectTrigger className="w-50">
+              <SelectTrigger className="w-full sm:w-50">
                 <SelectValue placeholder="Semua Event" />
               </SelectTrigger>
               <SelectContent>
@@ -77,7 +77,7 @@ const RegistrationsCMS: FC = () => {
               value={statusFilter || ''}
               onValueChange={(value) => setStatusFilter(value || undefined)}
             >
-              <SelectTrigger className="w-50">
+              <SelectTrigger className="w-full sm:w-50">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>

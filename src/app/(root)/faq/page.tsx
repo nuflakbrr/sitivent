@@ -119,11 +119,11 @@ const FAQPage: FC = () => {
       >
         {/* Decorative blobs */}
         <div
-          className="absolute -top-32 -left-32 w-[400px] h-[400px] rounded-full opacity-[0.06]"
+          className="absolute -top-32 -left-32 w-100 h-100 rounded-full opacity-[0.06]"
           style={{ background: 'radial-gradient(circle, #D97757, transparent 70%)' }}
         />
         <div
-          className="absolute -bottom-32 -right-20 w-[350px] h-[350px] rounded-full opacity-[0.05]"
+          className="absolute -bottom-32 -right-20 w-87.5 h-87.5 rounded-full opacity-[0.05]"
           style={{ background: 'radial-gradient(circle, #788C5D, transparent 70%)' }}
         />
 

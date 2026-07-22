@@ -55,7 +55,7 @@ export default async function ScanPage() {
     );
   }
 
-   return (
+  return (
     <div className="container mx-auto py-4 px-4 sm:py-6 max-w-4xl">
       <ScannerClient />
     </div>

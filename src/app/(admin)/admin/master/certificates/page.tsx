@@ -70,7 +70,7 @@ const CertificatesCMS: FC = () => {
             : 'Apakah Anda yakin ingin menyinkronkan sertifikat untuk SEMUA event? Proses ini akan memproses semua data event yang aktif.'
         }
       />
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 md:mb-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 md:mb-4">
         <Heading
           title={`Manajemen Sertifikat (${meta.total})`}
           description="Pantau dan kelola sertifikat elektronik untuk peserta event."
@@ -81,13 +81,14 @@ const CertificatesCMS: FC = () => {
               onClick={() => setIsConfirmOpen(true)}
               disabled={isGenerating || isLoading}
               variant="outline"
+              className="w-full sm:w-auto"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
               {eventId ? 'Sinkronisasi Event Ini' : 'Sinkronisasi Semua Event'}
             </Button>
           )}
           {hasPermission('certificates.create') && (
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link href="/admin/master/certificates/template">
                 <Settings className="h-4 w-4 mr-2" /> Konfigurasi Template
               </Link>

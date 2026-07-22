@@ -34,11 +34,11 @@ const Register: FC = () => {
       >
         {/* Decorative blobs */}
         <div
-          className="absolute -top-32 -right-32 w-[460px] h-[460px] rounded-full opacity-[0.07]"
+          className="absolute -top-32 -right-32 w-115 h-115 rounded-full opacity-[0.07]"
           style={{ background: 'radial-gradient(circle, #788C5D, transparent 70%)' }}
         />
         <div
-          className="absolute bottom-0 -left-20 w-[320px] h-[320px] rounded-full opacity-[0.06]"
+          className="absolute bottom-0 -left-20 w-[320px] h-80 rounded-full opacity-[0.06]"
           style={{ background: 'radial-gradient(circle, #D97757, transparent 70%)' }}
         />
 

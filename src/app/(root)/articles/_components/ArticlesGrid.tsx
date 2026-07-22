@@ -77,7 +77,7 @@ export const ArticlesGrid: FC<ArticlesGridProps> = ({ initialItems }) => {
         {filteredItems.map((article) => (
           <article
             key={article.id}
-            className="group flex p-0 flex-col justify-between border shadow-xs hover:shadow-lg hover:border-[#D97757] transition-all duration-500 rounded-3xl overflow-hidden h-[420px]"
+            className="group flex p-0 flex-col justify-between border shadow-xs hover:shadow-lg hover:border-[#D97757] transition-all duration-500 rounded-3xl overflow-hidden h-105"
             style={{ borderColor: '#E3DACC', background: '#FFFFFF' }}
           >
             <div className="space-y-4">
