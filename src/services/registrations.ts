@@ -157,6 +157,70 @@ export async function getEventsForFilter() {
   }
 }
 
+export async function exportRegistrationsData(
+  search: string = '',
+  eventId?: string,
+  status?: string
+) {
+  const hasAccess = await verifyPermission('registrations.read');
+  if (!hasAccess) {
+    return {
+      success: false,
+      data: [],
+      error: 'Anda tidak memiliki hak akses untuk mengeksport data ini.',
+    };
+  }
+
+  try {
+    const where = {
+      deletedAt: null,
+      ...(eventId ? { eventId } : {}),
+      ...(status ? { status: status as RegistrationStatus } : {}),
+      ...(search
+        ? {
+            OR: [
+              { registrationNumber: { contains: search, mode: 'insensitive' as const } },
+              { user: { name: { contains: search, mode: 'insensitive' as const } } },
+              { user: { email: { contains: search, mode: 'insensitive' as const } } },
+              { event: { title: { contains: search, mode: 'insensitive' as const } } },
+            ],
+          }
+        : {}),
+    };
+
+    const data = await prisma.registration.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        event: {
+          select: {
+            title: true,
+            price: true,
+          },
+        },
+      },
+    });
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error('Export Registrations Error:', error);
+    return {
+      success: false,
+      data: [],
+      error: 'Terjadi kesalahan sistem saat mengeksport data registrasi.',
+    };
+  }
+}
+
 export async function registerToEvent(eventId: string) {
   try {
     const session = await verifySession();
