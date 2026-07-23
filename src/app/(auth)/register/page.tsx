@@ -5,6 +5,7 @@ import { CheckCircle2 } from 'lucide-react';
 
 import { genPageMetadata } from '@/app/seo';
 import RegisterForm from './_components/RegisterForm';
+import Image from 'next/image';
 
 export const metadata: Metadata = genPageMetadata({
   title: 'Daftar Akun',
@@ -49,7 +50,15 @@ const Register: FC = () => {
             className="inline-flex items-center gap-3 group"
             aria-label="Beranda Sitivent"
           >
-            <span
+            <Image
+              className="w-auto h-25"
+              src={'/assets/img/SITIVENT-PRIMARY.png'}
+              alt="Logo"
+              width={120}
+              height={40}
+              loading="lazy"
+            />
+            {/* <span
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-serif font-bold text-lg shadow-lg"
               style={{ background: '#D97757' }}
             >
@@ -60,7 +69,7 @@ const Register: FC = () => {
               style={{ color: '#FAF9F5' }}
             >
               Sitivent
-            </span>
+            </span> */}
           </Link>
         </div>
 
