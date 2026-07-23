@@ -33,6 +33,7 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
               alt="Logo"
               width={120}
               height={40}
+              loading="lazy"
             />
             {/* <span
               className="flex items-center justify-center w-7 h-7 rounded-md font-black text-xs shadow-sm"

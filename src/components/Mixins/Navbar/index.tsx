@@ -193,6 +193,7 @@ const Navbar: FC = () => {
                 alt="Logo"
                 width={120}
                 height={40}
+                loading="lazy"
               />
               {/* <span
                 className="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-sm"

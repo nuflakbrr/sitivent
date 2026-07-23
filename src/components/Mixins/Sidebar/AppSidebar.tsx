@@ -137,6 +137,7 @@ export function AppSidebar({
           alt="Logo"
           width={120}
           height={40}
+          loading="lazy"
         />
       </SidebarHeader>
       <SidebarContent className="gap-0">
