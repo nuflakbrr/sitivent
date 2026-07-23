@@ -1,7 +1,7 @@
 import { type FC } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 
 import { prisma } from '@/lib/prisma';
 import type { Route } from 'next';
@@ -12,8 +12,6 @@ const GalleryBento: FC = async () => {
     orderBy: { createdAt: 'desc' },
     take: 5,
   });
-
-  if (galleries.length === 0) return null;
 
   // Pattern layout bento untuk 5 item
   const getBentoSpans = (index: number) => {
@@ -63,60 +61,88 @@ const GalleryBento: FC = async () => {
               kegiatan kami.
             </p>
           </div>
-          <Link
-            href={'/gallery' as Route}
-            className="flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 hover:gap-2.5 shrink-0 self-start sm:self-auto"
-            style={{ color: '#D97757' }}
-          >
-            Lihat Galeri Lengkap <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2 md:auto-rows-45">
-          {galleries.map((item, idx) => (
-            <div
-              key={item.id}
-              className={`group relative overflow-hidden rounded-2xl border shadow-xs transition-all duration-300 hover:shadow-md ${getBentoSpans(idx)}`}
-              style={{ borderColor: '#E3DACC', background: '#FFFFFF' }}
+          {galleries.length > 0 && (
+            <Link
+              href={'/gallery' as Route}
+              className="flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 hover:gap-2.5 shrink-0 self-start sm:self-auto"
+              style={{ color: '#D97757' }}
             >
-              <Image
-                src={item.imageUrl}
-                alt={item.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover group-hover:scale-102 transition-transform duration-500 ease-out"
-              />
-              {/* Gradient Overlay */}
-              <div
-                className="absolute inset-0 transition-opacity duration-300"
-                style={{
-                  background:
-                    'linear-gradient(to top, rgba(20, 20, 19, 0.85) 0%, rgba(20, 20, 19, 0.3) 50%, transparent 100%)',
-                }}
-              />
-
-              {/* Title & Description Overlay */}
-              <div className="absolute bottom-0 inset-x-0 p-5 flex flex-col justify-end text-white">
-                <span
-                  className="text-[9px] font-bold tracking-wider uppercase opacity-75 mb-1"
-                  style={{
-                    fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
-                    color: '#E3DACC',
-                  }}
-                >
-                  Dokumentasi
-                </span>
-                <h3 className="text-sm font-bold line-clamp-1 leading-snug">{item.title}</h3>
-                {item.description && (
-                  <p className="text-xs text-zinc-300 line-clamp-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-sm">
-                    {item.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+              Lihat Galeri Lengkap <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
         </div>
+
+        {galleries.length === 0 ? (
+          <div
+            className="text-center py-12 px-6 rounded-2xl border bg-white max-w-md mx-auto space-y-3"
+            style={{ borderColor: '#E3DACC' }}
+          >
+            <div
+              className="w-12 h-12 rounded-full mx-auto flex items-center justify-center"
+              style={{ background: 'rgba(120,140,93,0.08)' }}
+            >
+              <ImageIcon className="w-6 h-6" style={{ color: '#788C5D' }} />
+            </div>
+            <h3 className="text-base font-semibold text-[#141413]">Dokumentasi Belum Tersedia</h3>
+            <p className="text-xs text-[#87867F] leading-relaxed">
+              Dokumentasi foto event belum diunggah. Silakan kunjungi galeri secara berkala.
+            </p>
+            <div className="pt-2">
+              <Link
+                href={'/gallery' as Route}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-transform hover:scale-105 text-white"
+                style={{ background: '#788C5D' }}
+              >
+                Kunjungi Halaman Galeri
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2 md:auto-rows-45">
+            {galleries.map((item, idx) => (
+              <div
+                key={item.id}
+                className={`group relative overflow-hidden rounded-2xl border shadow-xs transition-all duration-300 hover:shadow-md ${getBentoSpans(idx)}`}
+                style={{ borderColor: '#E3DACC', background: '#FFFFFF' }}
+              >
+                <Image
+                  src={item.imageUrl}
+                  alt={item.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover group-hover:scale-102 transition-transform duration-500 ease-out"
+                />
+                {/* Gradient Overlay */}
+                <div
+                  className="absolute inset-0 transition-opacity duration-300"
+                  style={{
+                    background:
+                      'linear-gradient(to top, rgba(20, 20, 19, 0.85) 0%, rgba(20, 20, 19, 0.3) 50%, transparent 100%)',
+                  }}
+                />
+
+                {/* Title & Description Overlay */}
+                <div className="absolute bottom-0 inset-x-0 p-5 flex flex-col justify-end text-white">
+                  <span
+                    className="text-[9px] font-bold tracking-wider uppercase opacity-75 mb-1"
+                    style={{
+                      fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                      color: '#E3DACC',
+                    }}
+                  >
+                    Dokumentasi
+                  </span>
+                  <h3 className="text-sm font-bold line-clamp-1 leading-snug">{item.title}</h3>
+                  {item.description && (
+                    <p className="text-xs text-zinc-300 line-clamp-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-sm">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

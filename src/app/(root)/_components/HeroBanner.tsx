@@ -70,7 +70,76 @@ const HeroBanner: FC<Props> = ({ events }) => {
     };
   }, [api]);
 
-  if (!events || events.length === 0) return null;
+  if (!events || events.length === 0) {
+    const fallbackDesign = DESIGNS[0];
+    return (
+      <div
+        className="w-full relative overflow-hidden flex items-center"
+        style={{ height: SLIDE_HEIGHT, background: fallbackDesign.bg }}
+      >
+        <div
+          className="absolute right-[-5%] top-[-10%] w-[45%] aspect-square rounded-full opacity-30 pointer-events-none blur-3xl"
+          style={{
+            background: `radial-gradient(circle, ${fallbackDesign.bloom} 0%, transparent 70%)`,
+          }}
+        />
+        <div className="relative z-10 container mx-auto px-6 max-w-6xl h-full flex items-center">
+          <div className="space-y-6 pt-28 pb-16 max-w-2xl">
+            <div className="flex items-center gap-3">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full text-white"
+                style={{
+                  background: fallbackDesign.accent,
+                  fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+                }}
+              >
+                SITIVENT
+              </span>
+              <span
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{ color: 'rgba(240,238,230,0.7)' }}
+              >
+                Platform Event & Workshop
+              </span>
+            </div>
+            <h1
+              className="leading-[1.1] tracking-tight"
+              style={{
+                fontFamily: "ui-serif, Georgia, 'Times New Roman', serif",
+                fontWeight: 500,
+                fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
+                color: '#FAF9F5',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Jelajahi Event & Workshop Berkualitas
+            </h1>
+            <p
+              className="text-sm md:text-base leading-relaxed"
+              style={{ color: 'rgba(240,238,230,0.7)' }}
+            >
+              Platform terpercaya untuk mengikuti berbagai seminar, workshop, dan pelatihan
+              teknologi dengan sertifikat resmi.
+            </p>
+            <div className="pt-1">
+              <Link
+                href="/events"
+                className="inline-flex items-center gap-2 px-7 py-3.5 font-semibold rounded-xl text-sm transition-all duration-200 hover:scale-[1.04]"
+                style={{
+                  background: fallbackDesign.accent,
+                  color: '#FFFFFF',
+                  boxShadow: `0 8px 24px ${fallbackDesign.accent}55`,
+                }}
+              >
+                Lihat Semua Event
+                <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const slides = events.map((e, index) => {
     const design = DESIGNS[index % DESIGNS.length];

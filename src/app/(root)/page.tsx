@@ -51,7 +51,7 @@ export default async function HomePage() {
 
   return (
     <div className="w-full">
-      {heroEvents.length >= 3 && <HeroBanner events={heroEvents as Event[]} />}
+      <HeroBanner events={heroEvents as Event[]} />
       <Suspense fallback={<div className="h-14 border-b bg-white" />}>
         <CategoryLinks categories={categories} />
       </Suspense>
