@@ -58,8 +58,7 @@ const NavbarUserDropdown: FC<NavbarUserDropdownProps> = ({ user, scrolled, isAdm
     },
     onSuccess: () => {
       toast.success('Berhasil keluar. Sampai jumpa!');
-      router.push('/');
-      router.refresh();
+      window.location.href = '/';
     },
     onError: (err: Error) => toast.error(err.message || 'Terjadi kesalahan.'),
   });
