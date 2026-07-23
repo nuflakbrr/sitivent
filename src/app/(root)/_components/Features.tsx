@@ -1,11 +1,11 @@
 import type { FC } from 'react';
-import { Shield, Zap, Award, BookOpen, Users, Infinity as InfinityIcon } from 'lucide-react';
+import { Shield, Zap, Award, BookOpen, Sparkles, Users } from 'lucide-react';
 
 const highlights = [
   {
     icon: Zap,
     title: 'Konfirmasi Cepat',
-    desc: 'Pembayaran diverifikasi manual oleh tim kami dalam waktu 1×24 jam.',
+    desc: 'Registrasi instan dan dapatkan QR code untuk event offline.',
     accent: '#D97757',
     bg: 'rgba(217,119,87,0.07)',
     border: 'rgba(217,119,87,0.2)',
@@ -21,7 +21,7 @@ const highlights = [
   {
     icon: Award,
     title: 'Sertifikat Resmi',
-    desc: 'e-Certificate dengan nomor unik yang dapat diverifikasi kapan saja.',
+    desc: 'e-Certificate resmi dan dapat diunduh kapan saja.',
     accent: '#3D3D3A',
     bg: 'rgba(61,61,58,0.05)',
     border: 'rgba(61,61,58,0.12)',
@@ -29,26 +29,26 @@ const highlights = [
   {
     icon: BookOpen,
     title: 'Materi Berkualitas',
-    desc: 'Kurikulum event disusun terstruktur oleh instruktur berpengalaman.',
+    desc: 'Materi event disusun terstruktur oleh instruktur berpengalaman.',
     accent: '#06B6D4',
     bg: 'rgba(6,182,212,0.07)',
     border: 'rgba(6,182,212,0.2)',
   },
   {
-    icon: Users,
-    title: 'Komunitas Aktif',
-    desc: 'Grup diskusi eksklusif setelah event untuk kolaborasi berkelanjutan.',
-    accent: '#D9A757',
-    bg: 'rgba(217,167,87,0.07)',
-    border: 'rgba(217,167,87,0.2)',
+    icon: Sparkles,
+    title: 'Narasumber Ekspert',
+    desc: 'Belajar langsung dari praktisi dan pakar terbaik di bidang industri.',
+    accent: '#8B5CF6',
+    bg: 'rgba(139,92,246,0.07)',
+    border: 'rgba(139,92,246,0.2)',
   },
   {
-    icon: InfinityIcon,
-    title: 'Akses Selamanya',
-    desc: 'Rekaman sesi dan materi pembelajaran dapat diakses kapan saja.',
-    accent: '#B04A3F',
-    bg: 'rgba(176,74,63,0.07)',
-    border: 'rgba(176,74,63,0.2)',
+    icon: Users,
+    title: 'Jaringan Koneksi',
+    desc: 'Perluas relasi dan kolaborasi dengan sesama peserta event.',
+    accent: '#F59E0B',
+    bg: 'rgba(245,158,11,0.07)',
+    border: 'rgba(245,158,11,0.2)',
   },
 ];
 
@@ -79,7 +79,7 @@ const Features: FC = () => {
         </div>
 
         {/* Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {highlights.map((h) => {
             const Icon = h.icon;
             return (
