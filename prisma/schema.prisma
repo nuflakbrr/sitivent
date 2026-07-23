@@ -162,6 +162,7 @@ model Event {
   endTime              String               @map("end_time")
   location             String
   eventType            EventType            @map("event_type")
+  onlineAttendance     Boolean              @default(false) @map("online_attendance")
   registrationDeadline DateTime             @map("registration_deadline")
   quota                Int
   price                Int
@@ -193,6 +194,7 @@ model Registration {
   userId             String             @map("user_id")
   registrationNumber String             @unique @map("registration_number")
   qrToken            String?            @unique @map("qr_token")
+  onlineAttendance   Boolean            @default(false) @map("online_attendance")
   status             RegistrationStatus @default(WAITING_PAYMENT)
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")

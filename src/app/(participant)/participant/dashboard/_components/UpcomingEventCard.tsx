@@ -1,6 +1,8 @@
+'use client';
+
 import type { Route } from 'next';
 import Link from 'next/link';
-import { AlertCircle, Calendar, Clock, MapPin, Video } from 'lucide-react';
+import { AlertCircle, Calendar, Clock, MapPin, Video, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Empty,
@@ -11,6 +13,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import ShowQrButton from './ShowQrButton';
+import ConfirmOnlineButton from './ConfirmOnlineButton';
 import { canDownloadCertificate, formatEventDate } from './dashboard-helpers';
 
 interface UpcomingEventCardProps {
@@ -28,6 +31,7 @@ interface UpcomingEventCardProps {
     qrToken: string | null;
     status: string;
     registrationNumber?: string;
+    onlineAttendance?: boolean;
   } | null;
 }
 
@@ -127,7 +131,7 @@ export default function UpcomingEventCard({ upcomingEvent }: UpcomingEventCardPr
                     >
                       <a href={upcomingEvent.meetingLink} target="_blank" rel="noopener noreferrer">
                         <Video className="w-4 h-4 shrink-0" />
-                        Gabung Link Zoom
+                        Gabung Link Event
                       </a>
                     </Button>
                   )}
@@ -164,6 +168,19 @@ export default function UpcomingEventCard({ upcomingEvent }: UpcomingEventCardPr
             </div>
           </div>
         )}
+
+        {upcomingEvent &&
+          upcomingEvent.eventType === 'ONLINE' &&
+          upcomingEvent.onlineAttendance && (
+            <div className="px-6 pb-6 pt-0" style={{ borderTop: '1.5px solid #F0EEE6' }}>
+              <div className="pt-4">
+                <ConfirmOnlineButton
+                  registrationId={upcomingEvent.id}
+                  disabled={upcomingEvent.status === 'CHECKED_IN'}
+                />
+              </div>
+            </div>
+          )}
       </div>
     </div>
   );

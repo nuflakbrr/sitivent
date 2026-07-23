@@ -35,6 +35,7 @@ export interface Event {
   location: string;
   meetingLink?: string | null;
   eventType: EventType;
+  onlineAttendance?: boolean;
   registrationDeadline: Date;
   quota: number;
   price: number;

@@ -407,6 +407,33 @@ const EventForm: FC<Props> = ({ initialData }) => {
                 />
               )}
 
+              {eventType === EventType.ONLINE && (
+                <Controller
+                  name="onlineAttendance"
+                  control={form.control}
+                  render={({ field }) => (
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between items-center border p-4 rounded-xl"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <FieldLabel className="text-sm font-semibold">
+                          Aktifkan Presensi Online
+                        </FieldLabel>
+                        <span className="text-xs text-muted-foreground">
+                          Peserta dapat melakukan presensi mandiri dari dashboard.
+                        </span>
+                      </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={!canEdit}
+                      />
+                    </Field>
+                  )}
+                />
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Controller
                   name="quota"

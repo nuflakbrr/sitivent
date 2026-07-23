@@ -8,6 +8,161 @@ import moment from 'moment';
 import 'moment-timezone';
 import 'moment/locale/id';
 
+export async function confirmOnlineAttendance(registrationId: string) {
+  try {
+    const session = await verifySession();
+    if (!session || !session.user) {
+      return { success: false, error: 'INVALID_SESSION', message: 'Sesi tidak valid.' };
+    }
+
+    const userId = session.user.id;
+
+    // Cari pendaftaran
+    const registration = await prisma.registration.findFirst({
+      where: {
+        id: registrationId,
+        userId, // Hanya bisa absen diri sendiri
+        deletedAt: null,
+      },
+      include: {
+        event: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!registration) {
+      return {
+        success: false,
+        error: 'NOT_FOUND',
+        message: 'Data pendaftaran tidak ditemukan.',
+      };
+    }
+
+    const event = registration.event;
+
+    // Validasi event online dan onlineAttendance diaktifkan
+    if (event.eventType !== 'ONLINE') {
+      return {
+        success: false,
+        error: 'NOT_ONLINE_EVENT',
+        message: 'Fitur ini hanya untuk event online.',
+      };
+    }
+
+    if (!event.onlineAttendance && !registration.onlineAttendance) {
+      return {
+        success: false,
+        error: 'NOT_ENABLED',
+        message: 'Presensi online tidak diaktifkan untuk event ini.',
+      };
+    }
+
+    // Construct actual start & end date-times with time strings
+    const actualEnd = new Date(event.endDate);
+    if (event.endTime) {
+      const [endH, endM] = event.endTime.split(':').map(Number);
+      actualEnd.setHours(endH ?? 23, endM ?? 59, 59, 999);
+    } else {
+      actualEnd.setHours(23, 59, 59, 999);
+    }
+
+    if (event.status === 'COMPLETED' || new Date() > actualEnd) {
+      return {
+        success: false,
+        error: 'EVENT_COMPLETED',
+        message: 'Attendance tidak boleh dilakukan setelah event selesai.',
+      };
+    }
+
+    const actualStart = new Date(event.startDate);
+    if (event.startTime) {
+      const [startH, startM] = event.startTime.split(':').map(Number);
+      actualStart.setHours(startH ?? 0, startM ?? 0, 0, 0);
+    } else {
+      actualStart.setHours(0, 0, 0, 0);
+    }
+
+    if (new Date() < actualStart) {
+      return {
+        success: false,
+        error: 'EVENT_NOT_STARTED',
+        message: 'Event belum dimulai.',
+      };
+    }
+
+    // Validasi status pendaftaran
+    if (registration.status === 'CHECKED_IN') {
+      return {
+        success: false,
+        error: 'ALREADY_CHECKED_IN',
+        message: 'Anda sudah melakukan presensi.',
+      };
+    }
+
+    if (registration.status !== 'REGISTERED') {
+      return {
+        success: false,
+        error: 'NOT_REGISTERED',
+        message: 'Peserta yang tidak memiliki status REGISTERED tidak dapat melakukan presensi.',
+      };
+    }
+
+    // Jalankan check-in dalam transaksi
+    await prisma.$transaction([
+      prisma.registration.update({
+        where: { id: registration.id },
+        data: { status: RegistrationStatus.CHECKED_IN },
+      }),
+      prisma.attendance.create({
+        data: {
+          registrationId: registration.id,
+          status: AttendanceStatus.SUCCESS,
+        },
+      }),
+    ]);
+
+    // Send Attendance Verification Email
+    try {
+      const { queueEmail } = await import('./emails');
+      const emailBody = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #E3DACC; border-radius: 12px; background-color: #FAF9F5;">
+          <h2 style="color: #D97757; font-family: serif;">Kehadiran Event Terverifikasi</h2>
+          <p>Halo ${registration.user.name || registration.user.email},</p>
+          <p>Kehadiran Anda pada event <strong>${event.title}</strong> (${event.eventType}) telah berhasil diverifikasi pada pukul <strong>${moment(new Date()).clone().locale('id').tz('Asia/Jakarta').format('DD MMM YYYY, HH:mm:ss') + ' WIB'}</strong>.</p>
+          <p>Terima kasih atas partisipasi Anda!</p>
+        </div>
+      `;
+      await queueEmail(
+        registration.user.email,
+        `Kehadiran Terverifikasi: ${event.title}`,
+        emailBody
+      );
+    } catch (err) {
+      console.error('Queue Attendance Email Error:', err);
+    }
+
+    revalidatePath('/participant/dashboard');
+    revalidatePath('/participant/event-history');
+
+    return {
+      success: true,
+      message: `Berhasil check-in untuk event ${event.title}`,
+    };
+  } catch (error) {
+    console.error('Confirm Online Attendance Error:', error);
+    return {
+      success: false,
+      error: 'SYSTEM_ERROR',
+      message: 'Terjadi kesalahan sistem saat memproses presensi.',
+    };
+  }
+}
+
 export async function scanQrCode(qrToken: string) {
   try {
     // 1. Verifikasi izin scanner

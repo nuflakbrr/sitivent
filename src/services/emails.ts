@@ -1,3 +1,4 @@
+'use server';
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 import { EmailStatus } from '@/generated/prisma/enums';

@@ -136,13 +136,19 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
 
     const userId = session.user.id;
 
-    // Upcoming event: get nearest event starting in the future that user registered for
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    // Upcoming event: get nearest event ending today or in the future that user registered for
     const upcomingReg = await prisma.registration.findFirst({
       where: {
         userId,
         event: {
-          startDate: {
-            gte: new Date(),
+          endDate: {
+            gte: startOfToday,
+          },
+          status: {
+            notIn: ['COMPLETED'],
           },
         },
         status: {
@@ -161,7 +167,8 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
 
     const upcomingEvent = upcomingReg
       ? {
-          id: upcomingReg.event.id,
+          id: upcomingReg.id,
+          eventId: upcomingReg.event.id,
           title: upcomingReg.event.title,
           slug: upcomingReg.event.slug,
           description: upcomingReg.event.description,
@@ -173,6 +180,7 @@ export async function getParticipantDashboardData(): Promise<ParticipantDashboar
           location: upcomingReg.event.location,
           eventType: upcomingReg.event.eventType,
           meetingLink: upcomingReg.event.meetingLink,
+          onlineAttendance: upcomingReg.event.onlineAttendance,
           qrToken: upcomingReg.qrToken,
           status: upcomingReg.status,
           registrationNumber: upcomingReg.registrationNumber,

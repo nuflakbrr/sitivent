@@ -295,6 +295,8 @@ export async function registerToEvent(eventId: string) {
     const isFree = event.price === 0;
 
     let createdReg;
+    const isOnline = event.eventType === 'ONLINE';
+
     if (isFree) {
       createdReg = await prisma.registration.create({
         data: {
@@ -303,6 +305,7 @@ export async function registerToEvent(eventId: string) {
           registrationNumber: regNumber,
           qrToken,
           status: RegistrationStatus.REGISTERED,
+          onlineAttendance: isOnline,
         },
         include: {
           user: true,
@@ -311,7 +314,7 @@ export async function registerToEvent(eventId: string) {
       });
 
       // Send Registration Success Email
-      const isOnline = createdReg.event.eventType === 'ONLINE';
+      const isOnlineCreated = createdReg.event.eventType === 'ONLINE';
       const meetingInfo =
         isOnline && createdReg.event.meetingLink
           ? `<p>Link Meeting (Zoom): <a href="${createdReg.event.meetingLink}">${createdReg.event.meetingLink}</a></p>`

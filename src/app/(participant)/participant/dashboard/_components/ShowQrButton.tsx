@@ -28,15 +28,23 @@ const ShowQrButton: FC<Props> = ({ qrToken, eventTitle, registrationNumber, disa
         <Button
           id="btn-show-qr"
           disabled={disabled}
-          className="w-full flex items-center justify-center gap-2 py-5 font-semibold text-sm shadow-md disabled:opacity-75 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer disabled:cursor-not-allowed"
+          style={{
+            background: disabled ? '#E3DACC' : '#788C5D',
+            color: disabled ? '#87867F' : '#ffffff',
+            borderColor: 'transparent',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+          }}
         >
           {disabled ? (
             <>
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" /> Presensi Selesai (Sudah Hadir)
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Hadir Terkonfirmasi
             </>
           ) : (
             <>
-              <QrCode className="h-5 w-5" /> Tampilkan QR Code Presensi
+              <QrCode className="w-4 h-4 mr-2" />
+              Tampilkan QR Code Presensi
             </>
           )}
         </Button>

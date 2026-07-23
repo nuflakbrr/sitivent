@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@/generated/prisma/client';
 import { verifySession, verifyPermission } from './security';
 import { RegistrationStatus, EventStatus } from '@/generated/prisma/enums';
 import { revalidatePath } from 'next/cache';
@@ -129,7 +130,7 @@ export async function getTestimonies(
 
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.TestimonialWhereInput = {};
     if (eventId) {
       where.eventId = eventId;
     }

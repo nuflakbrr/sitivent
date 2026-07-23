@@ -52,6 +52,7 @@ export const eventSchema = z.object({
   certificateEnabled: z.boolean().default(false),
   categoryId: z.string().optional().nullable(),
   createdById: z.string().optional().nullable(),
+  onlineAttendance: z.boolean().default(false),
   speakers: z.array(speakerSchema).default([]),
   benefits: z.array(benefitSchema).default([]),
 });

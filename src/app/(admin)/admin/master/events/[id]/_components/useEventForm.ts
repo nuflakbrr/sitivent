@@ -42,6 +42,8 @@ export const useEventForm = (initialData: Event | null) => {
       certificateEnabled: initialData?.certificateEnabled || false,
       categoryId: initialData?.categoryId || '',
       createdById: initialData?.createdById || '',
+      // Add onlineAttendance mapping
+      onlineAttendance: initialData?.onlineAttendance ?? false,
       speakers: speakers.length > 0 ? speakers : [{ ...defaultSpeaker, order: 0 }],
       benefits: benefits.length > 0 ? benefits : [{ ...defaultBenefit, order: 0 }],
     },
