@@ -1,3 +1,5 @@
+'use client';
+
 import type { FC } from 'react';
 import Link from 'next/link';
 import ParticipantNavbarClient from '@/components/Mixins/Participant/ParticipantNavbarClient';
@@ -41,21 +43,21 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
           <nav className="hidden md:flex items-center gap-1 ml-2">
             <Link
               href="/participant/dashboard"
-              data-tour="step-dashboard"
+              data-tour-desktop="step-dashboard"
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
             >
               Dashboard
             </Link>
             <Link
               href="/participant/event-history"
-              data-tour="step-history"
+              data-tour-desktop="step-history"
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
             >
               Riwayat Event
             </Link>
             <Link
               href="/participant/payment-history"
-              data-tour="step-payments"
+              data-tour-desktop="step-payments"
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#3D3D3A] hover:text-[#141413] hover:bg-[#FAF9F5] transition-colors"
             >
               Riwayat Pembayaran
@@ -64,7 +66,7 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
         </div>
 
         {/* Right: user dropdown */}
-        <div className="flex items-center gap-3" data-tour="step-profile">
+        <div className="flex items-center gap-3" data-tour-desktop="step-profile">
           <ParticipantNavbarClient user={user} />
         </div>
       </div>

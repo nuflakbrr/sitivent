@@ -62,12 +62,14 @@ pnpm prisma db seed
 
 ### Key Files
 
-- **middleware.ts** - PBAC routing protection
-- **proxy.ts** - Next.js proxy security
+- **proxy.ts** - PBAC routing protection (middleware-based auth) & Next.js proxy security
 - **src/lib/auth.ts** - Better Auth configuration
 - **src/lib/prisma/** - Prisma client wrapper
 - **prisma/schema.prisma** - Database schema
 - **prisma/seed.ts** - Data seeding script
+- **generate/index.ts** - Auto-generates frontend types from DB schema and Prisma models
+- **generate/script.ts** - Auto-generates Zod schemas and TypeScript interfaces from DB schemas
+- **next.config.ts** - Turbopack, caching, security headers, React compiler config
 
 ## Database Schema
 

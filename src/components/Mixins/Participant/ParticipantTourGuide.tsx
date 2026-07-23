@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, type FC, type ReactNode } from 'react';
+import { useState, useEffect, type FC, type ReactNode } from 'react';
 import { TourProvider, useTour } from '@reactour/tour';
 import { Compass, LayoutDashboard, CalendarDays, CreditCard, UserCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/useMobile';
 
 const STORAGE_KEY = 'sitivent_participant_tour_completed';
 
-const steps = [
+const desktopSteps = [
   {
-    selector: '[data-tour="step-dashboard"]',
+    selector: '[data-tour-desktop="step-dashboard"]',
     content: () => (
       <div className="space-y-2 p-1">
         <div className="flex items-center gap-2">
@@ -23,7 +24,7 @@ const steps = [
     ),
   },
   {
-    selector: '[data-tour="step-history"]',
+    selector: '[data-tour-desktop="step-history"]',
     content: () => (
       <div className="space-y-2 p-1">
         <div className="flex items-center gap-2">
@@ -38,7 +39,7 @@ const steps = [
     ),
   },
   {
-    selector: '[data-tour="step-payments"]',
+    selector: '[data-tour-desktop="step-payments"]',
     content: () => (
       <div className="space-y-2 p-1">
         <div className="flex items-center gap-2">
@@ -53,7 +54,78 @@ const steps = [
     ),
   },
   {
-    selector: '[data-tour="step-profile"]',
+    selector: '[data-tour-desktop="step-profile"]',
+    content: () => (
+      <div className="space-y-2 p-1">
+        <div className="flex items-center gap-2">
+          <UserCircle className="w-5 h-5 text-[#D97757]" />
+          <h4 className="font-bold text-[#141413] text-base">Profil & Pengaturan Akun</h4>
+        </div>
+        <p className="text-xs text-[#87867F] leading-relaxed">
+          Perbarui data pribadi, dan informasi penting akun peserta Anda kapan saja melalui menu
+          profil.
+        </p>
+      </div>
+    ),
+  },
+];
+
+const mobileSteps = [
+  {
+    selector: '[data-tour-mobile="step-dashboard"]',
+    mutationObservables: ['body'],
+    resizeObservables: ['body'],
+    content: () => (
+      <div className="space-y-2 p-1">
+        <div className="flex items-center gap-2">
+          <LayoutDashboard className="w-5 h-5 text-[#D97757]" />
+          <h4 className="font-bold text-[#141413] text-base">Dashboard Peserta</h4>
+        </div>
+        <p className="text-xs text-[#87867F] leading-relaxed">
+          Ini adalah pusat kontrol utama Anda di SITIVENT. Di sini Anda dapat melihat statistik
+          ringkasan, info e-tiket event terdekat, serta pengumuman penting.
+        </p>
+      </div>
+    ),
+  },
+  {
+    selector: '[data-tour-mobile="step-history"]',
+    mutationObservables: ['body'],
+    resizeObservables: ['body'],
+    content: () => (
+      <div className="space-y-2 p-1">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-[#D97757]" />
+          <h4 className="font-bold text-[#141413] text-base">Riwayat Event & E-Tiket</h4>
+        </div>
+        <p className="text-xs text-[#87867F] leading-relaxed">
+          Lihat semua event yang pernah Anda daftari, periksa status hadir (CHECKED_IN), akses
+          e-tiket QR code, unduh sertifikat, dan berikan ulasan testimoni.
+        </p>
+      </div>
+    ),
+  },
+  {
+    selector: '[data-tour-mobile="step-payments"]',
+    mutationObservables: ['body'],
+    resizeObservables: ['body'],
+    content: () => (
+      <div className="space-y-2 p-1">
+        <div className="flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-[#D97757]" />
+          <h4 className="font-bold text-[#141413] text-base">Riwayat Transaksi & Pembayaran</h4>
+        </div>
+        <p className="text-xs text-[#87867F] leading-relaxed">
+          Kelola dan pantau seluruh transaksi event berbayar Anda, cek bukti pembayaran, dan
+          dapatkan konfirmasi otomatis.
+        </p>
+      </div>
+    ),
+  },
+  {
+    selector: '[data-tour-mobile="step-profile"]',
+    mutationObservables: ['body'],
+    resizeObservables: ['body'],
     content: () => (
       <div className="space-y-2 p-1">
         <div className="flex items-center gap-2">
@@ -77,7 +149,23 @@ const tourStyles = {
     border: '1px solid #E3DACC',
     color: '#141413',
     padding: '20px 24px',
+    minWidth: '330px',
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+  }),
+  controls: (base: Record<string, unknown>) => ({
+    ...base,
+    marginTop: 16,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+  }),
+  navigation: (base: Record<string, unknown>) => ({
+    ...base,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: '1',
   }),
   maskArea: (base: Record<string, unknown>) => ({
     ...base,
@@ -136,14 +224,64 @@ interface TourGuideProps {
 }
 
 export const ParticipantTourGuide: FC<TourGuideProps> = ({ children }) => {
+  const [mounted, setMounted] = useState(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
+  const activeSteps = isMobile ? mobileSteps : desktopSteps;
+
   return (
     <TourProvider
-      steps={steps}
+      key={isMobile ? 'mobile' : 'desktop'}
+      steps={activeSteps}
       styles={tourStyles}
       padding={{ popover: [16, 20], mask: [6, 6] }}
       onClickMask={({ setIsOpen }) => setIsOpen(false)}
       beforeClose={() => {
         localStorage.setItem(STORAGE_KEY, 'true');
+      }}
+      nextButton={({ currentStep, stepsLength, setIsOpen, setCurrentStep }) => {
+        if (currentStep === stepsLength - 1) {
+          return (
+            <button
+              onClick={() => {
+                localStorage.setItem(STORAGE_KEY, 'true');
+                setIsOpen(false);
+              }}
+              className="px-3.5 py-1.5 bg-[#D97757] hover:bg-[#c46647] text-white text-xs font-bold rounded-lg shadow-sm transition-all duration-200 cursor-pointer shrink-0"
+            >
+              Ya, Saya mengerti!
+            </button>
+          );
+        }
+        return (
+          <button
+            onClick={() => setCurrentStep((s) => s + 1)}
+            className="px-3 py-1.5 bg-[#D97757] hover:bg-[#c46647] text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 cursor-pointer shrink-0"
+          >
+            Lanjut
+          </button>
+        );
+      }}
+      prevButton={({ currentStep, setCurrentStep }) => {
+        if (currentStep === 0) {
+          return <span className="w-14 shrink-0 inline-block" />;
+        }
+        return (
+          <button
+            onClick={() => setCurrentStep((s) => s - 1)}
+            className="px-2.5 py-1.5 text-xs font-medium text-[#87867F] hover:text-[#141413] transition-colors cursor-pointer w-14 shrink-0 text-left"
+          >
+            Kembali
+          </button>
+        );
       }}
     >
       {children}

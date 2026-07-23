@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { LogOut, LayoutDashboard, CreditCard, Award, UserCircle, Home } from 'lucide-react';
 import Link from 'next/link';
+import { useTour } from '@reactour/tour';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/lib/authClient';
 import AlertModal from '@/components/Common/Modals/AlertModal';
+import { useIsMobile } from '@/hooks/useMobile';
 
 interface Props {
   user: {
@@ -41,6 +43,9 @@ const getInitials = (name: string): string =>
 export default function ParticipantNavbarClient({ user }: Props) {
   const router = useRouter();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { isOpen: isTourOpen } = useTour();
+  const isMobile = useIsMobile();
 
   const { mutate: handleLogout, isPending } = useMutation({
     mutationFn: async () => {
@@ -59,7 +64,11 @@ export default function ParticipantNavbarClient({ user }: Props) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu
+        open={open || (isMobile && isTourOpen)}
+        onOpenChange={setOpen}
+        modal={!(isMobile && isTourOpen)}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -81,15 +90,22 @@ export default function ParticipantNavbarClient({ user }: Props) {
           style={{ background: '#FFFFFF', borderColor: '#D1CFC5' }}
           align="end"
           forceMount
+          onInteractOutside={(e) => {
+            if (isMobile && isTourOpen) e.preventDefault();
+          }}
+          onFocusOutside={(e) => {
+            if (isMobile && isTourOpen) e.preventDefault();
+          }}
         >
           <DropdownMenuLabel className="font-normal px-3 py-2.5">
             <p className="text-sm font-semibold text-[#141413] truncate">{user.name}</p>
             <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
-          {/* <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild>
             <Link
               href="/participant/dashboard"
+              data-tour-mobile="step-dashboard"
               className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
             >
               <LayoutDashboard className="h-4 w-4" />
@@ -98,7 +114,18 @@ export default function ParticipantNavbarClient({ user }: Props) {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
+              href="/participant/event-history"
+              data-tour-mobile="step-history"
+              className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
+            >
+              <Award className="h-4 w-4" />
+              Riwayat Event
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
               href="/participant/payment-history"
+              data-tour-mobile="step-payments"
               className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
             >
               <CreditCard className="h-4 w-4" />
@@ -107,23 +134,15 @@ export default function ParticipantNavbarClient({ user }: Props) {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href="/participant/event-history"
-              className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
-            >
-              <Award className="h-4 w-4" />
-              Riwayat Event
-            </Link>
-          </DropdownMenuItem> */}
-          <DropdownMenuItem asChild>
-            <Link
               href="/participant/profile"
+              data-tour-mobile="step-profile"
               className="cursor-pointer flex items-center gap-2 px-3 py-2 text-sm text-[#3D3D3A] hover:text-[#141413]"
             >
               <UserCircle className="h-4 w-4" />
               Profil Saya
             </Link>
           </DropdownMenuItem>
-          {/* <DropdownMenuSeparator style={{ background: '#E3DACC' }} /> */}
+          <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
           <DropdownMenuItem asChild>
             <Link
               href="/"
