@@ -3,7 +3,7 @@ import type { EventCategory } from './event-categories';
 
 export interface EventSpeaker {
   id?: string;
-  name: string;
+  name?: string | null;
   title?: string | null;
   company?: string | null;
   companyUrl?: string | null;

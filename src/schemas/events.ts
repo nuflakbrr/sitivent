@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { EventStatus, EventType } from '@/generated/prisma/enums';
 
 export const speakerSchema = z.object({
-  name: z.string().min(2, 'Nama pemateri minimal 2 karakter.'),
+  name: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   company: z.string().optional().nullable(),
   companyUrl: z
@@ -38,7 +38,7 @@ export const eventSchema = z.object({
   }),
   startTime: z.string().min(1, 'Waktu mulai wajib diisi.'),
   endTime: z.string().min(1, 'Waktu selesai wajib diisi.'),
-  location: z.string().min(3, 'Lokasi minimal 3 karakter.'),
+  location: z.string().min(1, 'Lokasi minimal 1 karakter.'),
   meetingLink: z.string().optional().nullable(),
   eventType: z.nativeEnum(EventType, {
     message: 'Tipe event wajib dipilih.',
@@ -93,19 +93,7 @@ export const refinedEventSchema = eventSchema
   )
   .refine(
     (data) => {
-      if (data.eventType === EventType.ONLINE) {
-        return !!data.meetingLink && data.meetingLink.trim().length > 0;
-      }
-      return true;
-    },
-    {
-      message: 'Link meeting/Zoom wajib diisi jika tipe event online.',
-      path: ['meetingLink'],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.eventType === EventType.ONLINE && data.meetingLink) {
+      if (data.meetingLink && data.meetingLink.trim().length > 0) {
         try {
           new URL(data.meetingLink);
           return true;

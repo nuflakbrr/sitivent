@@ -50,6 +50,7 @@ import { toast } from 'sonner';
 import { EventStatus, EventType } from '@/generated/prisma/enums';
 import { slugify } from '@/lib/slugify';
 import { getAllEventCategories } from '@/services/event-categories';
+import type { EventValues } from '@/services/events';
 
 type Props = {
   initialData: Event | null;
@@ -186,6 +187,34 @@ const EventForm: FC<Props> = ({ initialData }) => {
   const speakersArray = useFieldArray({ control: form.control, name: 'speakers' });
   const benefitsArray = useFieldArray({ control: form.control, name: 'benefits' });
 
+  const selectedCategoryId = form.watch('categoryId');
+  const selectedCategory = (categories || []).find((c) => c.id === selectedCategoryId);
+  const isSeminarOrWebinar = selectedCategory
+    ? /seminar|webinar/i.test(selectedCategory.name) ||
+      /seminar|webinar/i.test(selectedCategory.slug)
+    : false;
+
+  const handleFormSubmit = (data: EventValues) => {
+    if (data.eventType === EventType.ONLINE && isSeminarOrWebinar) {
+      if (!data.meetingLink || data.meetingLink.trim().length === 0) {
+        toast.error('Link Zoom / Meeting wajib diisi untuk event Online Seminar & Webinar.');
+        return;
+      }
+    }
+    if (isSeminarOrWebinar) {
+      const validSpeakers = (data.speakers || []).filter((s) => s.name && s.name.trim().length > 0);
+      if (validSpeakers.length === 0) {
+        toast.error('Pemateri / Narasumber wajib diisi untuk event Seminar & Webinar.');
+        return;
+      }
+    }
+    const cleanedSpeakers = (data.speakers || []).filter((s) => s.name && s.name.trim().length > 0);
+    onSubmit({
+      ...data,
+      speakers: cleanedSpeakers,
+    });
+  };
+
   return (
     <section className="space-y-6">
       <AlertModal
@@ -224,7 +253,7 @@ const EventForm: FC<Props> = ({ initialData }) => {
         </div>
       )}
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Kiri: Detail Informasi Event */}
           <div className="space-y-6">
@@ -393,7 +422,8 @@ const EventForm: FC<Props> = ({ initialData }) => {
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>
-                        Link Zoom / Meeting <span className="text-red-600">*</span>
+                        Link Zoom / Meeting{' '}
+                        {isSeminarOrWebinar && <span className="text-red-600">*</span>}
                       </FieldLabel>
                       <Input
                         {...field}
@@ -768,7 +798,11 @@ const EventForm: FC<Props> = ({ initialData }) => {
           <div className="flex items-center justify-between">
             <Heading
               title="Pemateri / Narasumber"
-              description="Daftar pemateri yang mengisi event ini."
+              description={
+                isSeminarOrWebinar
+                  ? 'Daftar pemateri yang mengisi event ini (wajib untuk Seminar & Webinar).'
+                  : 'Daftar pemateri yang mengisi event ini (opsional).'
+              }
             />
             {canEdit && (
               <Button
@@ -810,9 +844,14 @@ const EventForm: FC<Props> = ({ initialData }) => {
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel>
                           <User className="h-3 w-3 inline" /> Nama Pemateri{' '}
-                          <span className="text-red-600">*</span>
+                          {isSeminarOrWebinar && <span className="text-red-600">*</span>}
                         </FieldLabel>
-                        <Input {...field} placeholder="Nama lengkap" disabled={!canEdit} />
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          placeholder="Nama lengkap"
+                          disabled={!canEdit}
+                        />
                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                       </Field>
                     )}
@@ -823,8 +862,8 @@ const EventForm: FC<Props> = ({ initialData }) => {
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel>
-                          <Briefcase className="h-3 w-3 inline" /> Jabatan
-                          <span className="text-red-600">*</span>
+                          <Briefcase className="h-3 w-3 inline" /> Jabatan{' '}
+                          {isSeminarOrWebinar && <span className="text-red-600">*</span>}
                         </FieldLabel>
                         <Input
                           {...field}
@@ -842,8 +881,8 @@ const EventForm: FC<Props> = ({ initialData }) => {
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel>
-                          Instansi / Perusahaan
-                          <span className="text-red-600">*</span>
+                          Instansi / Perusahaan{' '}
+                          {isSeminarOrWebinar && <span className="text-red-600">*</span>}
                         </FieldLabel>
                         <Input
                           {...field}

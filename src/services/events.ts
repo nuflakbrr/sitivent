@@ -233,7 +233,7 @@ export async function createEvent(values: EventValues): Promise<EventResponse> {
             ? {
                 createMany: {
                   data: data.speakers.map((s: EventSpeaker, idx: number) => ({
-                    name: s.name,
+                    name: s.name || '',
                     title: s.title,
                     company: s.company,
                     companyUrl: s.companyUrl,
@@ -369,7 +369,7 @@ export async function updateEvent(id: string, values: EventValues): Promise<Even
             ? {
                 createMany: {
                   data: data.speakers.map((s: EventSpeaker, idx: number) => ({
-                    name: s.name,
+                    name: s.name || '',
                     title: s.title,
                     company: s.company,
                     companyUrl: s.companyUrl,

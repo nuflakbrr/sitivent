@@ -1,6 +1,6 @@
 export const siteMetadata = {
-  title: process.env.NEXT_PUBLIC_SEO_TITLE || 'Tiba Tiba Ngoding',
-  author: process.env.NEXT_PUBLIC_SEO_AUTHOR || 'Tiba Tiba Ngoding',
+  title: process.env.NEXT_PUBLIC_SEO_TITLE || 'SITIVENT',
+  author: process.env.NEXT_PUBLIC_SEO_AUTHOR || 'Naufal Akbar Nugroho',
   description:
     process.env.NEXT_PUBLIC_SEO_DESCRIPTION ||
     'Sejak 2023, kami telah membantu berbagai bisnis mewujudkan visi digital mereka. Dengan dedikasi tinggi dan keahlian rekayasa perangkat lunak modern, kami menciptakan website premium, aplikasi kustom, dan solusi IT bisnis yang andal dan tepat sasaran.',
