@@ -102,7 +102,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
             <p className="text-xs text-[#87867F] font-mono truncate">{user.email}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="md:hidden">
             <Link
               href="/participant/dashboard"
               data-tour-mobile="step-dashboard"
@@ -112,7 +112,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
               Dashboard
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="md:hidden">
             <Link
               href="/participant/event-history"
               data-tour-mobile="step-history"
@@ -122,7 +122,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
               Riwayat Event
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="md:hidden">
             <Link
               href="/participant/payment-history"
               data-tour-mobile="step-payments"
@@ -142,7 +142,7 @@ export default function ParticipantNavbarClient({ user }: Props) {
               Profil Saya
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator style={{ background: '#E3DACC' }} />
+          <DropdownMenuSeparator className="md:hidden" style={{ background: '#E3DACC' }} />
           <DropdownMenuItem asChild>
             <Link
               href="/"
