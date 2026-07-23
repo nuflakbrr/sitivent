@@ -41,7 +41,9 @@ export function AppSidebar({
   React.useEffect(() => {
     const handleCloseSidebar = () => {
       if (window.innerWidth < 768) {
-        const sidebarTrigger = document.querySelector('[data-sidebar] button[aria-label="Toggle Sidebar"]') as HTMLButtonElement;
+        const sidebarTrigger = document.querySelector(
+          '[data-sidebar] button[aria-label="Toggle Sidebar"]'
+        ) as HTMLButtonElement;
         if (sidebarTrigger) {
           sidebarTrigger.click();
         }
@@ -129,7 +131,13 @@ export function AppSidebar({
     <Sidebar {...props}>
       <SidebarHeader className="flex items-center justify-center p-4">
         {/* Menggunakan img standar sementara untuk memastikan path benar-benar bisa diakses */}
-        <img src={logoSrc} alt="Logo" className="w-auto h-20 object-contain" loading="lazy" />
+        <Image
+          className="w-auto h-25"
+          src={'/assets/img/SITIVENT-PRIMARY.png'}
+          alt="Logo"
+          width={120}
+          height={40}
+        />
       </SidebarHeader>
       <SidebarContent className="gap-0">
         {/* We create a collapsible SidebarGroup for each parent. */}
@@ -138,7 +146,10 @@ export function AppSidebar({
             {item.hasChildren ? (
               <Collapsible defaultOpen className="group/collapsible">
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton className="font-medium text-sidebar-foreground hover:bg-sidebar-accent" onClick={closeSidebarOnMobile}>
+                  <SidebarMenuButton
+                    className="font-medium text-sidebar-foreground hover:bg-sidebar-accent"
+                    onClick={closeSidebarOnMobile}
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -149,7 +160,10 @@ export function AppSidebar({
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <Link href={`${BASE_ADMIN_PATH}/${subItem.url}` as Route} onClick={closeSidebarOnMobile}>
+                          <Link
+                            href={`${BASE_ADMIN_PATH}/${subItem.url}` as Route}
+                            onClick={closeSidebarOnMobile}
+                          >
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>

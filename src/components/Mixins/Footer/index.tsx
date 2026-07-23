@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { footerLinks, socials } from './constant/footerLinks';
 import { subscribeNewsletter } from '@/app/actions/newsletter';
+import Image from 'next/image';
 
 const Footer: FC = () => {
   const year = new Date().getFullYear();
@@ -48,7 +49,14 @@ const Footer: FC = () => {
           {/* Brand */}
           <div className="lg:col-span-5 space-y-5">
             <Link href="/" className="inline-flex items-center gap-2">
-              <span
+              <Image
+                className="w-auto h-25"
+                src="/assets/img/SITIVENT-PRIMARY.png"
+                alt="Logo"
+                width={120}
+                height={40}
+              />
+              {/* <span
                 className="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-sm"
                 style={{ background: '#D97757', color: '#FFFFFF' }}
               >
@@ -59,7 +67,7 @@ const Footer: FC = () => {
                 style={{ fontFamily: 'ui-serif, Georgia, serif', color: '#FAF9F5' }}
               >
                 SITIVENT
-              </span>
+              </span> */}
             </Link>
             <p className="text-sm max-w-sm leading-relaxed" style={{ color: '#87867F' }}>
               Platform manajemen event & penjualan tiket digital terdepan di Indonesia. Temukan,

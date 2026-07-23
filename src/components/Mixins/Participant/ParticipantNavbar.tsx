@@ -3,6 +3,7 @@
 import type { FC } from 'react';
 import Link from 'next/link';
 import ParticipantNavbarClient from '@/components/Mixins/Participant/ParticipantNavbarClient';
+import Image from 'next/image';
 
 interface Props {
   user: {
@@ -26,7 +27,14 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
         {/* Left: logo + nav */}
         <div className="flex items-center gap-6">
           <Link href="/participant/dashboard" className="inline-flex items-center gap-2">
-            <span
+            <Image
+              className="w-auto h-25"
+              src={'/assets/img/SITIVENT-PRIMARY.png'}
+              alt="Logo"
+              width={120}
+              height={40}
+            />
+            {/* <span
               className="flex items-center justify-center w-7 h-7 rounded-md font-black text-xs shadow-sm"
               style={{ background: '#D97757', color: '#FFFFFF' }}
             >
@@ -37,7 +45,7 @@ export const ParticipantNavbar: FC<Props> = ({ user }) => {
               style={{ fontFamily: 'ui-serif, Georgia, serif', color: '#141413' }}
             >
               SITIVENT
-            </span>
+            </span> */}
           </Link>
 
           <nav className="hidden md:flex items-center gap-1 ml-2">

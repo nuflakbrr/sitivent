@@ -24,6 +24,7 @@ import {
 import { navlinks } from './constant/navLinks';
 import { EventSearch } from './EventSearch';
 import AlertModal from '@/components/Common/Modals/AlertModal';
+import Image from 'next/image';
 
 interface MeResponse {
   isAdmin: boolean;
@@ -184,7 +185,16 @@ const Navbar: FC = () => {
               aria-label="SITIVENT"
               className="inline-flex items-center gap-2 shrink-0"
             >
-              <span
+              <Image
+                className="w-auto h-25"
+                src={
+                  isSolid ? '/assets/img/SITIVENT-PRIMARY.png' : '/assets/img/SITIVENT-WHITE.png'
+                }
+                alt="Logo"
+                width={120}
+                height={40}
+              />
+              {/* <span
                 className="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-sm"
                 style={{ background: '#D97757', color: '#FFFFFF' }}
               >
@@ -198,7 +208,7 @@ const Navbar: FC = () => {
                 style={{ fontFamily: 'ui-serif, Georgia, serif' }}
               >
                 SITIVENT
-              </span>
+              </span> */}
             </Link>
 
             {/* Desktop nav */}
