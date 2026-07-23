@@ -63,18 +63,18 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
 
   const getBentoSpans = (index: number) => {
     const patterns = [
-      'md:col-span-2 md:row-span-2 h-[280px] md:h-full',
-      'md:col-span-1 md:row-span-1 h-[180px] md:h-full',
-      'md:col-span-1 md:row-span-2 h-[220px] md:h-full',
-      'md:col-span-1 md:row-span-1 h-[180px] md:h-full',
-      'md:col-span-2 md:row-span-1 h-[180px] md:h-full',
+      'col-span-1 sm:col-span-2 md:col-span-2 md:row-span-2 h-[240px] sm:h-[300px] md:h-full',
+      'col-span-1 md:col-span-1 md:row-span-1 h-[200px] md:h-full',
+      'col-span-1 md:col-span-1 md:row-span-2 h-[220px] md:h-full',
+      'col-span-1 md:col-span-1 md:row-span-1 h-[200px] md:h-full',
+      'col-span-1 sm:col-span-2 md:col-span-2 md:row-span-1 h-[200px] md:h-full',
     ];
     return patterns[index % patterns.length];
   };
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[180px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2 md:auto-rows-45">
         {items.map((item, idx) => (
           <div
             key={item.id}
@@ -128,13 +128,13 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
       {/* Lightbox / Detail Modal */}
       <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
         <DialogContent
-          className="sm:max-w-7xl p-0 overflow-hidden rounded-2xl border-none shadow-xl"
+          className="w-[calc(100vw-2rem)] sm:max-w-3xl md:max-w-5xl lg:max-w-6xl p-0 overflow-hidden rounded-2xl border-none shadow-xl max-h-[90vh]"
           style={{ background: '#FFFFFF' }}
         >
           {selectedItem && (
-            <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
+            <div className="flex flex-col md:flex-row h-full max-h-[90vh] overflow-y-auto md:overflow-hidden">
               {/* Image side - Huge, centered display */}
-              <div className="relative flex-1 bg-zinc-950 min-h-[300px] md:h-[600px] flex items-center justify-center">
+              <div className="relative w-full md:flex-1 bg-zinc-950 min-h-55 sm:min-h-75 md:h-137.5 flex items-center justify-center shrink-0">
                 <Image
                   src={selectedItem.imageUrl}
                   alt={selectedItem.title}
@@ -146,7 +146,7 @@ const GalleryGrid: FC<GalleryGridProps> = ({ initialItems }) => {
 
               {/* Info side - Right panel */}
               <div
-                className="w-full md:w-80 p-6 md:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l shrink-0"
+                className="w-full md:w-80 p-5 sm:p-6 md:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l shrink-0 overflow-y-auto"
                 style={{ borderColor: '#E3DACC', background: '#FFFFFF' }}
               >
                 <div className="space-y-6">

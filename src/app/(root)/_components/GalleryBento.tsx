@@ -18,11 +18,11 @@ const GalleryBento: FC = async () => {
   // Pattern layout bento untuk 5 item
   const getBentoSpans = (index: number) => {
     const patterns = [
-      'md:col-span-2 md:row-span-2 h-[280px] md:h-full', // Item 1 (Utama, besar)
-      'md:col-span-1 md:row-span-1 h-[180px] md:h-full', // Item 2 (Kecil)
-      'md:col-span-1 md:row-span-2 h-[220px] md:h-full', // Item 3 (Vertikal tinggi)
-      'md:col-span-1 md:row-span-1 h-[180px] md:h-full', // Item 4 (Kecil)
-      'md:col-span-2 md:row-span-1 h-[180px] md:h-full', // Item 5 (Lebar mendatar)
+      'col-span-1 sm:col-span-2 md:col-span-2 md:row-span-2 h-[240px] sm:h-[300px] md:h-full', // Item 1 (Utama, besar)
+      'col-span-1 md:col-span-1 md:row-span-1 h-[200px] md:h-full', // Item 2 (Kecil)
+      'col-span-1 md:col-span-1 md:row-span-2 h-[220px] md:h-full', // Item 3 (Vertikal tinggi)
+      'col-span-1 md:col-span-1 md:row-span-1 h-[200px] md:h-full', // Item 4 (Kecil)
+      'col-span-1 sm:col-span-2 md:col-span-2 md:row-span-1 h-[200px] md:h-full', // Item 5 (Lebar mendatar)
     ];
     return patterns[index % patterns.length];
   };
@@ -30,15 +30,15 @@ const GalleryBento: FC = async () => {
   return (
     <section
       id="galeri-unggulan"
-      className="py-16 border-t"
+      className="py-12 sm:py-16 border-t"
       style={{ background: '#FAF9F5', borderColor: '#E3DACC' }}
     >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Section header */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
           <div>
             <span
-              className="text-[11px] font-bold uppercase tracking-widest block mb-3"
+              className="text-[11px] font-bold uppercase tracking-widest block mb-2 sm:mb-3"
               style={{
                 fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
                 color: '#87867F',
@@ -65,7 +65,7 @@ const GalleryBento: FC = async () => {
           </div>
           <Link
             href={'/gallery' as Route}
-            className="flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 hover:gap-2.5"
+            className="flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 hover:gap-2.5 shrink-0 self-start sm:self-auto"
             style={{ color: '#D97757' }}
           >
             Lihat Galeri Lengkap <ArrowRight className="w-4 h-4" />
@@ -73,7 +73,7 @@ const GalleryBento: FC = async () => {
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[180px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2 md:auto-rows-45">
           {galleries.map((item, idx) => (
             <div
               key={item.id}
