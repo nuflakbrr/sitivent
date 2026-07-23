@@ -144,18 +144,28 @@ export async function registerAction(values: RegisterValues): Promise<AuthRespon
   }
 
   try {
-    // Look up "Peserta" role from database
-    const pesertaRole = await prisma.role.findFirst({
+    // Look up or create "Peserta" role from database
+    let pesertaRole = await prisma.role.findFirst({
       where: { name: { equals: 'Peserta', mode: 'insensitive' } },
       select: { id: true },
     });
+
+    if (!pesertaRole) {
+      pesertaRole = await prisma.role.create({
+        data: {
+          name: 'Peserta',
+          description: 'Role default untuk peserta event',
+        },
+        select: { id: true },
+      });
+    }
 
     const response = await auth.api.signUpEmail({
       body: {
         name: validatedFields.data.name,
         email: validatedFields.data.email,
         password: validatedFields.data.password,
-        ...(pesertaRole ? { roleId: pesertaRole.id } : {}),
+        roleId: pesertaRole.id,
       },
       headers: await headers(),
       asResponse: true,
@@ -179,6 +189,18 @@ export async function registerAction(values: RegisterValues): Promise<AuthRespon
       user: User;
     }
     const body = data as SignUpResponseBody;
+
+    if (body.user?.id) {
+      await prisma.user.update({
+        where: { id: body.user.id },
+        data: {
+          roleId: pesertaRole.id,
+          roles: {
+            connect: { id: pesertaRole.id },
+          },
+        },
+      });
+    }
 
     // Send Welcome Email
     const { queueEmail } = await import('./emails');
