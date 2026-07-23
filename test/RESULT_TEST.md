@@ -126,3 +126,27 @@ Dokumen ini menyajikan pemetaan komprehensif dan evaluasi kesesuaian antara **Sk
 1. **Seluruh 100 Skenario Pengujian** terwakilkan 1-berbanding-1 oleh file test case Playwright.
 2. **Kesesuaian Kode Test Case**: Setiap langkah pengujian, elemen input/button selector, serta ekspetasi output pada dokumen skenario telah diselaraskan pada file `.spec.ts`.
 3. **Kepatuhan Tipe Data (Typecheck)**: Seluruh file spec pengujian lulus pemeriksaan `npx tsc --noEmit` tanpa kesalahan sintaks atau kesalahan tipe data.
+
+---
+
+## 4. Arsitektur Eksekusi Sub-Agent & TDD (Test-Data-Driven)
+
+Untuk mendukung **Full Automated Testing & TDD**, 100 test case dikelompokkan ke dalam 5 Sub-Agent independen yang dapat dieksekusi secara terisolasi maupun secara paralel:
+
+- **Sub-Agent 1 (Auth & Security)**: Mengelola TC001–TC005, TC017–TC019, TC028–TC032, TC054–TC058, TC076, TC088, TC092 (Total: 21 TC).
+- **Sub-Agent 2 (Events & Categories)**: Mengelola TC006–TC007, TC020, TC033–TC036, TC059–TC062, TC077, TC081, TC086, TC093 (Total: 15 TC).
+- **Sub-Agent 3 (Registrations & Payments)**: Mengelola TC008–TC012, TC021, TC037–TC041, TC063–TC065, TC078–TC079, TC083, TC087 (Total: 18 TC).
+- **Sub-Agent 4 (Attendance & Certificates)**: Mengelola TC013–TC016, TC027, TC042–TC047, TC066–TC069, TC080, TC085, TC097 (Total: 10 TC).
+- **Sub-Agent 5 (Content, System & Audit)**: Mengelola TC022–TC026, TC048–TC053, TC070–TC075, TC082, TC084, TC089–TC091, TC094–TC096, TC098–TC100 (Total: 26 TC).
+
+Setiap Sub-Agent dapat menggunakan siklus TDD: **Red -> Green -> Refactor** untuk secara mandiri memverifikasi dan memperbarui kode aplikasi tanpa bentrok domain.
+
+### Protokol Instant Auto-Fixing (Ponytail + Caveman + Superpowers + UI-UX-Pro-Max)
+
+Apabila ditemukan test-case yang **FAIL** atau tidak sesuai saat eksekusi automated testing, Agent / Sub-Agent **WAJIB melakukan perbaikan (fixing) seketika itu juga pada saat itu juga** dengan memanfaatkan:
+- **Ponytail**: Analisis tajam & mendalam terhadap akar masalah.
+- **Caveman**: Perbaikan kode secara ultra-terfokus, cepat, dan presisi tinggi.
+- **Superpowers**: Otomatisasi mutakhir & penanganan edge cases secara tangguh.
+- **UI-UX-Pro-Max**: Perbaikan tampilan dan interaktivitas UI/UX berkualitas tinggi & modern.
+
+
