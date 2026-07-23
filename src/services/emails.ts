@@ -52,7 +52,7 @@ export async function queueEmail(to: string, subject: string, body: string, atta
       },
     });
 
-    void processEmailQueue();
+    await processEmailQueue();
 
     return { success: true, data: queueItem };
   } catch (error) {
