@@ -6,6 +6,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { genPageMetadata } from '@/app/seo';
 import RegisterForm from './_components/RegisterForm';
 import Image from 'next/image';
+import { getFeaturedTestimonials } from '@/services/testimonials';
 
 export const metadata: Metadata = genPageMetadata({
   title: 'Daftar Akun',
@@ -19,7 +20,10 @@ const perks = [
   'Sertifikat keikutsertaan digital',
 ];
 
-const Register: FC = () => {
+const Register = async () => {
+  const testimonials = await getFeaturedTestimonials(1);
+  const testimonial = testimonials.length > 0 ? testimonials[0] : null;
+
   return (
     <div
       className="min-h-screen flex"
@@ -52,7 +56,7 @@ const Register: FC = () => {
           >
             <Image
               className="w-auto h-25"
-              src={'/assets/img/SITIVENT-PRIMARY.png'}
+              src={'/assets/img/SITIVENT-WHITE.png'}
               alt="Logo"
               width={120}
               height={40}
@@ -114,37 +118,47 @@ const Register: FC = () => {
           </ul>
 
           {/* Testimonial card */}
-          <div
-            className="rounded-2xl p-5 space-y-3"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.07)',
-            }}
-          >
-            <p className="text-sm italic leading-relaxed" style={{ color: '#D1CFC5' }}>
-              &ldquo;Sitivent bikin aku nemu event-event keren yang nggak pernah aku tahu
-              sebelumnya. Highly recommended!&rdquo;
-            </p>
-            <div className="flex items-center gap-2.5">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-serif"
-                style={{ background: '#D97757' }}
-              >
-                A
-              </div>
-              <div>
-                <p className="text-xs font-bold" style={{ color: '#FAF9F5' }}>
-                  Anisa R.
-                </p>
-                <p
-                  className="text-[10px] uppercase tracking-widest font-bold"
-                  style={{ color: '#87867F' }}
-                >
-                  Peserta aktif
-                </p>
+          {testimonial && (
+            <div
+              className="rounded-2xl p-5 space-y-3"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <p className="text-sm italic leading-relaxed" style={{ color: '#D1CFC5' }}>
+                &ldquo;{testimonial.comment}&rdquo;
+              </p>
+              <div className="flex items-center gap-2.5">
+                {testimonial.user?.image ? (
+                  <img
+                    src={testimonial.user.image}
+                    alt={testimonial.user.name || 'Peserta'}
+                    className="w-8 h-8 rounded-full object-cover border"
+                    style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-serif shrink-0"
+                    style={{ background: '#D97757' }}
+                  >
+                    {testimonial.user?.name ? testimonial.user.name.charAt(0).toUpperCase() : 'P'}
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-bold" style={{ color: '#FAF9F5' }}>
+                    {testimonial.user?.name || 'Peserta Sitivent'}
+                  </p>
+                  <p
+                    className="text-[10px] uppercase tracking-widest font-bold truncate max-w-50"
+                    style={{ color: '#87867F' }}
+                  >
+                    {testimonial.event?.title || 'Peserta aktif'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}

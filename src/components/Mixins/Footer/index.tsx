@@ -51,7 +51,7 @@ const Footer: FC = () => {
             <Link href="/" className="inline-flex items-center gap-2">
               <Image
                 className="w-auto h-25"
-                src="/assets/img/SITIVENT-PRIMARY.png"
+                src="/assets/img/SITIVENT-WHITE.png"
                 alt="Logo"
                 width={120}
                 height={40}

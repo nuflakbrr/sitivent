@@ -51,7 +51,7 @@ const Login: FC = () => {
           >
             <Image
               className="w-auto h-25"
-              src={'/assets/img/SITIVENT-PRIMARY.png'}
+              src={'/assets/img/SITIVENT-WHITE.png'}
               alt="Logo"
               width={120}
               height={40}
